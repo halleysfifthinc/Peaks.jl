@@ -1,7 +1,7 @@
-# Peaks
+# Peaks.jl
 
 [![Build Status](https://travis-ci.org/halleysfifthinc/Peaks.jl.svg?branch=master)](https://travis-ci.org/halleysfifthinc/Peaks.jl)
-
-[![Coverage Status](https://coveralls.io/repos/halleysfifthinc/Peaks.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/halleysfifthinc/Peaks.jl?branch=master)
-
+[![Build status](https://ci.appveyor.com/api/projects/status/9xn2obyrn2xr5n21?svg=true)](https://ci.appveyor.com/project/halleysfifthinc/peaks)
 [![codecov.io](http://codecov.io/github/halleysfifthinc/Peaks.jl/coverage.svg?branch=master)](http://codecov.io/github/halleysfifthinc/Peaks.jl?branch=master)
+
+Peaks.jl is a repository of many (soon) different methods of peak finding for vector data. Contributions welcome.
