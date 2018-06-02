@@ -96,7 +96,7 @@ Find the local maxima of `x`.
 If `w` is supplied, point `i` must be the maximum of the surrounding window, `(i-w):(i+w)`. 
 If `includebounds` is `true`, maxima are allowed to be less than `w` away from the bounds 
 of the input vector.
-""" ->
+"""
 maxima
 
 @doc """
@@ -107,6 +107,6 @@ Find the local minima of `x`.
 If `w` is supplied, point `i` must be the minimum of the surrounding window, `(i-w):(i+w)`.
 If `includebounds` is `true`, minima are allowed to be less than `w` away from the bounds 
 of the input vector.
-""" ->
+"""
 minima
 
