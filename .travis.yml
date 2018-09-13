@@ -4,12 +4,11 @@ os:
   - linux
   - osx
 julia:
-  - 0.6
+  - 0.7
+  - 1.0
   - nightly
 notifications:
   email: false
-git:
-  depth: 99999999
 
 ## uncomment the following lines to allow failures on nightly julia
 ## (tests will run but not make your overall status red)
@@ -17,17 +16,6 @@ git:
 #  allow_failures:
 #  - julia: nightly
 
-## uncomment and modify the following lines to manually install system packages
-#addons:
-#  apt: # apt-get for linux
-#    packages:
-#    - gfortran
-#before_script: # homebrew for mac
-#  - if [ $TRAVIS_OS_NAME = osx ]; then brew install gcc; fi
-
-## uncomment the following lines to override the default test script
-#script:
-#  - julia -e 'Pkg.clone(pwd()); Pkg.build("Peaks"); Pkg.test("Peaks"; coverage=true)'
 after_success:
   # push coverage results to Codecov
-  - julia -e 'cd(Pkg.dir("Peaks")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+  - julia -e 'using Pkg, Peaks; cd(dirname(dirname(pathof(Peaks)))); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
