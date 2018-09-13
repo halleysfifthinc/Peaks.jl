@@ -89,24 +89,24 @@ for (funcname, comp) in ((:maxima, :<),
 end
 
 @doc """
-    maxima(x,[w=1, includebounds=false])
+    maxima(x[, w=1, includebounds=false])
 
 Find the local maxima of `x`.
 
-If `w` is supplied, point `i` must be the maximum of the surrounding window, `(i-w):(i+w)`. 
-If `includebounds` is `true`, maxima are allowed to be less than `w` away from the bounds 
-of the input vector.
+`w` sets the minimum allowed distance between maxima. If `includebounds` is `true`, maxima
+are allowed to be less than `w` away from the bounds of `x`, otherwise, maxima may not be
+located any closer to the ends of `x` than `w`.
 """
 maxima
 
 @doc """
-    minima(x,[w=1, includebounds=false])
+    minima(x[, w=1, includebounds=false])
 
 Find the local minima of `x`.
 
-If `w` is supplied, point `i` must be the minimum of the surrounding window, `(i-w):(i+w)`.
-If `includebounds` is `true`, minima are allowed to be less than `w` away from the bounds 
-of the input vector.
+`w` sets the minimum allowed distance between minima. If `includebounds` is `true`, minima
+are allowed to be less than `w` away from the bounds of `x`, otherwise, minima may not be
+located any closer to the ends of `x` than `w`.
 """
 minima
 
