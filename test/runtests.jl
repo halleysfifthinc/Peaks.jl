@@ -1,5 +1,5 @@
 using Peaks
-using Base.Test
+using Test
 
 include("tests-minmax.jl")
 
