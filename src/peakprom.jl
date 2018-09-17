@@ -52,7 +52,7 @@ for (comps, Extrema) in (((:>, minimum, max), Maxima),
                 proms[i] = abs(x[m[i]] - ($argcomp2)(lcan, rcan))
             end
 
-            matched = findall(x -> x > minprom, proms)
+            matched = findall(x -> x >= minprom, proms)
             return (m[matched], proms[matched])
         end
 
@@ -64,7 +64,7 @@ end
 
 Find all local maxima and maxima prominences in `x` matching the conditions `w` and `minprom`.
 `w` sets the minimum allowed distance between maxima. `minprom` sets the minimum prominence
-of returned maxima.
+(inclusive) of returned maxima.
 
 Peak prominence is calculated as the distance between the current maxima and the highest of
 the minimums of the lower and upper bounds. Bounds extend from the next index from the
@@ -92,7 +92,7 @@ peakprom(x, ::Maxima)
 
 Find all local minima and minima prominences in `x` matching the conditions `w` and `minprom`.
 `w` sets the minimum allowed distance between minima. `minprom` sets the minimum prominence
-of returned minima.
+(inclusive) of returned minima.
 
 Peak prominence is calculated as the distance between the current minima and the lowest of
 the maximums of the lower and upper bounds. Bounds extend from the next index from the
