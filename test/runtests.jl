@@ -1,5 +1,5 @@
 using Peaks
 using Test
 
-include("tests-minmax.jl")
+include("minmax.jl")
 
