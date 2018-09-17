@@ -52,8 +52,12 @@ for (comps, Extrema) in (((:>, minimum, max), Maxima),
                 proms[i] = abs(x[m[i]] - ($argcomp2)(lcan, rcan))
             end
 
-            matched = findall(x -> x >= minprom, proms)
-            return (m[matched], proms[matched])
+            if minprom != zero(T)
+                matched = findall(x -> x >= minprom, proms)
+                return (m[matched], proms[matched])
+            else
+                return (m, proms)
+            end
         end
 
     end
