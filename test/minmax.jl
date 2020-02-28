@@ -24,4 +24,7 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
 
     @test length(maxima(x1, 1000, true)) == 5
     @test length(minima(x1, 1000, true)) == 5
+
+    # issue #4
+    @test isempty(maxima(zeros(10)))
 end

@@ -33,21 +33,14 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         minprom = 1.5
         i, p = peakprom(sin.(1e-5:1e-5:9*pi), Maxima())
         mi, mp = peakprom(sin.(1e-5:1e-5:9*pi), Maxima(), 1, minprom)
+        @test all(>=(minprom), mp)
+    end
 
-        @test begin
-            for j in 1:5 # number of peaks in i and p
-                if i ∈ mi
-                    if p[j] < minprom
-                        return false
-                    end
-                else
-                    if p[j] >= minprom
-                        return false
-                    end
-                end
-            end
-            return true
-        end
+    # issue #4
+    let i, p
+        i, p = peakprom(zeros(10), Maxima())
+        @test isempty(i)
+        @test isempty(p)
     end
 end
 
