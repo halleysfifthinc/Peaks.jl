@@ -26,7 +26,8 @@ for (funcname, comp) in ((:maxima, :<),
                 @inbounds while i <= w
                     peak = true
                     for j in max(i-w, 1):(i+w)
-                        if ($comp)(x[i], x[j])
+                        i === j && continue
+                        if ($comp)(x[i], x[j]) || x[i] === x[j]
                             peak &= false
                             break # No reason to continue checking if the rest of the elements qualify
                         end
@@ -47,7 +48,7 @@ for (funcname, comp) in ((:maxima, :<),
             @inbounds while i <= maxI
                 peak = true
                 for j in ww # For all elements within the window
-                    if ($comp)(x[i], x[i+j])
+                    if ($comp)(x[i], x[i-j]) || x[i] === x[i-j]
                         peak &= false
                         break # No reason to continue checking if the rest of the elements qualify
                     end
@@ -65,7 +66,8 @@ for (funcname, comp) in ((:maxima, :<),
                 @inbounds while i <= xlen
                     peak = true
                     for j in (i-w):min((i+w),xlen)
-                        if ($comp)(x[i], x[j])
+                        i === j && continue
+                        if i !== j && ($comp)(x[i], x[j]) || x[i] === x[j]
                             peak &= false
                             break # No reason to continue checking if the rest of the elements qualify
                         end
