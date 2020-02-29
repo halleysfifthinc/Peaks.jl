@@ -18,6 +18,11 @@ jobs:
   allow_failures:
   - julia: nightly
 
+branches:
+  only:
+    - master
+    - /^v[0-9]+\.[0-9]+\.[0-9]+$/ # version tags
+
 codecov: true
 
 # remove following lines pending merging of https://github.com/travis-ci/travis-build/pull/1571
