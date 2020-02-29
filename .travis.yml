@@ -19,6 +19,8 @@ jobs:
   - julia: nightly
 
 codecov: true
+
+# remove following lines pending merging of https://github.com/travis-ci/travis-build/pull/1571
 # after_success:
 #   # push coverage results to Codecov
 #   - julia -e 'using Pkg, Peaks; cd(dirname(dirname(pathof(Peaks)))); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
