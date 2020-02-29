@@ -1,21 +1,26 @@
 ## Documentation: http://docs.travis-ci.com/user/languages/julia/
 language: julia
+
 os:
   - linux
   - osx
+  - windows
+
 julia:
-  - 0.7
   - 1.0
+  - 1
   - nightly
+
 notifications:
   email: false
 
-## uncomment the following lines to allow failures on nightly julia
-## (tests will run but not make your overall status red)
-#matrix:
-#  allow_failures:
-#  - julia: nightly
+jobs:
+  allow_failures:
+  - julia: nightly
 
-after_success:
-  # push coverage results to Codecov
-  - julia -e 'using Pkg, Peaks; cd(dirname(dirname(pathof(Peaks)))); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+codecov: true
+
+# remove following lines pending merging of https://github.com/travis-ci/travis-build/pull/1571
+# after_success:
+#   # push coverage results to Codecov
+#   - julia -e 'using Pkg, Peaks; cd(dirname(dirname(pathof(Peaks)))); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
