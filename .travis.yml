@@ -14,8 +14,6 @@ julia:
 notifications:
   email: false
 
-## uncomment the following lines to allow failures on nightly julia
-## (tests will run but not make your overall status red)
 jobs:
   allow_failures:
   - julia: nightly
