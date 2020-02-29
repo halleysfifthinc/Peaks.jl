@@ -33,7 +33,7 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         minprom = 1.5
         i, p = peakprom(sin.(1e-5:1e-5:9*pi), Maxima())
         mi, mp = peakprom(sin.(1e-5:1e-5:9*pi), Maxima(), 1, minprom)
-        @test all(>=(minprom), mp)
+        @test all(x -> x >= minprom, mp)
     end
 
     # issue #4
