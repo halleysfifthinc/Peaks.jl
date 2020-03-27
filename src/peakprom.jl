@@ -12,7 +12,7 @@ for (comps, Extrema) in (((:>, minimum, max), Maxima),
                        ((:<, maximum, min), Minima))
 
     comp, argcomp1, argcomp2 = comps
-    
+
     @eval begin
         function peakprom(x::AbstractVector{T}, ::$Extrema, w=1, minprom::T=zero(T)) where T
             if ($Extrema) === Maxima
@@ -46,8 +46,8 @@ for (comps, Extrema) in (((:>, minimum, max), Maxima),
                     end
                 end
 
-                lcan = ($argcomp1)(uview(x, lb:(m[i] - 1))) # Slice from lower bound to the index prior to the current extrema
-                rcan = ($argcomp1)(uview(x, (m[i] + 1):rb)) # Slice corollary upper side
+                lcan = ($argcomp1)(skipmissing(uview(x, lb:(m[i] - 1)))) # Slice from lower bound to the index prior to the current extrema
+                rcan = ($argcomp1)(skipmissing(uview(x, (m[i] + 1):rb))) # Slice corollary upper side
 
                 proms[i] = abs(x[m[i]] - ($argcomp2)(lcan, rcan))
             end

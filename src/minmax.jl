@@ -20,14 +20,14 @@ for (funcname, comp) in ((:maxima, :<),
 
             sizehint!(idxs,maxN)
 
-            i = 1
+            i = findfirst(!ismissing, x)
 
             if includebounds
                 @inbounds while i <= w
                     peak = true
                     for j in max(i-w, 1):(i+w)
                         i === j && continue
-                        if ($comp)(x[i], x[j]) || x[i] === x[j]
+                        if coalesce(($comp)(x[i], x[j]), true) || x[i] === x[j]
                             peak &= false
                             break # No reason to continue checking if the rest of the elements qualify
                         end
@@ -38,17 +38,21 @@ for (funcname, comp) in ((:maxima, :<),
                         N += 1
                         i += w # There can't be another peak for at least `w` more elements
                     end
-                    i += 1
+                    if ismissing(x[i])
+                        i = something(findnext(!ismissing, x, i+1), xlen+1)
+                    else
+                        i += 1
+                    end
                 end
             end
 
-            i = 1+w
+            i = something(findnext(!ismissing, x, 1+w), xlen+1)
             maxI = xlen-w
 
             @inbounds while i <= maxI
                 peak = true
                 for j in ww # For all elements within the window
-                    if ($comp)(x[i], x[i-j]) || x[i] === x[i-j]
+                    if coalesce(($comp)(x[i], x[i-j]), true) || x[i] === x[i-j]
                         peak &= false
                         break # No reason to continue checking if the rest of the elements qualify
                     end
@@ -59,7 +63,11 @@ for (funcname, comp) in ((:maxima, :<),
                     N += 1
                     i += w # There can't be another peak for at least `w` more elements
                 end
-                i += 1
+                if ismissing(x[i])
+                    i = something(findnext(!ismissing, x, i+1), xlen+1)
+                else
+                    i += 1
+                end
             end
 
             if includebounds
@@ -67,7 +75,7 @@ for (funcname, comp) in ((:maxima, :<),
                     peak = true
                     for j in (i-w):min((i+w),xlen)
                         i === j && continue
-                        if i !== j && ($comp)(x[i], x[j]) || x[i] === x[j]
+                        if coalesce(($comp)(x[i], x[j]), true) || x[i] === x[j]
                             peak &= false
                             break # No reason to continue checking if the rest of the elements qualify
                         end
@@ -78,7 +86,11 @@ for (funcname, comp) in ((:maxima, :<),
                         N += 1
                         i += w # There can't be another peak for at least `w` more elements
                     end
-                    i += 1
+                    if i < xlen && ismissing(x[i])
+                        i = something(findnext(!ismissing, x, i+1), xlen+1)
+                    else
+                        i += 1
+                    end
                 end
             end
 
