@@ -16,68 +16,87 @@ for (funcname, comp) in ((:maxima, :<),
             maxN = includebounds ? cld(xlen,2*w) : fld(xlen,2*w)
             N = 0
 
-            ww = [ collect(w:-1:1); collect(-w:-1) ]
+            ww = [ collect(-w:-1); collect(1:w) ]
 
             sizehint!(idxs,maxN)
 
-            i = findfirst(!ismissing, x)
+            firsti = firstindex(x)
+            lasti = lastindex(x)
+            i = firsti
+            maxI = lasti-w
 
             if includebounds
-                @inbounds while i <= w
+                @inbounds while i <= firsti + w
                     peak = true
-                    for j in max(i-w, 1):(i+w)
-                        i === j && continue
-                        if coalesce(($comp)(x[i], x[j]), true) || x[i] === x[j]
-                            peak &= false
-                            break # No reason to continue checking if the rest of the elements qualify
-                        end
-                    end
-
-                    if peak
-                        push!(idxs,i)
-                        N += 1
-                        i += w # There can't be another peak for at least `w` more elements
-                    end
                     if ismissing(x[i])
-                        i = something(findnext(!ismissing, x, i+1), xlen+1)
+                        i = something(findnext(!ismissing, x, i+1), lasti+1)
+                    elseif isnan(x[i])
+                        i = something(findnext(!isnan, x, i+1), lasti+1)
                     else
+                        for j in max(i-w, firsti):(i+w)
+                            i === j && continue
+                            if coalesce(($comp)(x[i], x[j]), true) || isnan(x[j])
+                                peak &= false
+                                break # No reason to continue checking if the rest of the elements qualify
+                            elseif x[i] === x[j] && j > i
+                                _i = findnext(y -> x[i] !== y, x, j+1)
+                                if isnothing(_i) # x is constant till the end, not a peak
+                                    peak &= false
+                                    i = lasti+1
+                                    break
+                                elseif coalesce(($comp)(x[i], x[_i]), true) || isnan(x[j]) # x moves towards a peak
+                                    peak &= false
+                                    break
+                                else # Push new peak here to shift the right number of elements
+                                    peak &= false
+                                    push!(idxs,i)
+                                    N += 1
+                                    i = max(_i,i+w)
+                                    break
+                                end
+                            end
+                        end
+
+                        if peak
+                            push!(idxs,i)
+                            N += 1
+                            i += w # There can't be another peak for at least `w` more elements
+                        end
                         i += 1
                     end
                 end
             end
 
-            i = something(findnext(!ismissing, x, 1+w), xlen+1)
-            maxI = xlen-w
+            i = firsti + w
 
             @inbounds while i <= maxI
                 peak = true
-                for j in ww # For all elements within the window
-                    if coalesce(($comp)(x[i], x[i-j]), true) || x[i] === x[i-j]
-                        peak &= false
-                        break # No reason to continue checking if the rest of the elements qualify
-                    end
-                end
-
-                if peak
-                    push!(idxs,i)
-                    N += 1
-                    i += w # There can't be another peak for at least `w` more elements
-                end
                 if ismissing(x[i])
-                    i = something(findnext(!ismissing, x, i+1), xlen+1)
+                    i = something(findnext(!ismissing, x, i+1), lasti+1)
+                elseif isnan(x[i])
+                    i = something(findnext(!isnan, x, i+1), lasti+1)
                 else
-                    i += 1
-                end
-            end
-
-            if includebounds
-                @inbounds while i <= xlen
-                    peak = true
-                    for j in (i-w):min((i+w),xlen)
-                        i === j && continue
-                        if coalesce(($comp)(x[i], x[j]), true) || x[i] === x[j]
+                    for j in ww # For all elements within the window
+                        if coalesce(($comp)(x[i], x[i+j]), true) || isnan(x[i+j])
                             peak &= false
                             break # No reason to continue checking if the rest of the elements qualify
+                        elseif x[i] === x[i+j] && i+j > i
+                            _i = findnext(y -> x[i] !== y, x, i+j+1)
+                            if isnothing(_i) # x is constant till the end, not a peak
+                                peak &= false
+                                i = lasti+1
+                                break
+                            elseif coalesce(($comp)(x[i], x[_i]), true) || isnan(x[_i])
+                                # x moves towards a peak or ends with a missing or NaN
+                                peak &= false
+                                break
+                            else # Push first element of plateau as peak here to shift the correct number of elements
+                                peak &= false
+                                push!(idxs,i)
+                                N += 1
+                                i = max(_i,i+w)
+                                break
+                            end
                         end
                     end
 
@@ -86,9 +105,47 @@ for (funcname, comp) in ((:maxima, :<),
                         N += 1
                         i += w # There can't be another peak for at least `w` more elements
                     end
-                    if i < xlen && ismissing(x[i])
-                        i = something(findnext(!ismissing, x, i+1), xlen+1)
+                    i += 1
+                end
+            end
+
+            if includebounds
+                @inbounds while i <= lasti
+                    peak = true
+                    if ismissing(x[i])
+                        i = something(findnext(!ismissing, x, i+1), lasti+1)
+                    elseif isnan(x[i])
+                        i = something(findnext(!isnan, x, i+1), lasti+1)
                     else
+                        for j in (i-w):min((i+w),lasti)
+                            i === j && continue
+                            if coalesce(($comp)(x[i], x[j]), true)
+                                peak &= false
+                                break # No reason to continue checking if the rest of the elements qualify
+                            elseif x[i] === x[j] && j > i
+                                _i = findnext(y -> x[i] !== y, x, j+1)
+                                if isnothing(_i) # x is constant till the end, not a peak
+                                    peak &= false
+                                    i = lasti+1
+                                    break
+                                elseif coalesce(($comp)(x[i], x[_i]), true) || isnan(x[j]) # x moves towards a peak
+                                    peak &= false
+                                    break
+                                else # Push new peak here to shift the right number of elements
+                                    peak &= false
+                                    push!(idxs,i)
+                                    N += 1
+                                    i = max(_i,i+w)
+                                    break
+                                end
+                            end
+                        end
+
+                        if peak
+                            push!(idxs,i)
+                            N += 1
+                            i += w # There can't be another peak for at least `w` more elements
+                        end
                         i += 1
                     end
                 end

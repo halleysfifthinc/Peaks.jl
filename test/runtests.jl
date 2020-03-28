@@ -1,5 +1,5 @@
 using Peaks
-using Test
+using Test, OffsetArrays
 
 include("minmax.jl")
 include("peakprom.jl")

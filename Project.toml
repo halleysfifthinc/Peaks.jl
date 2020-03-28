@@ -6,10 +6,9 @@ version = "0.1.0"
 [deps]
 UnsafeArrays = "c4a57d5a-5b31-53a6-b365-19f8c011fbd6"
 
-
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
 
 [targets]
-test = ["Test"]
-
+test = ["Test", "OffsetArrays"]
