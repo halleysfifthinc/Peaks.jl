@@ -23,36 +23,41 @@ for (funcname, comp) in ((:maxima, :<),
             firsti = firstindex(x)
             lasti = lastindex(x)
             i = firsti
-            maxI = lasti-w
+            maxI = lasti - w
 
             if includebounds
                 @inbounds while i <= firsti + w
+                    xi = x[i]
                     peak = true
-                    if ismissing(x[i])
+                    if ismissing(xi)
                         i = something(findnext(!ismissing, x, i+1), lasti+1)
-                    elseif isnan(x[i])
+                    elseif isnan(xi)
                         i = something(findnext(!isnan, x, i+1), lasti+1)
                     else
                         for j in max(i-w, firsti):(i+w)
                             i === j && continue
-                            if coalesce(($comp)(x[i], x[j]), true) || isnan(x[j])
+                            xj = x[j]
+                            if ismissing(xj) || ($comp)(xi, xj) || isnan(xj)
                                 peak &= false
                                 break # No reason to continue checking if the rest of the elements qualify
-                            elseif x[i] === x[j] && j > i
-                                _i = findnext(y -> x[i] !== y, x, j+1)
-                                if isnothing(_i) # x is constant till the end, not a peak
+                            elseif xi === xj && j > i
+                                k = findnext(y -> xi !== y, x, j+1)
+                                if isnothing(k) # x is constant till the end, not a peak
                                     peak &= false
                                     i = lasti+1
                                     break
-                                elseif coalesce(($comp)(x[i], x[_i]), true) || isnan(x[j]) # x moves towards a peak
-                                    peak &= false
-                                    break
-                                else # Push new peak here to shift the right number of elements
-                                    peak &= false
-                                    push!(idxs,i)
-                                    N += 1
-                                    i = max(_i,i+w)
-                                    break
+                                else
+                                    xk = x[k]
+                                    if ismissing(xk) || ($comp)(xi, xk) || isnan(xk) # x moves towards a peak
+                                        peak &= false
+                                        break
+                                    else # Push new peak here to shift the right number of elements
+                                        peak &= false
+                                        push!(idxs,i)
+                                        N += 1
+                                        i = max(k,i+w)
+                                        break
+                                    end
                                 end
                             end
                         end
@@ -70,32 +75,37 @@ for (funcname, comp) in ((:maxima, :<),
             i = firsti + w
 
             @inbounds while i <= maxI
+                xi = x[i]
                 peak = true
-                if ismissing(x[i])
+                if ismissing(xi)
                     i = something(findnext(!ismissing, x, i+1), lasti+1)
-                elseif isnan(x[i])
+                elseif isnan(xi)
                     i = something(findnext(!isnan, x, i+1), lasti+1)
                 else
                     for j in ww # For all elements within the window
-                        if coalesce(($comp)(x[i], x[i+j]), true) || isnan(x[i+j])
+                        xj = x[i+j]
+                        if ismissing(xj) || ($comp)(xi, xj) || isnan(xj)
                             peak &= false
                             break # No reason to continue checking if the rest of the elements qualify
-                        elseif x[i] === x[i+j] && i+j > i
-                            _i = findnext(y -> x[i] !== y, x, i+j+1)
-                            if isnothing(_i) # x is constant till the end, not a peak
+                        elseif xi === xj && i+j > i
+                            k = findnext(y -> xi !== y, x, i+j+1)
+                            if isnothing(k) # x is constant till the end, not a peak
                                 peak &= false
                                 i = lasti+1
                                 break
-                            elseif coalesce(($comp)(x[i], x[_i]), true) || isnan(x[_i])
-                                # x moves towards a peak or ends with a missing or NaN
-                                peak &= false
-                                break
-                            else # Push first element of plateau as peak here to shift the correct number of elements
-                                peak &= false
-                                push!(idxs,i)
-                                N += 1
-                                i = max(_i,i+w)
-                                break
+                            else
+                                xk = x[k]
+                                if ismissing(xk) || ($comp)(xi, xk) || isnan(xk)
+                                    # x moves towards a peak or ends with a missing or NaN
+                                    peak &= false
+                                    break
+                                else # Push first element of plateau as peak here to shift the correct number of elements
+                                    peak &= false
+                                    push!(idxs,i)
+                                    N += 1
+                                    i += max(k,i+w)
+                                    break
+                                end
                             end
                         end
                     end
@@ -111,32 +121,37 @@ for (funcname, comp) in ((:maxima, :<),
 
             if includebounds
                 @inbounds while i <= lasti
+                    xi = x[i]
                     peak = true
-                    if ismissing(x[i])
+                    if ismissing(xi)
                         i = something(findnext(!ismissing, x, i+1), lasti+1)
-                    elseif isnan(x[i])
+                    elseif isnan(xi)
                         i = something(findnext(!isnan, x, i+1), lasti+1)
                     else
                         for j in (i-w):min((i+w),lasti)
                             i === j && continue
-                            if coalesce(($comp)(x[i], x[j]), true)
+                            xj = x[j]
+                            if ismissing(xj) || ($comp)(xi, xj) || isnan(xj)
                                 peak &= false
                                 break # No reason to continue checking if the rest of the elements qualify
-                            elseif x[i] === x[j] && j > i
-                                _i = findnext(y -> x[i] !== y, x, j+1)
-                                if isnothing(_i) # x is constant till the end, not a peak
+                            elseif xi === xj && j > i
+                                k = findnext(y -> xi !== y, x, j+1)
+                                if isnothing(k) # x is constant till the end, not a peak
                                     peak &= false
                                     i = lasti+1
                                     break
-                                elseif coalesce(($comp)(x[i], x[_i]), true) || isnan(x[j]) # x moves towards a peak
-                                    peak &= false
-                                    break
-                                else # Push new peak here to shift the right number of elements
-                                    peak &= false
-                                    push!(idxs,i)
-                                    N += 1
-                                    i = max(_i,i+w)
-                                    break
+                                else
+                                    xk = x[k]
+                                    if ismissing(xk) || ($comp)(xi, xk) || isnan(xk) # x moves towards a peak
+                                        peak &= false
+                                        break
+                                    else # Push new peak here to shift the right number of elements
+                                        peak &= false
+                                        push!(idxs,i)
+                                        N += 1
+                                        i = max(k,i+w)
+                                        break
+                                    end
                                 end
                             end
                         end
