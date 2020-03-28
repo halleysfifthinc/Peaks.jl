@@ -166,7 +166,9 @@ Find the local maxima of `x`.
 
 `w` sets the minimum allowed distance between maxima. If `includebounds` is `true`, maxima
 are allowed to be less than `w` away from the bounds of `x`, otherwise, maxima may not be
-located any closer to the ends of `x` than `w`.
+located any closer to the ends of `x` than `w`. `missing` and `NaN` are effectively treated
+as bounds (ie a peak may not be closer than `w` to a `missing` or `NaN`. The first index of
+a peak that plateaus is used as the peak index.
 """
 maxima
 
@@ -177,7 +179,9 @@ Find the local minima of `x`.
 
 `w` sets the minimum allowed distance between minima. If `includebounds` is `true`, minima
 are allowed to be less than `w` away from the bounds of `x`, otherwise, minima may not be
-located any closer to the ends of `x` than `w`.
+located any closer to the ends of `x` than `w`. `missing` and `NaN` are effectively treated
+as bounds (ie a peak may not be closer than `w` to a `missing` or `NaN`. The first index of
+a peak that plateaus is used as the peak index.
 """
 minima
 
