@@ -44,12 +44,13 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                                 k = findnext(y -> xi !== y, x, j+1)
                                 if isnothing(k) # x is constant till the end, not a peak
                                     if !strictbounds
-                                        peak &= false
                                         push!(idxs,i)
                                         N += 1
                                         i = lasti+1
+                                        peak &= false
                                         break
                                     else
+                                        i = lasti+1
                                         peak &= false
                                         break
                                     end
@@ -59,10 +60,10 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                                         peak &= false
                                         break
                                     else # Push new peak here to shift the right number of elements
-                                        peak &= false
                                         push!(idxs,i)
                                         N += 1
                                         i = max(k,i+w)
+                                        peak &= false
                                         break
                                     end
                                 end
@@ -100,12 +101,13 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                                 k = findnext(y -> xi !== y, x, i+j+1)
                                 if isnothing(k)
                                     if !strictbounds # x is constant till the end, not a peak
-                                        peak &= false
                                         push!(idxs,i)
                                         N += 1
                                         i = lasti+1
+                                        peak &= false
                                         break
                                     else
+                                        i = lasti+1
                                         peak &= false
                                         break
                                     end
@@ -116,10 +118,10 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                                         peak &= false
                                         break
                                     elseif j === 1 # Push first element of plateau as peak here to shift the correct number of elements
-                                        peak &= false
                                         push!(idxs,i)
                                         N += 1
                                         i = max(k,i+w)
+                                        peak &= false
                                         break
                                     end
                                 end
@@ -160,12 +162,13 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                                     k = findnext(y -> xi !== y, x, j+1)
                                     if isnothing(k)
                                         if !strictbounds # x is constant till the end, not a peak
-                                            peak &= false
                                             push!(idxs,i)
                                             N += 1
                                             i = lasti+1
+                                            peak &= false
                                             break
                                         else
+                                            i = lasti+1
                                             peak &= false
                                             break
                                         end
@@ -175,10 +178,10 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                                             peak &= false
                                             break
                                         else # Push new peak here to shift the right number of elements
-                                            peak &= false
                                             push!(idxs,i)
                                             N += 1
                                             i = max(k,i+w)
+                                            peak &= false
                                             break
                                         end
                                     end
