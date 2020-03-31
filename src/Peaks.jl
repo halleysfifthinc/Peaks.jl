@@ -1,5 +1,7 @@
 module Peaks
 
+using Compat
+
 include("minmax.jl")
 include("peakprom.jl")
 
