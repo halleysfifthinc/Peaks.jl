@@ -29,10 +29,8 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                 while i <= firsti + w
                     xi = x[i]
                     peak = true
-                    if ismissing(xi)
-                        i = something(findnext(!ismissing, x, i+1), lasti+1)
-                    elseif isnan(xi)
-                        i = something(findnext(!isnan, x, i+1), lasti+1)
+                    if ismissing(xi) || isnan(xi)
+                        i = something(findnext(x -> !isnan(x) & !ismissing(x), x, i+1), lasti+1)
                     else
                         for j in max(i-w, firsti):(i+w)
                             i === j && continue
@@ -85,10 +83,8 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
             while i <= maxI
                 xi = x[i]
                 peak = true
-                if ismissing(xi)
-                    i = something(findnext(!ismissing, x, i+1), lasti+1)
-                elseif isnan(xi)
-                    i = something(findnext(!isnan, x, i+1), lasti+1)
+                if ismissing(xi) || isnan(xi)
+                    i = something(findnext(x -> !isnan(x) & !ismissing(x), x, i+1), lasti+1)
                 else
                     for j in ww # For all elements within the window
                         xj = x[i+j]
@@ -145,10 +141,8 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                 while i <= lasti
                     xi = x[i]
                     peak = true
-                    if ismissing(xi)
-                        i = something(findnext(!ismissing, x, i+1), lasti+1)
-                    elseif isnan(xi)
-                        i = something(findnext(!isnan, x, i+1), lasti+1)
+                    if ismissing(xi) || isnan(xi)
+                        i = something(findnext(x -> !isnan(x) & !ismissing(x), x, i+1), lasti+1)
                     else
                         for j in (i-w):min((i+w),lasti)
                             i === j && continue
