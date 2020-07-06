@@ -47,9 +47,13 @@ for (extrema, comps, Extrema) in ((maxima, (:>, minimum, max), Maxima),
                     end
                 end
 
-                lcan = ($argcomp1)(skipmissing(uview(x, lb:(m[i] - 1)))) # Slice from lower bound to the index prior to the current extrema
-                rcan = ($argcomp1)(skipmissing(uview(x, (m[i] + 1):rb))) # Slice corollary upper side
-
+                if strictbounds
+                    lcan = m[i] == lbegin ? x[m[i]] : ($argcomp1)(uview(x, lb:(m[i] - 1))) # Slice from lower bound to the index prior to the current extrema
+                    rcan = m[i] == lend ? x[m[i]] : ($argcomp1)(uview(x, (m[i] + 1):rb)) # Slice corollary upper side
+                else
+                    lcan = m[i] == lbegin ? x[m[i]] : ($argcomp1)(filter(!isnan, (skipmissing(uview(x, lb:(m[i] - 1)))))) # Slice from lower bound to the index prior to the current extrema, ignoring NaNs and missings
+                    rcan = m[i] == lend ? x[m[i]] : ($argcomp1)(filter(!isnan, (skipmissing(uview(x, (m[i] + 1):rb))))) # Slice corollary upper side
+                end
                 proms[i] = abs(x[m[i]] - ($argcomp2)(lcan, rcan))
             end
 
