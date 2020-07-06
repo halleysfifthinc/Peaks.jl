@@ -35,7 +35,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                         for j in firsti:min(i+w,lasti)
                             i === j && continue
                             xj = x[j]
-                            if coalesce(($comp)(xi, xj), strictbounds) || (strictbounds && (ismissing(xj) || isnan(xj)))
+                            if coalesce(($comp)(xi, xj), strictbounds) || (strictbounds && isnan(xj))
                                 peak &= false
                                 break # No reason to continue checking if the rest of the elements qualify
                             elseif xi === xj
@@ -82,7 +82,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                 else
                     for j in ww # For all elements within the window
                         xj = x[i+j]
-                        if coalesce(($comp)(xi, xj), strictbounds) || (strictbounds && (ismissing(xj) || isnan(xj)))
+                        if coalesce(($comp)(xi, xj), strictbounds) || (strictbounds && isnan(xj))
                             peak &= false
                             break # No reason to continue checking if the rest of the elements qualify
                         elseif xi === xj
@@ -103,7 +103,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                                     end
                                 else
                                     xk = x[k]
-                                    if coalesce(($comp)(xi, xk), strictbounds) || (strictbounds && (ismissing(xk) || isnan(xk)))
+                                    if coalesce(($comp)(xi, xk), strictbounds) || (strictbounds && isnan(xk))
                                         # x moves towards a peak or ends with a missing or NaN
                                         peak &= false
                                         break
@@ -141,7 +141,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                         for j in (i-w):lasti
                             i === j && continue
                             xj = x[j]
-                            if coalesce(($comp)(xi, xj), strictbounds) || (strictbounds && (ismissing(xj) || isnan(xj)))
+                            if coalesce(($comp)(xi, xj), strictbounds) || (strictbounds && isnan(xj))
                                 peak &= false
                                 break # No reason to continue checking if the rest of the elements qualify
                             elseif xi === xj
@@ -156,7 +156,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                                         break
                                     else
                                         xk = x[k]
-                                        if coalesce(($comp)(xi, xk), strictbounds) || (strictbounds && (ismissing(xk) || isnan(xk))) # x moves towards a peak
+                                        if coalesce(($comp)(xi, xk), strictbounds) || (strictbounds && isnan(xk)) # x moves towards a peak
                                             peak &= false
                                             break
                                         else # Push new peak here to shift the right number of elements
