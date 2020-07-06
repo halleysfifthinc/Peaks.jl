@@ -94,7 +94,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                             if coalesce(($notcomp)(xi, xi1), !strictbounds) || (!strictbounds && isnan(xi1))
                                 k = findnext(y -> xi !== y, x, i+j+1)
                                 if isnothing(k)
-                                    if !strictbounds # x is constant till the end, not a peak
+                                    if !strictbounds # x is constant till the end, only a peak for strictbounds false
                                         push!(idxs,i)
                                         N += 1
                                         i = lasti+1
