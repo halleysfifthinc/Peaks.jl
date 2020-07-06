@@ -42,5 +42,26 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test isempty(i)
         @test isempty(p)
     end
-end
 
+    @testset "Strictbounds" begin
+        si, sp = peakprom([1.,0,1,0,1], Maxima())
+        nsi, nsp = peakprom([1.,0,1,0,1], Maxima(), 1, 0., false)
+        @test si == [3]
+        @test nsi == [1,3,5]
+        @test sp == [1.]
+        @test nsp == [0.,1.,0.]
+    end
+
+    @testset "Missings and NaNs" begin
+        m1 = [0.,1,0,2,missing,2,0,1,0]
+        n1 = [0.,1,0,2,NaN,2,0,1,0]
+        mi, mp = peakprom(m1,Maxima())
+        ni, np = peakprom(n1,Maxima())
+        @test mp == [1.,1.]
+        @test np == [1.,1.]
+        mi, mp = peakprom(m1, Maxima(), 1, 1.5, false)
+        ni, np = peakprom(n1, Maxima(), 1, 1.5, false)
+        @test mp == [2.,2.]
+        @test np == [2.,2.]
+    end
+end
