@@ -131,5 +131,9 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test minima(-m3) == [2,8]
         @test maxima(n3) == [2,8]
         @test minima(-n3) == [2,8]
+
+        mn = [1,NaN,missing,1]
+        @test isempty(maxima(mn))
+        @test isempty(minima(mn))
     end
 end
