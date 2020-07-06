@@ -12,8 +12,8 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
             xlen = length(x)
             idxs = Int[]
 
-            # There can't be more than one peak every `w` elements
-            maxN = strictbounds ? cld(xlen,2*w) : fld(xlen,2*w)
+            # There can't be more than one peak every `w` elements, but a peak is an element as well
+            maxN = strictbounds ? max(0,fld(xlen-w,w+1)) : cld(xlen,w+1)
             N = 0
 
             ww = [ collect(-w:-1); collect(1:w) ]
