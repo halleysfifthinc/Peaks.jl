@@ -32,7 +32,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                     if ismissing(xi) || isnan(xi)
                         i = something(findnext(x -> !isnan(x) & !ismissing(x), x, i+1), lasti+1)
                     else
-                        for j in max(i-w, firsti):(i+w)
+                        for j in firsti:min(i+w,lasti)
                             i === j && continue
                             xj = x[j]
                             if coalesce(($comp)(xi, xj), strictbounds) || (strictbounds && (ismissing(xj) || isnan(xj)))
@@ -138,7 +138,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                     if ismissing(xi) || isnan(xi)
                         i = something(findnext(x -> !isnan(x) & !ismissing(x), x, i+1), lasti+1)
                     else
-                        for j in (i-w):min((i+w),lasti)
+                        for j in (i-w):lasti
                             i === j && continue
                             xj = x[j]
                             if coalesce(($comp)(xi, xj), strictbounds) || (strictbounds && (ismissing(xj) || isnan(xj)))
