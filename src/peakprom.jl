@@ -14,14 +14,13 @@ for (extrema, comps, Extrema) in ((maxima, (:>, minimum, max), Maxima),
     comp, argcomp1, argcomp2 = comps
 
     @eval begin
-        function peakprom(x::AbstractVector{T}, ::$Extrema, w=1, minprom::T=zero(T)) where T
-            if ($Extrema) === Maxima
-                m = maxima(x, w)
-            else
-                m = minima(x, w)
-            end
+        function peakprom(x::AbstractVector{T}, ::$Extrema, w::Integer=1, minprom::T=zero(T), strictbounds::Bool=true) where T
+            m = ($extrema)(x, w, strictbounds)
+            # the peaks should always be compared to the peaks within the boundary
+            mcomp = strictbounds ? ($extrema)(x, w, false) : m
 
             M = lastindex(m)
+            Mcomp = lastindex(mcomp)
             lbegin = firstindex(x)
             lend = lastindex(x)
             proms = similar(x,M)
@@ -30,18 +29,20 @@ for (extrema, comps, Extrema) in ((maxima, (:>, minimum, max), Maxima),
                 lb, rb = lbegin, lend
                 lcan, rcan = zero(T), zero(T)
 
+                ci = findnext(x -> x == m[i], mcomp, i)
+
                 # Find left bound
-                for ii in (i-1):-1:1
-                    if ($comp)(x[m[ii]], x[m[i]])
-                        lb = m[ii]
+                for ii in (ci - 1):-1:1
+                    if ($comp)(x[mcomp[ii]], x[m[i]])
+                        lb = mcomp[ii]
                         break
                     end
                 end
 
-                # Find left bound
-                for ii in (i+1):M
-                    if ($comp)(x[m[ii]], x[m[i]])
-                        rb = m[ii]
+                # Find right bound
+                for ii in (ci + 1):Mcomp
+                    if ($comp)(x[mcomp[ii]], x[m[i]])
+                        rb = mcomp[ii]
                         break
                     end
                 end
