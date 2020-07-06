@@ -48,15 +48,19 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                                     break
                                 else
                                     xk = x[k]
-                                    if coalesce(($comp)(xi, xk), strictbounds) || (strictbounds && (ismissing(xk) || isnan(xk))) # x moves towards a peak
+                                    if coalesce(($comp)(xi, xk), strictbounds) # x moves towards a peak
                                         peak &= false
                                         break
-                                    else # Push new peak here to shift the right number of elements
-                                        push!(idxs,i)
-                                        N += 1
-                                        i = max(k,i+w)
-                                        peak &= false
-                                        break
+                                    else
+                                        if k < i + w # if the plateau is within w there could be a larger peak afterwards
+                                            j = k
+                                        else # Push new peak here to shift the right number of elements
+                                            push!(idxs,i)
+                                            N += 1
+                                            i = k
+                                            peak &= false
+                                            break
+                                        end
                                     end
                                 end
                             end
@@ -108,11 +112,15 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                                         peak &= false
                                         break
                                     elseif j === 1 # Push first element of plateau as peak here to shift the correct number of elements
-                                        push!(idxs,i)
-                                        N += 1
-                                        i = max(k,i+w)
-                                        peak &= false
-                                        break
+                                        if k < i + w
+                                            j = k - i
+                                        else
+                                            push!(idxs,i)
+                                            N += 1
+                                            i = k
+                                            peak &= false
+                                            break
+                                        end
                                     end
                                 end
                             else
@@ -160,11 +168,15 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                                             peak &= false
                                             break
                                         else # Push new peak here to shift the right number of elements
-                                            push!(idxs,i)
-                                            N += 1
-                                            i = max(k,i+w)
-                                            peak &= false
-                                            break
+                                            if k < lasti
+                                                j = k
+                                            else
+                                                push!(idxs,i)
+                                                N += 1
+                                                i = max(k,i+w)
+                                                peak &= false
+                                                break
+                                            end
                                         end
                                     end
                                 else
