@@ -76,6 +76,8 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test minima(-[0,1,1,1,1,0]) == [2]
         @test maxima( [0,1,1,1,2,0]) == [5]
         @test minima(-[0,1,1,1,2,0]) == [5]
+        @test maxima( [0,1,1,0,2,1], 3, false) == [5]
+        @test minima(-[0,1,1,0,2,1], 3, false) == [5]
 
         # issue #4
         @test isempty(maxima(zeros(10)))
@@ -129,5 +131,11 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test minima(-m3) == [2,8]
         @test maxima(n3) == [2,8]
         @test minima(-n3) == [2,8]
+
+        mn = [1,NaN,missing,1]
+        @test isempty(maxima(mn))
+        @test isempty(minima(mn))
+        @test isempty(maxima(reverse(mn)))
+        @test isempty(minima(reverse(mn)))
     end
 end

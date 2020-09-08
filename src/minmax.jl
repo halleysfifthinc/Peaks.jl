@@ -12,8 +12,8 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
             xlen = length(x)
             idxs = Int[]
 
-            # There can't be more than one peak every `w` elements
-            maxN = strictbounds ? cld(xlen,2*w) : fld(xlen,2*w)
+            # There can't be more than one peak every `w` elements, but a peak is an element as well
+            maxN = strictbounds ? max(0,fld(xlen-w,w+1)) : cld(xlen,w+1)
             N = 0
 
             ww = [ collect(-w:-1); collect(1:w) ]
@@ -29,42 +29,38 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                 while i <= firsti + w
                     xi = x[i]
                     peak = true
-                    if ismissing(xi)
-                        i = something(findnext(!ismissing, x, i+1), lasti+1)
-                    elseif isnan(xi)
-                        i = something(findnext(!isnan, x, i+1), lasti+1)
+                    if ismissing(xi) || isnan(xi)
+                        i = something(findnext(x -> !isnan(x) & !ismissing(x), x, i+1), lasti+1)
                     else
-                        for j in max(i-w, firsti):(i+w)
+                        for j in firsti:min(i+w,lasti)
                             i === j && continue
                             xj = x[j]
-                            if coalesce(($comp)(xi, xj), strictbounds) || (strictbounds && (ismissing(xj) || isnan(xj)))
+                            if coalesce(($comp)(xi, xj), strictbounds) || (strictbounds && isnan(xj))
                                 peak &= false
                                 break # No reason to continue checking if the rest of the elements qualify
                             elseif xi === xj
                                 k = findnext(y -> xi !== y, x, j+1)
                                 if isnothing(k) # x is constant till the end, not a peak
-                                    if !strictbounds
-                                        push!(idxs,i)
-                                        N += 1
-                                        i = lasti+1
+                                    push!(idxs,i)
+                                    N += 1
+                                    i = lasti+1
+                                    peak &= false
+                                    break
+                                else
+                                    xk = x[k]
+                                    if coalesce(($comp)(xi, xk), strictbounds) # x moves towards a peak
                                         peak &= false
                                         break
                                     else
-                                        i = lasti+1
-                                        peak &= false
-                                        break
-                                    end
-                                else
-                                    xk = x[k]
-                                    if coalesce(($comp)(xi, xk), strictbounds) || (strictbounds && (ismissing(xk) || isnan(xk))) # x moves towards a peak
-                                        peak &= false
-                                        break
-                                    else # Push new peak here to shift the right number of elements
-                                        push!(idxs,i)
-                                        N += 1
-                                        i = max(k,i+w)
-                                        peak &= false
-                                        break
+                                        if k < i + w # if the plateau is within w there could be a larger peak afterwards
+                                            j = k
+                                        else # Push new peak here to shift the right number of elements
+                                            push!(idxs,i)
+                                            N += 1
+                                            i = k
+                                            peak &= false
+                                            break
+                                        end
                                     end
                                 end
                             end
@@ -85,14 +81,12 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
             while i <= maxI
                 xi = x[i]
                 peak = true
-                if ismissing(xi)
-                    i = something(findnext(!ismissing, x, i+1), lasti+1)
-                elseif isnan(xi)
-                    i = something(findnext(!isnan, x, i+1), lasti+1)
+                if ismissing(xi) || isnan(xi)
+                    i = something(findnext(x -> !isnan(x) & !ismissing(x), x, i+1), lasti+1)
                 else
                     for j in ww # For all elements within the window
                         xj = x[i+j]
-                        if coalesce(($comp)(xi, xj), strictbounds) || (strictbounds && (ismissing(xj) || isnan(xj)))
+                        if coalesce(($comp)(xi, xj), strictbounds) || (strictbounds && isnan(xj))
                             peak &= false
                             break # No reason to continue checking if the rest of the elements qualify
                         elseif xi === xj
@@ -100,7 +94,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                             if coalesce(($notcomp)(xi, xi1), !strictbounds) || (!strictbounds && isnan(xi1))
                                 k = findnext(y -> xi !== y, x, i+j+1)
                                 if isnothing(k)
-                                    if !strictbounds # x is constant till the end, not a peak
+                                    if !strictbounds # x is constant till the end, only a peak for strictbounds false
                                         push!(idxs,i)
                                         N += 1
                                         i = lasti+1
@@ -113,16 +107,20 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                                     end
                                 else
                                     xk = x[k]
-                                    if coalesce(($comp)(xi, xk), strictbounds) || (strictbounds && (ismissing(xk) || isnan(xk)))
+                                    if coalesce(($comp)(xi, xk), strictbounds) || (strictbounds && isnan(xk))
                                         # x moves towards a peak or ends with a missing or NaN
                                         peak &= false
                                         break
                                     elseif j === 1 # Push first element of plateau as peak here to shift the correct number of elements
-                                        push!(idxs,i)
-                                        N += 1
-                                        i = max(k,i+w)
-                                        peak &= false
-                                        break
+                                        if k < i + w
+                                            j = k - i
+                                        else
+                                            push!(idxs,i)
+                                            N += 1
+                                            i = k
+                                            peak &= false
+                                            break
+                                        end
                                     end
                                 end
                             else
@@ -145,15 +143,13 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                 while i <= lasti
                     xi = x[i]
                     peak = true
-                    if ismissing(xi)
-                        i = something(findnext(!ismissing, x, i+1), lasti+1)
-                    elseif isnan(xi)
-                        i = something(findnext(!isnan, x, i+1), lasti+1)
+                    if ismissing(xi) || isnan(xi)
+                        i = something(findnext(x -> !isnan(x) & !ismissing(x), x, i+1), lasti+1)
                     else
-                        for j in (i-w):min((i+w),lasti)
+                        for j in (i-w):lasti
                             i === j && continue
                             xj = x[j]
-                            if coalesce(($comp)(xi, xj), strictbounds) || (strictbounds && (ismissing(xj) || isnan(xj)))
+                            if coalesce(($comp)(xi, xj), strictbounds) || (strictbounds && isnan(xj))
                                 peak &= false
                                 break # No reason to continue checking if the rest of the elements qualify
                             elseif xi === xj
@@ -161,28 +157,26 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                                 if coalesce(($notcomp)(xi, xi1), !strictbounds) || (!strictbounds && isnan(xi1))
                                     k = findnext(y -> xi !== y, x, j+1)
                                     if isnothing(k)
-                                        if !strictbounds # x is constant till the end, not a peak
-                                            push!(idxs,i)
-                                            N += 1
-                                            i = lasti+1
-                                            peak &= false
-                                            break
-                                        else
-                                            i = lasti+1
-                                            peak &= false
-                                            break
-                                        end
+                                        push!(idxs,i)
+                                        N += 1
+                                        i = lasti+1
+                                        peak &= false
+                                        break
                                     else
                                         xk = x[k]
-                                        if coalesce(($comp)(xi, xk), strictbounds) || (strictbounds && (ismissing(xk) || isnan(xk))) # x moves towards a peak
+                                        if coalesce(($comp)(xi, xk), strictbounds) || (strictbounds && isnan(xk)) # x moves towards a peak
                                             peak &= false
                                             break
                                         else # Push new peak here to shift the right number of elements
-                                            push!(idxs,i)
-                                            N += 1
-                                            i = max(k,i+w)
-                                            peak &= false
-                                            break
+                                            if k < lasti
+                                                j = k
+                                            else
+                                                push!(idxs,i)
+                                                N += 1
+                                                i = max(k,i+w)
+                                                peak &= false
+                                                break
+                                            end
                                         end
                                     end
                                 else
