@@ -135,5 +135,7 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         mn = [1,NaN,missing,1]
         @test isempty(maxima(mn))
         @test isempty(minima(mn))
+        @test isempty(maxima(reverse(mn)))
+        @test isempty(minima(reverse(mn)))
     end
 end
