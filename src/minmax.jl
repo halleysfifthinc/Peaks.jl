@@ -1,16 +1,18 @@
-export maxima,
-       minima
+export argmaxima, argminima, maxima, minima
 
-for (funcname, comp, notcomp) in ((:maxima, :<, :>),
-                         (:minima, :>, :<))
+for (funcname, comp, notcomp, val, TT) in ((:argmaxima, :<, :>, :i, Int),
+    (:argminima, :>, :<, :i, Int))
+    # FIXME: Enable maxima/minima => values after deprecation cycle
+    # (:maxima, :<, :>, :(x[i]), :T),
+    # (:minima, :>, :<, :(x[i]), :T))
 
     @eval begin
-        function ($funcname)(x::AbstractVector,
+        function ($funcname)(x::AbstractVector{T},
                         w::Integer=1,
-                        strictbounds::Bool=true)
+                        strictbounds::Bool=true) where T
             w > 0 || throw(ArgumentError("window cannot be negative"))
             xlen = length(x)
-            idxs = Int[]
+            out = nonmissingtype($TT)[]
 
             # There can't be more than one peak every `w` elements, but a peak is an element as well
             maxN = strictbounds ? max(0,fld(xlen-w,w+1)) : cld(xlen,w+1)
@@ -18,7 +20,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
 
             ww = [ collect(-w:-1); collect(1:w) ]
 
-            sizehint!(idxs,maxN)
+            sizehint!(out,maxN)
 
             firsti = firstindex(x)
             lasti = lastindex(x)
@@ -41,7 +43,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                             elseif xi === xj
                                 k = findnext(y -> xi !== y, x, j+1)
                                 if isnothing(k) # x is constant till the end, not a peak
-                                    push!(idxs,i)
+                                    push!(out, $val)
                                     N += 1
                                     i = lasti+1
                                     peak &= false
@@ -55,7 +57,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                                         if k < i + w # if the plateau is within w there could be a larger peak afterwards
                                             j = k
                                         else # Push new peak here to shift the right number of elements
-                                            push!(idxs,i)
+                                            push!(out, $val)
                                             N += 1
                                             i = k
                                             peak &= false
@@ -67,7 +69,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                         end
 
                         if peak
-                            push!(idxs,i)
+                            push!(out, $val)
                             N += 1
                             i += w # There can't be another peak for at least `w` more elements
                         end
@@ -95,7 +97,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                                 k = findnext(y -> xi !== y, x, i+j+1)
                                 if isnothing(k)
                                     if !strictbounds # x is constant till the end, only a peak for strictbounds false
-                                        push!(idxs,i)
+                                        push!(out, $val)
                                         N += 1
                                         i = lasti+1
                                         peak &= false
@@ -115,7 +117,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                                         if k < i + w
                                             j = k - i
                                         else
-                                            push!(idxs,i)
+                                            push!(out, $val)
                                             N += 1
                                             i = k
                                             peak &= false
@@ -131,7 +133,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                     end
 
                     if peak
-                        push!(idxs,i)
+                        push!(out, $val)
                         N += 1
                         i += w # There can't be another peak for at least `w` more elements
                     end
@@ -157,7 +159,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                                 if coalesce(($notcomp)(xi, xi1), !strictbounds) || (!strictbounds && isnan(xi1))
                                     k = findnext(y -> xi !== y, x, j+1)
                                     if isnothing(k)
-                                        push!(idxs,i)
+                                        push!(out, $val)
                                         N += 1
                                         i = lasti+1
                                         peak &= false
@@ -171,7 +173,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                                             if k < lasti
                                                 j = k
                                             else
-                                                push!(idxs,i)
+                                                push!(out, $val)
                                                 N += 1
                                                 i = max(k,i+w)
                                                 peak &= false
@@ -187,7 +189,7 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                         end
 
                         if peak
-                            push!(idxs,i)
+                            push!(out, $val)
                             N += 1
                             i += w # There can't be another peak for at least `w` more elements
                         end
@@ -196,16 +198,16 @@ for (funcname, comp, notcomp) in ((:maxima, :<, :>),
                 end
             end
 
-            resize!(idxs,N)
-            sizehint!(idxs,N)
+            resize!(out,N)
+            sizehint!(out,N)
 
-            return idxs
+            return out
         end
     end
 end
 
 @doc """
-    maxima(x[, w=1, strictbounds=true])
+    argmaxima(x[, w=1, strictbounds=true])
 
 Find the indices of the local maxima of `x` where each maxima is either the maximum of
 `x[-w:w]` or the first index of a plateau.
@@ -215,10 +217,10 @@ or `NaN`. If `strictbounds` is `false`, elements of `x[-w:w]` may not exist (eg 
 be less than `w` indices from either end of `x`), or may be `missing` or `NaN`. `missing`
 or `NaN` must not be maxima.
 """
-maxima
+argmaxima
 
 @doc """
-    minima(x[, w=1, strictbounds=false])
+    argminima(x[, w=1, strictbounds=false])
 
 Find the indices of the local minima of `x` where each minima is either the minimum of
 `x[-w:w]` or the first index of a plateau.
@@ -228,5 +230,5 @@ or `NaN`. If `strictbounds` is `false`, elements of `x[-w:w]` may not exist (eg 
 be less than `w` indices from either end of `x`), or may be `missing` or `NaN`. `missing`
 or `NaN` must not be minima.
 """
-minima
+argminima
 

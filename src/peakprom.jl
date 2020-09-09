@@ -16,9 +16,9 @@ for (comps, Extrema) in (((:>, minimum, max), Maxima),
     @eval begin
         function peakprom(x::AbstractVector{T}, ::$Extrema, w=1, minprom::T=zero(T)) where T
             if ($Extrema) === Maxima
-                m = maxima(x, w)
+                m = argmaxima(x, w)
             else
-                m = minima(x, w)
+                m = argminima(x, w)
             end
 
             M = lastindex(m)
@@ -66,7 +66,7 @@ end
 @doc """
     peakprom(x, ::Maxima[, w=1, minprom=0])
 
-Find all local maxima and maxima prominences in `x` matching the conditions `w` and `minprom`.
+Find the indices of all local maxima and their prominences in `x` matching the conditions `w` and `minprom`.
 `w` sets the minimum allowed distance between maxima. `minprom` sets the minimum prominence
 (inclusive) of returned maxima.
 
@@ -87,14 +87,14 @@ julia> @assert (mi == ma) && (pa == pi)
 
 ```
 
-See also: [`maxima`](@ref), [`minima`](@ref)
+See also: [`argmaxima`](@ref), [`maxima`](@ref)
 """
 peakprom(x, ::Maxima)
 
 @doc """
     peakprom(x, ::Minima[, w=1, minprom=0])
 
-Find all local minima and minima prominences in `x` matching the conditions `w` and `minprom`.
+Find the indices of all local minima and their prominences in `x` matching the conditions `w` and `minprom`.
 `w` sets the minimum allowed distance between minima. `minprom` sets the minimum prominence
 (inclusive) of returned minima.
 
@@ -103,7 +103,7 @@ the maximums of the lower and upper bounds. Bounds extend from the next index fr
 current minima to the next minima lower than the current minima, or the end of the signal,
 which ever comes first.
 
-See also: [`maxima`](@ref), [`minima`](@ref)
+See also: [`argminima`](@ref), [`minima`](@ref)
 """
 peakprom(x, ::Minima)
 
