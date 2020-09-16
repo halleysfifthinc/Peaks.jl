@@ -8,7 +8,7 @@ for (funcname, comp, notcomp, val, TT) in ((:argmaxima, :<, :>, :i, Int),
 
     @eval begin
         function ($funcname)(x::AbstractVector{T},
-                        w::Integer=1,
+                        w::Integer=1;
                         strictbounds::Bool=true) where T
             w > 0 || throw(ArgumentError("window cannot be negative"))
             xlen = length(x)
@@ -207,7 +207,7 @@ for (funcname, comp, notcomp, val, TT) in ((:argmaxima, :<, :>, :i, Int),
 end
 
 @doc """
-    argmaxima(x[, w=1, strictbounds=true])
+    argmaxima(x[, w=1; strictbounds=true])
 
 Find the indices of the local maxima of `x` where each maxima is either the maximum of
 `x[-w:w]` or the first index of a plateau.
@@ -220,7 +220,7 @@ or `NaN` must not be maxima.
 argmaxima
 
 @doc """
-    argminima(x[, w=1, strictbounds=false])
+    argminima(x[, w=1; strictbounds=false])
 
 Find the indices of the local minima of `x` where each minima is either the minimum of
 `x[-w:w]` or the first index of a plateau.
