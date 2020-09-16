@@ -219,6 +219,11 @@ or `NaN` must not be maxima.
 """
 argmaxima
 
+function findmaxima(x, w; strictbounds=false)
+    idxs = argmaxima(x, w; strictbounds)
+    return (idxs, x[idxs])
+end
+
 @doc """
     argminima(x[, w=1; strictbounds=false])
 
@@ -231,6 +236,11 @@ be less than `w` indices from either end of `x`), or may be `missing` or `NaN`. 
 or `NaN` must not be minima.
 """
 argminima
+
+function findminima(x, w; strictbounds=false)
+    idxs = argminima(x, w; strictbounds)
+    return (idxs, x[idxs])
+end
 
 # Deprecations
 @deprecate maxima(x,w,strictbounds) argmaxima(x,w; strictbounds)
