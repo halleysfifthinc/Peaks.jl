@@ -232,3 +232,6 @@ or `NaN` must not be minima.
 """
 argminima
 
+# Deprecations
+@deprecate maxima(x,w,strictbounds) argmaxima(x,w; strictbounds)
+@deprecate minima(x,w,strictbounds) argminima(x,w; strictbounds)
