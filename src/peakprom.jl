@@ -1,10 +1,5 @@
 using UnsafeArrays
 
-export Maxima,
-       Minima
-
-export peakprom
-
 struct Maxima; end
 struct Minima; end
 

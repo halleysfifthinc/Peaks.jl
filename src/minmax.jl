@@ -1,5 +1,3 @@
-export argmaxima, argminima, maxima, minima
-
 for (funcname, comp, notcomp, val, TT) in ((:argmaxima, :<, :>, :i, Int),
     (:argminima, :>, :<, :i, Int))
     # FIXME: Enable maxima/minima => values after deprecation cycle
