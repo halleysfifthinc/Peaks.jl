@@ -138,4 +138,7 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test isempty(argmaxima(reverse(mn)))
         @test isempty(argminima(reverse(mn)))
     end
+
+    @test_deprecated maxima(x1, 1, false)
+    @test_deprecated minima(x1, 1, false)
 end
