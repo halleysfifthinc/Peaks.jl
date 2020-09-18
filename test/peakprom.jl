@@ -45,10 +45,10 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         # The presence of a missing/NaN in either bounding interval poisons the prominence
         m4 = [missing; p4; missing]
         n4 = [NaN; p4; NaN]
-        @test prod(last(peakprom(m4)) .=== [missing,1,missing])
-        @test prod(last(peakprom(n4)) .=== [NaN,1.,NaN])
+        @test isequal(last(peakprom(m4)), [missing,1,missing])
+        @test isequal(last(peakprom(n4)), [NaN,1.,NaN])
         @test last(peakprom(m4; strictbounds=false)) == [2,1,1]
-        @test last(peakprom(n4; strictbounds=false)) ≈ [2.,1.,1.] atol=0.01
+        @test last(peakprom(n4; strictbounds=false)) == [2.,1.,1.]
 
         @test_skip peakprom([missing,1,missing]; strictbounds=false) == [missing]
 
