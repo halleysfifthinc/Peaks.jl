@@ -217,7 +217,7 @@ or `NaN` must not be maxima.
 """
 argmaxima
 
-function findmaxima(x, w; strictbounds=true)
+function findmaxima(x, w::Integer=1; strictbounds::Bool=true)
     idxs = argmaxima(x, w; strictbounds)
     return (idxs, x[idxs])
 end
@@ -235,11 +235,11 @@ or `NaN` must not be minima.
 """
 argminima
 
-function findminima(x, w; strictbounds=true)
+function findminima(x, w::Integer=1; strictbounds::Bool=true)
     idxs = argminima(x, w; strictbounds)
     return (idxs, x[idxs])
 end
 
 # Deprecations
-@deprecate maxima(x,w,strictbounds) argmaxima(x,w; strictbounds)
-@deprecate minima(x,w,strictbounds) argminima(x,w; strictbounds)
+@deprecate maxima(x,w=1,strictbounds=true) argmaxima(x,w; strictbounds)
+@deprecate minima(x,w=1,strictbounds=true) argminima(x,w; strictbounds)
