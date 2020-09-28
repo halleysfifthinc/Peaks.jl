@@ -217,7 +217,7 @@ or `NaN` must not be maxima.
 """
 argmaxima
 
-function findmaxima(x, w; strictbounds=false)
+function findmaxima(x, w; strictbounds=true)
     idxs = argmaxima(x, w; strictbounds)
     return (idxs, x[idxs])
 end
@@ -235,7 +235,7 @@ or `NaN` must not be minima.
 """
 argminima
 
-function findminima(x, w; strictbounds=false)
+function findminima(x, w; strictbounds=true)
     idxs = argminima(x, w; strictbounds)
     return (idxs, x[idxs])
 end
