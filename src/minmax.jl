@@ -212,8 +212,7 @@ Find the indices of the local maxima of `x` where each maxima is either the maxi
 
 If `strictbounds` is `true`, all elements of `x[-w:w]` must exist and may not be `missing`
 or `NaN`. If `strictbounds` is `false`, elements of `x[-w:w]` may not exist (eg peaks may
-be less than `w` indices from either end of `x`), or may be `missing` or `NaN`. `missing`
-or `NaN` must not be maxima.
+be less than `w` indices from either end of `x`), or may be `missing` or `NaN`.
 """
 argmaxima
 
@@ -230,8 +229,7 @@ Find the indices of the local minima of `x` where each minima is either the mini
 
 If `strictbounds` is `true`, all elements of `x[-w:w]` must exist and may not be `missing`
 or `NaN`. If `strictbounds` is `false`, elements of `x[-w:w]` may not exist (eg peaks may
-be less than `w` indices from either end of `x`), or may be `missing` or `NaN`. `missing`
-or `NaN` must not be minima.
+be less than `w` indices from either end of `x`), or may be `missing` or `NaN`.
 """
 argminima
 
