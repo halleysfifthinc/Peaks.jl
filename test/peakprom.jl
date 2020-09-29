@@ -50,7 +50,7 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test last(peakprom(m4; strictbounds=false)) == [2,1,1]
         @test last(peakprom(n4; strictbounds=false)) == [2.,1.,1.]
 
-        @test_skip peakprom([missing,1,missing]; strictbounds=false) == [missing]
+        @test last(peakprom([missing,1,missing]; strictbounds=false)) == [0]
 
         p5 = [-1,6,3,4,2,4,2,5,-2,0]
         @test last(peakprom(p5, 3; strictbounds=false)) == [7,3]
