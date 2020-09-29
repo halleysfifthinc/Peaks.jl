@@ -10,7 +10,7 @@ for (funcname, comp, notcomp, val, TT) in ((:argmaxima, :<, :>, :i, Int),
                         strictbounds::Bool=true) where T
             w > 0 || throw(ArgumentError("window cannot be negative"))
             xlen = length(x)
-            out = nonmissingtype($TT)[]
+            out = Base.nonmissingtype($TT)[]
 
             # There can't be more than one peak every `w` elements, but a peak is an element as well
             maxN = strictbounds ? max(0,fld(xlen-w,w+1)) : cld(xlen,w+1)
