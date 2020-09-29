@@ -12,7 +12,7 @@ for (comps, Extrema) in (((:>=, minimum, max), Maxima),
             strictbounds=true, minprom=nothing
         ) where T
             if ($Extrema) === Maxima
-                m = argmaxima(x, w; strictbounds)
+                m = argmaxima(x, w; strictbounds=strictbounds)
 
                 # The extremum search space in the bounding intervals can be reduced by
                 # restricting the search space to known peaks/reverse peaks. The cost of
@@ -24,7 +24,7 @@ for (comps, Extrema) in (((:>=, minimum, max), Maxima),
                     notm = argminima(x, 1; strictbounds=false)
                 end
             else
-                m = argminima(x, w; strictbounds)
+                m = argminima(x, w; strictbounds=strictbounds)
                 if !strictbounds
                     m′ = (w === 1) ? m : argminima(x, 1; strictbounds=false)
                     notm = argmaxima(x, 1; strictbounds=false)

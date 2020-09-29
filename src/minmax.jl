@@ -217,7 +217,7 @@ be less than `w` indices from either end of `x`), or may be `missing` or `NaN`.
 argmaxima
 
 function findmaxima(x, w::Integer=1; strictbounds::Bool=true)
-    idxs = argmaxima(x, w; strictbounds)
+    idxs = argmaxima(x, w; strictbounds=strictbounds)
     return (idxs, x[idxs])
 end
 
@@ -234,10 +234,10 @@ be less than `w` indices from either end of `x`), or may be `missing` or `NaN`.
 argminima
 
 function findminima(x, w::Integer=1; strictbounds::Bool=true)
-    idxs = argminima(x, w; strictbounds)
+    idxs = argminima(x, w; strictbounds=strictbounds)
     return (idxs, x[idxs])
 end
 
 # Deprecations
-@deprecate maxima(x,w=1,strictbounds=true) argmaxima(x,w; strictbounds)
-@deprecate minima(x,w=1,strictbounds=true) argminima(x,w; strictbounds)
+@deprecate maxima(x, w=1, strictbounds=true) argmaxima(x, w; strictbounds=strictbounds)
+@deprecate minima(x, w=1, strictbounds=true) argminima(x, w; strictbounds=strictbounds)
