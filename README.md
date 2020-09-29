@@ -10,16 +10,18 @@ Peaks.jl contains peak (local extrema) finding functions for vector data. Contri
 
 ## Functions
 
-- `maxima`/`minima`
+- `argmaxima`/`argminima`
   - Find the indices of the local extrema of `x` where each extrema is
     either the maximum of `x[-w:w]` or the first index of a plateau.
     If `strictbounds` is `true`, all elements of `x[-w:w]` must exist
     and may not be `missing` or `NaN`. If `strictbounds` is `false`,
     elements of `x[-w:w]` may not exist (eg peaks may be less than `w`
     indices from either end of `x`), or may be `missing` or `NaN`.
-    `missing` or `NaN` must not be extrema.
   - Supports OffsetArrays
   - See docstring for more information
+
+- `findmaxima`/`findminima` => (indices, values)
+  - Return the indices and values of local extrema
 
 - `peakprom`
   - Find all local extrema and peak prominences in `x` matching the
@@ -28,10 +30,9 @@ Peaks.jl contains peak (local extrema) finding functions for vector data. Contri
     returned extrema.
     Peak prominence is calculated as the difference between the current
     extrema and the most extreme of the smallest extrema of the lower and upper
-    bounds. Bounds extend from the current extrema to the next extrema
+    bounds. Bounds extend from the current extrema to the next element
     more extreme than the current extrema, or the end of the signal,
     which ever comes first.
-  - Does not currently support `strictbounds = false`
   - See docstring for more information
 
 ## Related
