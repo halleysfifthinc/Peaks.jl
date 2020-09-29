@@ -1,6 +1,8 @@
 # Peaks.jl
 
+[![version](https://juliahub.com/docs/Peaks/version.svg)](https://juliahub.com/ui/Packages/Peaks/3TWUM)
 [![Build Status](https://travis-ci.com/halleysfifthinc/Peaks.jl.svg?branch=master)](https://travis-ci.com/halleysfifthinc/Peaks.jl)
+[![pkgeval](https://juliahub.com/docs/Peaks/pkgeval.svg)](https://juliahub.com/ui/Packages/Peaks/3TWUM)
 [![codecov](https://codecov.io/gh/halleysfifthinc/Peaks.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/halleysfifthinc/Peaks.jl)
 ![Maintenance](https://img.shields.io/maintenance/yes/2020)
 
