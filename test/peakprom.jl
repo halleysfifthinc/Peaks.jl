@@ -62,7 +62,7 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
     @testset "Minimum prominence" begin
         minprom = 1.5
         i, p = peakprom(sin.(1e-5:1e-5:9*pi))
-        mi, mp = peakprom(sin.(1e-5:1e-5:9*pi); minprom)
+        mi, mp = peakprom(sin.(1e-5:1e-5:9*pi); minprom=minprom)
         @test all(x -> x >= minprom, mp)
     end
 
