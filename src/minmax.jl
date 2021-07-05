@@ -84,7 +84,7 @@ If `strictbounds` is `true`, all elements of `x[-w:w]` must exist and may not be
 or `NaN`. If `strictbounds` is `false`, elements of `x[-w:w]` may not exist (eg peaks may
 be less than `w` indices from either end of `x`), or may be `missing` or `NaN`.
 """
-function argmaxima(x::AbstractVector{T}, w::Integer=1; strictbounds::Bool=true) where T
+function argmaxima(x::AbstractVector{T}, w::Int=1; strictbounds::Bool=true) where T
     w > 0 || throw(ArgumentError("window cannot be negative"))
     pks = Int[]
 
@@ -98,7 +98,7 @@ function argmaxima(x::AbstractVector{T}, w::Integer=1; strictbounds::Bool=true) 
     return pks
 end
 
-function findmaxima(x, w::Integer=1; strictbounds::Bool=true)
+function findmaxima(x, w::Int=1; strictbounds::Bool=true)
     idxs = argmaxima(x, w; strictbounds=strictbounds)
     return (idxs, x[idxs])
 end
@@ -121,7 +121,7 @@ If `strictbounds` is `true`, all elements of `x[-w:w]` must exist and may not be
 or `NaN`. If `strictbounds` is `false`, elements of `x[-w:w]` may not exist (eg peaks may
 be less than `w` indices from either end of `x`), or may be `missing` or `NaN`.
 """
-function argminima(x::AbstractVector{T}, w::Integer=1; strictbounds::Bool=true) where T
+function argminima(x::AbstractVector{T}, w::Int=1; strictbounds::Bool=true) where T
     w > 0 || throw(ArgumentError("window cannot be negative"))
     pks = Int[]
 
@@ -135,7 +135,7 @@ function argminima(x::AbstractVector{T}, w::Integer=1; strictbounds::Bool=true) 
     return pks
 end
 
-function findminima(x, w::Integer=1; strictbounds::Bool=true)
+function findminima(x, w::Int=1; strictbounds::Bool=true)
     idxs = argminima(x, w; strictbounds=strictbounds)
     return (idxs, x[idxs])
 end
