@@ -21,7 +21,6 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test pp == np
     end
 
-
     @testset "Prominence values" begin
         i, p = peakprom(sin.(1e-5:1e-5:9*pi))
 
@@ -51,6 +50,7 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test last(peakprom(n4; strictbounds=false)) == [2.,1.,1.]
 
         @test last(peakprom([missing,1,missing]; strictbounds=false)) == [0]
+        @test last(peakprom([NaN,1,NaN]; strictbounds=false)) == [0]
 
         p5 = [-1,6,3,4,2,4,2,5,-2,0]
         @test last(peakprom(p5, 3; strictbounds=false)) == [7,3]
@@ -72,5 +72,8 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test isempty(i)
         @test isempty(p)
     end
+
+    @test_deprecated peakprom(Minima(), x1)
+    @test_deprecated peakprom(Maxima(), x1)
 end
 
