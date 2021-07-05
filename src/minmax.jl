@@ -89,10 +89,10 @@ function argmaxima(x::AbstractVector{T}, w::Integer=1; strictbounds::Bool=true) 
     pks = Int[]
 
     i = strictbounds ? w + firstindex(x) : firstindex(x)
-    i = findnextmaxima(x, i, w; strictbounds)
+    i = findnextmaxima(x, i, w; strictbounds=strictbounds)
     while i ≤ lastindex(x)
         push!(pks, i)
-        i = findnextmaxima(x, i+w+1, w; strictbounds)
+        i = findnextmaxima(x, i+w+1, w; strictbounds=strictbounds)
     end
 
     return pks
@@ -126,10 +126,10 @@ function argminima(x::AbstractVector{T}, w::Integer=1; strictbounds::Bool=true) 
     pks = Int[]
 
     i = strictbounds ? w + firstindex(x) : firstindex(x)
-    i = findnextminima(x, i, w; strictbounds)
+    i = findnextminima(x, i, w; strictbounds=strictbounds)
     while i ≤ lastindex(x)
         push!(pks, i)
-        i = findnextminima(x, i+w+1, w; strictbounds)
+        i = findnextminima(x, i+w+1, w; strictbounds=strictbounds)
     end
 
     return pks
@@ -141,5 +141,5 @@ function findminima(x, w::Integer=1; strictbounds::Bool=true)
 end
 
 # Deprecations
-@deprecate maxima(x::AbstractVector, w::Int=1, strictbounds::Bool=true) argmaxima(x, w; strictbounds)
-@deprecate minima(x::AbstractVector, w::Int=1, strictbounds::Bool=true) argminima(x, w; strictbounds)
+@deprecate maxima(x::AbstractVector, w::Int=1, strictbounds::Bool=true) argmaxima(x, w; strictbounds=strictbounds)
+@deprecate minima(x::AbstractVector, w::Int=1, strictbounds::Bool=true) argminima(x, w; strictbounds=strictbounds)

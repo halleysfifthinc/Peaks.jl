@@ -8,7 +8,8 @@ function peakwidth(
         # peaks will not be modified
         _peaks = peaks
     end
-    peakwidth!(_peaks, x, proms; strictbounds, relheight, minwidth, maxwidth)
+    peakwidth!(_peaks, x, proms; strictbounds=strictbounds, relheight=relheight,
+        minwidth=minwidth, maxwidth=maxwidth)
 end
 
 function peakwidth!(
@@ -46,7 +47,7 @@ function peakwidth!(
 
     if !isnothing(minwidth) || !isnothing(maxwidth)
         lo = something(minwidth, zero(eltype(widths)))
-        up = something(maxwidth, typemax(nonmissingtype(eltype(widths))))
+        up = something(maxwidth, typemax(Base.nonmissingtype(eltype(widths))))
         matched = findall(x -> !ismissing(x) && !(lo ≤ x ≤ up), widths)
         deleteat!(peaks, matched)
         deleteat!(widths, matched)

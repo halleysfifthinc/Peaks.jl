@@ -35,7 +35,7 @@ function peakprom(peaks::AbstractVector{Int}, x::AbstractVector{T};
         # peaks will not be modified
         _peaks = peaks
     end
-    return peakprom!(_peaks, x; strictbounds, minprom, maxprom)
+    return peakprom!(_peaks, x; strictbounds=strictbounds, minprom=minprom, maxprom=maxprom)
 end
 
 """
@@ -138,7 +138,7 @@ function peakprom!(peaks::AbstractVector{Int}, x::AbstractVector{T};
 
     if !isnothing(minprom) || !isnothing(maxprom)
         lo = something(minprom, zero(eltype(x)))
-        up = something(maxprom, typemax(nonmissingtype(eltype(x))))
+        up = something(maxprom, typemax(Base.nonmissingtype(eltype(x))))
         matched = findall(x -> !ismissing(x) && !(lo ≤ x ≤ up), proms)
         deleteat!(peaks, matched)
         deleteat!(proms, matched)
@@ -150,7 +150,7 @@ end
 struct Maxima; end
 struct Minima; end
 
-@deprecate peakprom(x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakprom(argmaxima(x, w; strictbounds), x; strictbounds, minprom)
-@deprecate peakprom(m::Minima, x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakprom(argminima(x, w; strictbounds), x; strictbounds, minprom)
-@deprecate peakprom(m::Maxima, x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakprom(argmaxima(x, w; strictbounds), x; strictbounds, minprom)
+@deprecate peakprom(x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakprom(argmaxima(x, w; strictbounds=strictbounds), x; strictbounds=strictbounds, minprom=minprom)
+@deprecate peakprom(m::Minima, x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakprom(argminima(x, w; strictbounds=strictbounds), x; strictbounds=strictbounds, minprom=minprom)
+@deprecate peakprom(m::Maxima, x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakprom(argmaxima(x, w; strictbounds=strictbounds), x; strictbounds=strictbounds, minprom=minprom)
 
