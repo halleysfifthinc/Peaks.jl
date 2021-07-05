@@ -16,7 +16,11 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
     @testset "Reciprocity" begin
         pi, pp = peakprom(x1)
         ni, np = peakprom(Minima(), -x1)
+        @test pi == ni
+        @test pp == np
 
+        pi, pp = peakprom(x1; strictbounds=false)
+        ni, np = peakprom(Minima(), -x1; strictbounds=false)
         @test pi == ni
         @test pp == np
     end
