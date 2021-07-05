@@ -54,7 +54,11 @@ function peakprom(peaks::AbstractVector{Int}, x::AbstractVector{T};
 end
 
 """
-    peakprom!(peaks, x; strictbounds, minprom, maxprom) -> (peaks, proms)
+    peakprom!(peaks, x;
+        strictbounds=true,
+        minprom=nothing,
+        maxprom=nothing
+    ) -> (peaks, proms)
 
 Calculate the prominences of `peaks` in `x`, deleting `peaks` with prominences less than
 `minprom` and greater than `maxprom`, if either are given. Returns the modified `peaks` and
