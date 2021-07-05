@@ -19,6 +19,15 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
     @test length(argmaxima(x1, 1; strictbounds=false)) == 31
     @test length(argminima(x1, 1; strictbounds=false)) == 31
 
+    @test length(argmaxima(x1, 1000)) == 4
+    @test length(argminima(x1, 1000)) == 4
+
+    @test length(argmaxima(x1, 1000; strictbounds=false)) == 5
+    @test length(argminima(x1, 1000; strictbounds=false)) == 5
+
+    @test argmaxima([0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], 2) == [4,8,12]
+    @test argmaxima([0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], 2; strictbounds=false) == [2,6,10,14]
+
     # OffsetArrays
     x1_off = OffsetArray(x1, -200:length(x1)-201)
     @test length(argmaxima(x1_off)) == 30
@@ -29,15 +38,6 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
     @test length(argminima(x1_off, 1; strictbounds=false)) == 31
     @test argmaxima(x1_off, 1; strictbounds=false) == argmaxima(x1, 1; strictbounds=false) .- 201
     @test argminima(x1_off, 1; strictbounds=false) == argminima(x1, 1; strictbounds=false) .- 201
-
-    @test length(argmaxima(x1, 1000)) == 4
-    @test length(argminima(x1, 1000)) == 4
-
-    @test length(argmaxima(x1, 1000; strictbounds=false)) == 5
-    @test length(argminima(x1, 1000; strictbounds=false)) == 5
-
-    @test argmaxima([0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], 2) == [4,8,12]
-    @test argmaxima([0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], 2; strictbounds=false) == [2,6,10,14]
 
     @testset "Plateaus" begin
         p1 = [0,1,1,1,1,1]
