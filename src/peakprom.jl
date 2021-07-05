@@ -29,7 +29,13 @@ julia> @assert (mi == ma) && (pa == pi)
 function peakprom(peaks::AbstractVector{Int}, x::AbstractVector{T};
     strictbounds=true, minprom=nothing, maxprom=nothing
 ) where T
-    return peakprom!(copy(peaks), x; strictbounds, minprom, maxprom)
+    if !isnothing(minprom) || !isnothing(maxprom)
+        _peaks = copy(peaks)
+    else
+        # peaks will not be modified
+        _peaks = peaks
+    end
+    return peakprom!(_peaks, x; strictbounds, minprom, maxprom)
 end
 
 """

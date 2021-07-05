@@ -2,7 +2,13 @@ function peakwidth(
     peaks::AbstractVector{Int}, x::AbstractVector, proms::AbstractVector;
     strictbounds=true, relheight=0.5, minwidth=nothing, maxwidth=nothing,
 )
-    peakwidth!(copy(peaks), x, proms; strictbounds, relheight, minwidth, maxwidth)
+    if !isnothing(minwidth) || !isnothing(maxwidth)
+        _peaks = copy(peaks)
+    else
+        # peaks will not be modified
+        _peaks = peaks
+    end
+    peakwidth!(_peaks, x, proms; strictbounds, relheight, minwidth, maxwidth)
 end
 
 function peakwidth!(
