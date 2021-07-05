@@ -1,29 +1,44 @@
 """
-    peakprom(peaks, x; strictbounds, minprom, maxprom) -> (peaks, proms)
+    peakprom(peaks, x;
+        strictbounds=true,
+        minprom=nothing,
+        maxprom=nothing
+    ) -> (peaks, proms)
 
-Calculate the prominences of `peaks` in `x`, returning peaks and prominences between `minprom` and `maxprom`.
+Calculate the prominences of `peaks` in `x`, filtering peaks and prominences less than
+`minprom` and greater than `maxprom`, if either are given.
 
-Peak prominence is calculated as the distance between the current peak and the larger of
-the extremums of the left and right bounding intervals. Bounding intervals extend from the
-next/previous index from the current peak to the first element larger than or equal to
-the current peak, or the end of the signal, whichever comes first.
+Peak prominence is the absolute height difference between the current peak and the larger of
+the two adjacent smallest magnitude points between the current peak and adjacent larger
+peaks or signal ends.
 
-When bounding intervals contain `NaN` or `missing`, the reported prominence for that peak
-will be `NaN` or `missing`, respectively, if `strictbounds = true`; if `strictbounds = false`,
-the reference level for the contaminated bounding interval will be the maximum non-`NaN` or
-`missing` value.
+The prominence for a peak with a `NaN` or `missing` between the current peak and either
+adjacent larger peaks will be `NaN` or `missing` if `strictbounds == true`, or it will be
+the larger of the smallest non-`NaN` or `missing` values between the current peak and
+adjacent larger peaks for `strictbounds == false`.
 
 See also: [`argminima`](@ref), [`argmaxima`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
 
 # Examples
 ```jldoctest
-julia> x = rand(1000);
+julia> x = [0,5,2,3,3,1,4,0];
 
-julia> ma, pa = peakprom(x);
+julia> xpks = argmaxima(x)
+3-element Vector{Int64}:
+ 2
+ 4
+ 7
 
-julia> mi, pi = peakprom(Minima(), -x);
+julia> peakprom(xpks, x)
+([2, 4, 7], Union{Missing, Int64}[5, 1, 3])
 
-julia> @assert (mi == ma) && (pa == pi)
+julia> x = [missing,5,2,3,3,1,4,0];
+
+julia> peakprom(xpks, x)
+([2, 4, 7], Union{Missing, Int64}[missing, 1, 3])
+
+julia> peakprom(xpks, x; strictbounds=false)
+([2, 4, 7], Union{Missing, Int64}[4, 1, 3])
 ```
 """
 function peakprom(peaks::AbstractVector{Int}, x::AbstractVector{T};
@@ -41,10 +56,11 @@ end
 """
     peakprom!(peaks, x; strictbounds, minprom, maxprom) -> (peaks, proms)
 
-Calculate the prominences of `peaks` in `x` and delete peaks with prominences outside of
-`minprom` and `maxprom`. Returns the modified `peaks` and the prominences.
+Calculate the prominences of `peaks` in `x`, deleting `peaks` with prominences less than
+`minprom` and greater than `maxprom`, if either are given. Returns the modified `peaks` and
+their prominences.
 
-See also: [`peakprom`](@ref),[`argminima`](@ref), [`argmaxima`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
+See also: [`peakprom`](@ref), [`argminima`](@ref), [`argmaxima`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
 """
 function peakprom!(peaks::AbstractVector{Int}, x::AbstractVector{T};
     strictbounds=true, minprom=nothing, maxprom=nothing
