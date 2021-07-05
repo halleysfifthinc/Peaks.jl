@@ -139,6 +139,11 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test isempty(argminima(reverse(mn)))
     end
 
+    pks, vals = @test_nowarn findmaxima(x1)
+    @test x1[pks] == vals
+    pks, vals = @test_nowarn findminima(x1)
+    @test x1[pks] == vals
+
     @test_deprecated maxima(x1, 1, false)
     @test_deprecated minima(x1, 1, false)
 end
