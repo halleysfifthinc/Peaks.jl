@@ -44,6 +44,8 @@ julia> peakprom(xpks, x; strictbounds=false)
 function peakprom(peaks::AbstractVector{Int}, x::AbstractVector{T};
     strictbounds=true, minprom=nothing, maxprom=nothing
 ) where T
+    all(∈(eachindex(x)), peaks) ||
+        throw(ArgumentError("peaks contains invalid indices to x"))
     if !isnothing(minprom) || !isnothing(maxprom)
         _peaks = copy(peaks)
     else
@@ -69,6 +71,11 @@ See also: [`peakprom`](@ref), [`argminima`](@ref), [`argmaxima`](@ref), [`findmi
 function peakprom!(peaks::AbstractVector{Int}, x::AbstractVector{T};
     strictbounds=true, minprom=nothing, maxprom=nothing
 ) where T
+    if !isnothing(minprom) && !isnothing(maxprom)
+        minprom < maxprom || throw(ArgumentError("minprom must be less than maxprom"))
+    end
+    all(∈(eachindex(x)), peaks) ||
+        throw(ArgumentError("peaks contains invalid indices to x"))
     proms = similar(peaks,Union{Missing,T})
     isempty(peaks) && return peaks, proms
 

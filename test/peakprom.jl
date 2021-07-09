@@ -52,8 +52,8 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         n4 = [NaN; p4; NaN]
         @test isequal(last(peakprom(argmaxima(m4), m4)), [missing,1,missing])
         @test isequal(last(peakprom(argmaxima(n4), n4)), [NaN,1.,NaN])
-        @test last(peakprom(argmaxima(m4; strictbounds=false), m4; strictbounds=false)) == [2,1,1]
-        @test last(peakprom(argmaxima(n4; strictbounds=false), n4; strictbounds=false)) == [2.,1.,1.]
+        @test last(peakprom(argmaxima(m4), m4; strictbounds=false)) == [2,1,1]
+        @test last(peakprom(argmaxima(n4), n4; strictbounds=false)) == [2.,1.,1.]
 
         m5 = [missing, 1, missing]
         n5 = [NaN, 1, NaN]
@@ -67,13 +67,13 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
 
     end
 
-    @testset "Minimum prominence" begin
-        minprom = 1.5
-        x2 = sin.(1e-5:1e-5:9*pi)
-        max2 = argmaxima(x2)
-        _, p = peakprom(max2, x2)
-        _, mp = peakprom(max2, x2; minprom=minprom)
-        @test all(x -> x >= minprom, mp)
+    @testset "Min/max prominence" begin
+        sint = sin.(T:T:6pi)
+        maxs = argmaxima(sint)
+        @test length(first(peakprom(maxs, sint; minprom=1.5))) == 2
+        @test length(first(peakprom(maxs, sint; maxprom=1.5))) == 1
+
+        @test_throws ArgumentError peakprom([1,2,3], sint; maxprom=0.1, minprom=1)
     end
 
     # issue #4
