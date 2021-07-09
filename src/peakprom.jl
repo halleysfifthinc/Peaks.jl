@@ -76,7 +76,7 @@ function peakprom!(peaks::AbstractVector{Int}, x::AbstractVector{T};
     end
     all(∈(eachindex(x)), peaks) ||
         throw(ArgumentError("peaks contains invalid indices to x"))
-    proms = similar(peaks,Union{Missing,T})
+    proms = similar(peaks,T)
     isempty(peaks) && return peaks, proms
 
     fp = first(peaks)
@@ -88,21 +88,7 @@ function peakprom!(peaks::AbstractVector{Int}, x::AbstractVector{T};
     cmp = pktype === :maxima ? (≥) : (≤)
     exm = pktype === :maxima ? minimum : maximum
     exa = pktype === :maxima ? max : min
-
-    if !strictbounds
-        # The extremum search space in the bounding intervals can be reduced by
-        # restricting the search space to known peaks/reverse peaks. The cost of
-        # finding all peaks/reverse peaks should be mitigated by the fact that
-        # the same peaks/reverse peaks will be the pivotal elements for
-        # numerous peaks.
-        if pktype === :maxima
-            peaks′ = argmaxima(x, 1; strictbounds=false)
-            notm = argminima(x, 1; strictbounds=false)
-        else
-            peaks′ = argminima(x, 1; strictbounds=false)
-            notm = argmaxima(x, 1; strictbounds=false)
-        end
-    end
+    _ref = Missing <: T ? missing : T(NaN)
 
     if strictbounds
         lbegin, lend = firstindex(x), lastindex(x)
@@ -116,13 +102,13 @@ function peakprom!(peaks::AbstractVector{Int}, x::AbstractVector{T};
 
             # Find extremum of left and right bounds
             if isempty(lb:(peaks[i] - 1))
-                lref = missing
+                lref = _ref
             else
                 lref = exm(view(x, lb:(peaks[i] - 1)))
             end
 
             if isempty((peaks[i] + 1):rb)
-                rref = missing
+                rref = _ref
             else
                 rref = exm(view(x, (peaks[i] + 1):rb))
             end
@@ -130,29 +116,44 @@ function peakprom!(peaks::AbstractVector{Int}, x::AbstractVector{T};
             proms[i] = abs(x[peaks[i]] - exa(lref, rref))
         end
     else
-        peaks′val = x[peaks′]
+        # The extremum search space in the bounding intervals can be reduced by
+        # restricting the search space to known peaks/reverse peaks. The cost of
+        # finding all peaks/reverse peaks should be mitigated by the fact that
+        # the same peaks/reverse peaks will be the pivotal elements for
+        # numerous peaks.
+        if pktype === :maxima
+            peaks′ = argmaxima(x, 1; strictbounds=false)
+            notm = argminima(x, 1; strictbounds=false)
+        else
+            peaks′ = argminima(x, 1; strictbounds=false)
+            notm = argmaxima(x, 1; strictbounds=false)
+        end
+
         notmval = x[notm]
 
-        j = something(findfirst(y -> y === peaks[1], peaks′), firstindex(peaks′))
-        k = something(findfirst(>(peaks[1]), notm), firstindex(notm))
-        @inbounds for i in eachindex(peaks, proms)
-            j = something(findnext(y -> y === peaks[i], peaks′, j), j)
-            k = something(findnext(>(peaks[i]), notm, k), lastindex(notm))
+        for i in eachindex(peaks, proms)
+            j = searchsorted(peaks′, peaks[i])
 
             # Find left and right bounding peaks
-            _lb = something(findprev(y -> cmp(y, peaks′val[j]) === true, peaks′val, j - 1), firstindex(peaks′))
-            _rb = something(findnext(y -> cmp(y, peaks′val[j]) === true, peaks′val, j + 1), lastindex(peaks′))
+            _lb = findprev(y -> cmp(x[y], x[peaks[i]]) === true, peaks′, first(j)-1)
+            peaks′[j] === peaks[i] && (j += 1)
+            _rb = findnext(y -> cmp(x[y], x[peaks[i]]) === true, peaks′, last(j)+1)
 
             # Find left and right reverse peaks just inside the bounding peaks
-            lb = something(findprev(<(peaks′[_lb]+2), notm, k-1), firstindex(notm))
-            rb = something(findnext(>(peaks′[_rb]-2), notm, k), lastindex(notm))
+            lb = isnothing(_lb) ? firstindex(notm) :
+                                  searchsortedfirst(notm, peaks′[_lb])
+            rb = isnothing(_rb) ? lastindex(notm) :
+                                  searchsortedlast(notm, peaks′[_rb])
+
+            k = searchsortedfirst(notm, peaks[i])
 
             if isempty(lb:(k-1))
                 lref = missing
             else
-                lref = exm(view(notmval, lb:(k - 1)))
+                lref = exm(view(notmval, lb:(k-1)))
             end
 
+            rb > lastindex(notm) && (rb -= 1)
             if isempty(k:rb)
                 rref = missing
             else
