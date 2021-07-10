@@ -27,9 +27,6 @@ function peakwidth!(
     end
     all(∈(eachindex(x)), peaks) ||
         throw(ArgumentError("peaks contains invalid indices to x"))
-    V = promote_type(T,U)
-    lower = similar(proms, V)
-    upper = similar(proms, V)
 
     fp = first(peaks)
     if fp > 1 && ((x[fp] < x[fp-1]) === true)
@@ -40,7 +37,17 @@ function peakwidth!(
     cmp = pktype === :maxima ? (≤) : (≥)
     op = pktype === :maxima ? (-) : (+)
 
-    _bad = Missing <: V ? missing : V(NaN)
+    V1 = promote_type(T,U)
+    _bad = Missing <: V1 ? missing :
+           Float64 <: V1 ? NaN :
+           Float32 <: V1 ? NaN32 :
+           Float16 <: V1 ? NaN16 :
+                           missing
+
+    V = promote_type(V, typeof(_bad))
+    lower = similar(proms, V)
+    upper = similar(proms, V)
+
     if strictbounds
         lst, fst = _bad, _bad
     else

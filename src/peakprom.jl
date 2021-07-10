@@ -76,8 +76,7 @@ function peakprom!(peaks::AbstractVector{Int}, x::AbstractVector{T};
     end
     all(∈(eachindex(x)), peaks) ||
         throw(ArgumentError("peaks contains invalid indices to x"))
-    proms = similar(peaks,T)
-    isempty(peaks) && return peaks, proms
+    isempty(peaks) && return peaks, T[]
 
     fp = first(peaks)
     if fp > 1 && ((x[fp] < x[fp-1]) === true)
@@ -88,7 +87,14 @@ function peakprom!(peaks::AbstractVector{Int}, x::AbstractVector{T};
     cmp = pktype === :maxima ? (≥) : (≤)
     exm = pktype === :maxima ? minimum : maximum
     exa = pktype === :maxima ? max : min
-    _ref = Missing <: T ? missing : T(NaN)
+
+    _ref = Missing <: T ? missing :
+           Float64 <: T ? NaN :
+           Float32 <: T ? NaN32 :
+           Float16 <: T ? NaN16 :
+                          missing
+
+    proms = similar(peaks,promote_type(T,typeof(_ref)))
 
     if strictbounds
         lbegin, lend = firstindex(x), lastindex(x)
