@@ -6,11 +6,11 @@
 
     @testset "minima/maxima" begin
         sinpks = argmaxima(sint)
-        _, widths, _, _ = peakwidth(sinpks, sint, sint[sinpks]; strictbounds=false, relheight=1)
+        _, widths, _, _ = peakwidth(sinpks, sint, sint[sinpks]; strict=false, relheight=1)
         @test widths ≈ fill(pi*100, length(sinpks)) atol=.01
 
         sinpks = argminima(sint)
-        _, widths, _, _ = peakwidth(sinpks, sint, abs.(sint[sinpks]); strictbounds=false, relheight=1)
+        _, widths, _, _ = peakwidth(sinpks, sint, abs.(sint[sinpks]); strict=false, relheight=1)
         @test widths ≈ fill(pi*100, length(sinpks)) atol=.01
     end
 
@@ -20,17 +20,17 @@
     @test widths[1] === NaN
     _, widths, _, _ = peakwidth([2], [0.,1.,0.], [missing])
     @test widths[1] === missing
-    _, widths, _, _ = peakwidth([2], [0.,1.,NaN], [1.]; strictbounds=true)
+    _, widths, _, _ = peakwidth([2], [0.,1.,NaN], [1.]; strict=true)
     @test widths[1] === NaN
-    _, widths, _, _ = peakwidth([2], [0.,1.,0.,-1.], [1.]; strictbounds=false)
-    _, widthsnan, _, _ = peakwidth([2], [0.,1.,NaN,-1.], [1.]; strictbounds=false)
+    _, widths, _, _ = peakwidth([2], [0.,1.,0.,-1.], [1.]; strict=false)
+    _, widthsnan, _, _ = peakwidth([2], [0.,1.,NaN,-1.], [1.]; strict=false)
     @test widths == widthsnan
 
-    @testset "strictbounds" begin
+    @testset "strict" begin
         sinpks = argmaxima(sint)
-        _, widths, _, _ = peakwidth(sinpks, sint, ones(length(sinpks)); strictbounds=true, relheight=1)
+        _, widths, _, _ = peakwidth(sinpks, sint, ones(length(sinpks)); strict=true, relheight=1)
         @test first(widths) === NaN
-        _, widths, _, _ = peakwidth(sinpks, sint, ones(length(sinpks)); strictbounds=false, relheight=1)
+        _, widths, _, _ = peakwidth(sinpks, sint, ones(length(sinpks)); strict=false, relheight=1)
         @test first(widths) !== NaN
     end
 

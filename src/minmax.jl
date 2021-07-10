@@ -1,9 +1,9 @@
 _smallwerr(w) = throw(DomainError(w,"window size `w` must be greater than zero"))
 
-function findnextextrema(cmp, x::AbstractVector, i::Int, w::Int, strictbounds::Bool)
+function findnextextrema(cmp, x::AbstractVector, i::Int, w::Int, strict::Bool)
     w > 0 || _smallwerr(w)
-    strictbounds && i - w < firstindex(x) && (i = w + 1) # First peak can't be closer than w
-    maxlast = strictbounds ? lastindex(x) - w : lastindex(x)
+    strict && i - w < firstindex(x) && (i = w + 1) # First peak can't be closer than w
+    maxlast = strict ? lastindex(x) - w : lastindex(x)
 
     while i ≤ maxlast
         peak = true
@@ -14,14 +14,14 @@ function findnextextrema(cmp, x::AbstractVector, i::Int, w::Int, strictbounds::B
             for j in max(firstindex(x),i-w):min(i+w,lastindex(x))
                 j === i && continue
                 xj = x[j]
-                if coalesce(cmp(xi, xj), strictbounds) || (strictbounds && isnan(xj))
+                if coalesce(cmp(xi, xj), strict) || (strict && isnan(xj))
                     peak &= false
                     i = j > i ? j : i + 1
                     break # No reason to continue checking if the rest of the elements qualify
                 elseif xi === xj # plateau
                     k = findnext(p -> xi !== p, x, j+1)
                     # @show k i j
-                    if strictbounds
+                    if strict
                         if !isnothing(k) && i-1 ≥ firstindex(x)
                             xi1 = x[i-1]
                             xk = x[k]
@@ -70,14 +70,14 @@ function findnextextrema(cmp, x::AbstractVector, i::Int, w::Int, strictbounds::B
 end
 
 """
-    findnextmaxima(x, i[, w=1; strictbounds=true])
+    findnextmaxima(x, i[, w=1; strict=true])
 
 Find the index of the next maxima in `x` after or including `i`, where the maxima `i` is
 either the maximum of `x[i-w:i+w]` or the first index of a plateau. Returns `lastindex(x) +
 1` if no maxima occur after `i`.
 
-If `strictbounds` is `true`, all elements in `x[i-w:i+w]` or the bounds of a plateau must
-exist and must not be `missing` or `NaN`. For `strictbounds == false`, a maxima is the
+If `strict` is `true`, all elements in `x[i-w:i+w]` or the bounds of a plateau must
+exist and must not be `missing` or `NaN`. For `strict == false`, a maxima is the
 maximum or first element of all existing and non-NaN or missing elements in `x[i-w:i+w]` or
 the bounds of a plateau.
 
@@ -93,16 +93,16 @@ julia> findnextmaxima([0,2,0,1,1,0], 3)
 
 ```
 """
-findnextmaxima(x, i, w=1; strictbounds=true) = findnextextrema(<, x, i, w, strictbounds)
+findnextmaxima(x, i, w=1; strict=true) = findnextextrema(<, x, i, w, strict)
 
 """
-    argmaxima(x[, w=1; strictbounds=true])
+    argmaxima(x[, w=1; strict=true])
 
 Find the indices of the local maxima of `x` where each maxima `i` is either the maximum of
 `x[i-w:i+w]` or the first index of a plateau.
 
-If `strictbounds` is `true`, all elements of `x[i-w:i+w]` or the bounds of a plateau must
-exist and must not be `missing` or `NaN`. For `strictbounds == false`, a maxima is the
+If `strict` is `true`, all elements of `x[i-w:i+w]` or the bounds of a plateau must
+exist and must not be `missing` or `NaN`. For `strict == false`, a maxima is the
 maximum or first element of all existing and non-NaN or missing elements in `x[i-w:i+w]` or
 the bounds of a plateau.
 
@@ -118,48 +118,60 @@ julia> argmaxima([0,2,0,1,1,0])
 julia> argmaxima([2,0,1,1])
 Int64[]
 
-julia> argmaxima([2,0,1,1]; strictbounds=false)
+julia> argmaxima([2,0,1,1]; strict=false)
 2-element Vector{Int64}:
  1
  3
 ```
 """
-function argmaxima(x::AbstractVector{T}, w::Int=1; strictbounds::Bool=true) where T
+function argmaxima(
+    x::AbstractVector{T}, w::Int=1; strict::Bool=true, strictbounds=nothing
+) where T
+    if !isnothing(strictbounds)
+        Base.depwarn("Keyword `strictbounds` has been renamed to `strict`", :argmaxima)
+        strict=strictbounds
+    end
+
     w > 0 || _smallwerr(w)
     pks = Int[]
 
-    i = strictbounds ? w + firstindex(x) : firstindex(x)
-    i = findnextmaxima(x, i, w; strictbounds=strictbounds)
+    i = strict ? w + firstindex(x) : firstindex(x)
+    i = findnextmaxima(x, i, w; strict=strict)
     while i ≤ lastindex(x)
         push!(pks, i)
-        i = findnextmaxima(x, i+w+1, w; strictbounds=strictbounds)
+        i = findnextmaxima(x, i+w+1, w; strict=strict)
     end
 
     return pks
 end
 
 """
-    findmaxima(x[, w=1; strictbounds=true]) -> (idxs, vals)
+    findmaxima(x[, w=1; strict=true]) -> (idxs, vals)
 
 Find the indices and values of the local maxima of `x` where each maxima `i` is either the maximum of
 `x[i-w:i+w]` or the first index of a plateau.
 
 See also: [`argmaxima`](@ref), [`findnextmaxima`](@ref)
 """
-function findmaxima(x, w::Int=1; strictbounds::Bool=true)
-    idxs = argmaxima(x, w; strictbounds=strictbounds)
+function findmaxima(x, w::Int=1; strict::Bool=true, strictbounds=nothing)
+    if !isnothing(strictbounds)
+        Base.depwarn("Keyword `strictbounds` has been renamed to `strict`", :findmaxima)
+        strict=strictbounds
+    end
+
+    idxs = argmaxima(x, w; strict=strict)
     return (idxs, x[idxs])
 end
 
 """
-    findnextminima(x, i[, w=1, strictbounds=true])
+    findnextminima(x, i[, w=1, strict=true])
 
 Find the index of the next minima in `x` after or including `i`, where the minima `i` is
 either the minimum of `x[i-w:i+w]` or the first index of a plateau. Returns `lastindex(x) +
 1` if no minima occur after `i`.
 
-If `strictbounds` is `true`, all elements in `x[i-w:i+w]` or the bounds of a plateau must
-exist and must not be `missing` or `NaN`. For `strictbounds == false`, a minima is the
+If `strict` is `true`, all elements in `x[i-w:i+w]` or the bounds of a plateau must
+exist and must not be `missing` or `NaN`. For `strict == false`, a minima is the
 minimum or first element of all existing and non-NaN or missing elements in `x[i-w:i+w]` or
 the bounds of a plateau.
 
@@ -175,17 +187,17 @@ julia> findnextminima([3,2,3,1,1,3], 3)
 
 ```
 """
-findnextminima(x, i, w=1; strictbounds=true) = findnextextrema(>, x, i, w, strictbounds)
+findnextminima(x, i, w=1; strict=true) = findnextextrema(>, x, i, w, strict)
 
 """
-    argminima(x[, w=1; strictbounds=false])
+    argminima(x[, w=1; strict=false])
 
 
 Find the indices of the local minima of `x` where each minima `i` is either the minimum of
 `x[i-w:i+w]` or the first index of a plateau.
 
-If `strictbounds` is `true`, all elements of `x[i-w:i+w]` or the bounds of a plateau must
-exist and must not be `missing` or `NaN`. For `strictbounds == false`, a minima is the
+If `strict` is `true`, all elements of `x[i-w:i+w]` or the bounds of a plateau must
+exist and must not be `missing` or `NaN`. For `strict == false`, a minima is the
 minimum or first element of all existing and non-NaN or missing elements in `x[i-w:i+w]` or
 the bounds of a plateau.
 
@@ -201,39 +213,51 @@ julia> argminima([3,2,3,1,1,3])
 julia> argminima([2,3,1,1])
 Int64[]
 
-julia> argminima([2,3,1,1]; strictbounds=false)
+julia> argminima([2,3,1,1]; strict=false)
 2-element Vector{Int64}:
  1
  3
 ```
 """
-function argminima(x::AbstractVector{T}, w::Int=1; strictbounds::Bool=true) where T
+function argminima(
+    x::AbstractVector{T}, w::Int=1; strict::Bool=true, strictbounds=nothing
+) where T
+    if !isnothing(strictbounds)
+        Base.depwarn("Keyword `strictbounds` has been renamed to `strict`", :argminima)
+        strict=strictbounds
+    end
+
     w > 0 || _smallwerr(w)
     pks = Int[]
 
-    i = strictbounds ? w + firstindex(x) : firstindex(x)
-    i = findnextminima(x, i, w; strictbounds=strictbounds)
+    i = strict ? w + firstindex(x) : firstindex(x)
+    i = findnextminima(x, i, w; strict=strict)
     while i ≤ lastindex(x)
         push!(pks, i)
-        i = findnextminima(x, i+w+1, w; strictbounds=strictbounds)
+        i = findnextminima(x, i+w+1, w; strict=strict)
     end
 
     return pks
 end
 
 """
-    findminima(x[, w=1; strictbounds=true]) -> (idxs, vals)
+    findminima(x[, w=1; strict=true]) -> (idxs, vals)
 
 Find the indices and values of the local minima of `x` where each minima `i` is either the minimum of
 `x[i-w:i+w]` or the first index of a plateau.
 
 See also: [`argminima`](@ref), [`findnextminima`](@ref)
 """
-function findminima(x, w::Int=1; strictbounds::Bool=true)
-    idxs = argminima(x, w; strictbounds=strictbounds)
+function findminima(x, w::Int=1; strict::Bool=true, strictbounds=nothing)
+    if !isnothing(strictbounds)
+        Base.depwarn("Keyword `strictbounds` has been renamed to `strict`", :findminima)
+        strict=strictbounds
+    end
+
+    idxs = argminima(x, w; strict=strict)
     return (idxs, x[idxs])
 end
 
 # Deprecations
-@deprecate maxima(x::AbstractVector, w::Int=1, strictbounds::Bool=true) argmaxima(x, w; strictbounds=strictbounds)
-@deprecate minima(x::AbstractVector, w::Int=1, strictbounds::Bool=true) argminima(x, w; strictbounds=strictbounds)
+@deprecate maxima(x::AbstractVector, w::Int=1, strictbounds::Bool=true) argmaxima(x, w; strict=strictbounds)
+@deprecate minima(x::AbstractVector, w::Int=1, strictbounds::Bool=true) argminima(x, w; strict=strictbounds)

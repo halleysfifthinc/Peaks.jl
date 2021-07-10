@@ -1,6 +1,6 @@
 """
     peakprom(peaks, x;
-        strictbounds=true,
+        strict=true,
         minprom=nothing,
         maxprom=nothing
     ) -> (peaks, proms)
@@ -13,9 +13,9 @@ the two adjacent smallest magnitude points between the current peak and adjacent
 peaks or signal ends.
 
 The prominence for a peak with a `NaN` or `missing` between the current peak and either
-adjacent larger peaks will be `NaN` or `missing` if `strictbounds == true`, or it will be
+adjacent larger peaks will be `NaN` or `missing` if `strict == true`, or it will be
 the larger of the smallest non-`NaN` or `missing` values between the current peak and
-adjacent larger peaks for `strictbounds == false`.
+adjacent larger peaks for `strict == false`.
 
 See also: [`findminima`](@ref), [`findmaxima`](@ref)
 
@@ -37,27 +37,30 @@ julia> x = [missing,5,2,3,3,1,4,0];
 julia> peakprom(xpks, x)
 ([2, 4, 7], Union{Missing, Int64}[missing, 1, 3])
 
-julia> peakprom(xpks, x; strictbounds=false)
+julia> peakprom(xpks, x; strict=false)
 ([2, 4, 7], Union{Missing, Int64}[5, 1, 3])
 ```
 """
 function peakprom(peaks::AbstractVector{Int}, x::AbstractVector{T};
-    strictbounds=true, minprom=nothing, maxprom=nothing
+    strict=true, minprom=nothing, maxprom=nothing, strictbounds=nothing
 ) where T
-    all(∈(eachindex(x)), peaks) ||
-        throw(ArgumentError("peaks contains invalid indices to x"))
+    if !isnothing(strictbounds)
+        Base.depwarn("Keyword `strictbounds` has been renamed to `strict`", :peakprom!)
+        strict=strictbounds
+    end
+
     if !isnothing(minprom) || !isnothing(maxprom)
         _peaks = copy(peaks)
     else
         # peaks will not be modified
         _peaks = peaks
     end
-    return peakprom!(_peaks, x; strictbounds=strictbounds, minprom=minprom, maxprom=maxprom)
+    return peakprom!(_peaks, x; strict=strict, minprom=minprom, maxprom=maxprom)
 end
 
 """
     peakprom!(peaks, x;
-        strictbounds=true,
+        strict=true,
         minprom=nothing,
         maxprom=nothing
     ) -> (peaks, proms)
@@ -69,7 +72,7 @@ their prominences.
 See also: [`peakprom`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
 """
 function peakprom!(peaks::AbstractVector{Int}, x::AbstractVector{T};
-    strictbounds=true, minprom=nothing, maxprom=nothing
+    strict=true, minprom=nothing, maxprom=nothing
 ) where T
     if !isnothing(minprom) && !isnothing(maxprom)
         minprom < maxprom || throw(ArgumentError("minprom must be less than maxprom"))
@@ -96,7 +99,7 @@ function peakprom!(peaks::AbstractVector{Int}, x::AbstractVector{T};
 
     proms = similar(peaks,promote_type(T,typeof(_ref)))
 
-    if strictbounds
+    if strict
         lbegin, lend = firstindex(x), lastindex(x)
 
         @inbounds for i in eachindex(peaks, proms)
@@ -128,11 +131,11 @@ function peakprom!(peaks::AbstractVector{Int}, x::AbstractVector{T};
         # the same peaks/reverse peaks will be the pivotal elements for
         # numerous peaks.
         if pktype === :maxima
-            peaks′ = argmaxima(x, 1; strictbounds=false)
-            notm = argminima(x, 1; strictbounds=false)
+            peaks′ = argmaxima(x, 1; strict=false)
+            notm = argminima(x, 1; strict=false)
         else
-            peaks′ = argminima(x, 1; strictbounds=false)
-            notm = argmaxima(x, 1; strictbounds=false)
+            peaks′ = argminima(x, 1; strict=false)
+            notm = argmaxima(x, 1; strict=false)
         end
 
         notmval = x[notm]
@@ -184,7 +187,7 @@ end
 struct Maxima; end
 struct Minima; end
 
-@deprecate peakprom(x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakprom(argmaxima(x, w; strictbounds=strictbounds), x; strictbounds=strictbounds, minprom=minprom)
-@deprecate peakprom(m::Minima, x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakprom(argminima(x, w; strictbounds=strictbounds), x; strictbounds=strictbounds, minprom=minprom)
-@deprecate peakprom(m::Maxima, x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakprom(argmaxima(x, w; strictbounds=strictbounds), x; strictbounds=strictbounds, minprom=minprom)
+@deprecate peakprom(x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakprom(argmaxima(x, w; strict=strictbounds), x; strict=strictbounds, minprom=minprom)
+@deprecate peakprom(m::Minima, x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakprom(argminima(x, w; strict=strictbounds), x; strict=strictbounds, minprom=minprom)
+@deprecate peakprom(m::Maxima, x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakprom(argmaxima(x, w; strict=strictbounds), x; strict=strictbounds, minprom=minprom)
 

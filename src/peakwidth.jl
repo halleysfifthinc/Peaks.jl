@@ -1,6 +1,6 @@
 """
     peakwidth(peaks, x, proms;
-        strictbounds=true,
+        strict=true,
         relheight=0.5,
         minwidth=nothing,
         maxwidth=nothing
@@ -17,7 +17,7 @@ the difference between the peak height and `relheight` times the peak prominence
 cannot be calculated for a `NaN` or `missing` prominence.
 
 The width for a peak with a gap in the signal (e.g. `NaN`, `missing`) at the reference level
-will match the value/type of the signal gap if `strictbounds == true`. For `strictbounds ==
+will match the value/type of the signal gap if `strict == true`. For `strict ==
 false`, the signal crossing will be linearly interpolated between the edges of the gap.
 
 See also: [`peakprom`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
@@ -38,33 +38,27 @@ julia> x[3] = NaN;
 julia> peakwidth(xpks, x, [1])
 ([2], [NaN], [1.5], [NaN])
 
-julia> peakwidth(xpks, x, [1]; strictbounds=false)
+julia> peakwidth(xpks, x, [1]; strict=false)
 ([2], [1.0], [1.5], [2.5])
 ```
 """
 function peakwidth(
     peaks::AbstractVector{Int}, x::AbstractVector, proms::AbstractVector;
-    strictbounds=true, relheight=0.5, minwidth=nothing, maxwidth=nothing,
+    strict=true, relheight=0.5, minwidth=nothing, maxwidth=nothing,
 )
-    if !isnothing(minwidth) && !isnothing(maxwidth)
-        minwidth < maxwidth || throw(ArgumentError("maxwidth must be greater than minwidth"))
-    end
-    all(∈(eachindex(x)), peaks) ||
-        throw(ArgumentError("peaks contains invalid indices to x"))
-
     if !isnothing(minwidth) || !isnothing(maxwidth)
         _peaks = copy(peaks)
     else
         # peaks will not be modified
         _peaks = peaks
     end
-    peakwidth!(_peaks, x, proms; strictbounds=strictbounds, relheight=relheight,
+    peakwidth!(_peaks, x, proms; strict=strict, relheight=relheight,
         minwidth=minwidth, maxwidth=maxwidth)
 end
 
 """
     peakwidth!(peaks, x, proms;
-        strictbounds=true,
+        strict=true,
         relheight=0.5,
         minwidth=nothing,
         maxwidth=nothing
@@ -79,7 +73,7 @@ See also: [`peakwidth`](@ref), [`peakprom`](@ref), [`findminima`](@ref), [`findm
 """
 function peakwidth!(
     peaks::AbstractVector{Int}, x::AbstractVector{T}, proms::AbstractVector{U};
-    strictbounds=true, relheight=0.5, minwidth=nothing, maxwidth=nothing,
+    strict=true, relheight=0.5, minwidth=nothing, maxwidth=nothing,
 ) where {T, U}
     if !isnothing(minwidth) && !isnothing(maxwidth)
         minwidth < maxwidth || throw(ArgumentError("maxwidth must be greater than minwidth"))
@@ -103,7 +97,7 @@ function peakwidth!(
     ledge = similar(proms, V)
     redge = similar(proms, V)
 
-    if strictbounds
+    if strict
         lst, fst = _bad, _bad
     else
         lst = lastindex(x)
@@ -120,7 +114,7 @@ function peakwidth!(
             lo = findprev(v -> !ismissing(v) && cmp(v,ht), x, peaks[i])
             up = findnext(v -> !ismissing(v) && cmp(v,ht), x, peaks[i])
 
-            if !strictbounds
+            if !strict
                 if !isnothing(lo)
                     lo1 = findnext(v -> !ismissing(v) && cmp(ht,v), x, lo+1)
                     lo += (ht - x[lo])/(x[lo1] - x[lo])*(lo1 - lo)
