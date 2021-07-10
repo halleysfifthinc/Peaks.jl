@@ -97,15 +97,11 @@ function peakwidth!(
     op = pktype === :maxima ? (-) : (+)
 
     V1 = promote_type(T,U)
-    _bad = Missing <: V1 ? missing :
-           Float64 <: V1 ? NaN :
-           Float32 <: V1 ? NaN32 :
-           Float16 <: V1 ? NaN16 :
-                           missing
+    _bad = Missing <: V1 ? missing : float(Int)(NaN)
 
     V = promote_type(V1, typeof(_bad))
-    lower = similar(proms, V)
-    upper = similar(proms, V)
+    ledge = similar(proms, V)
+    redge = similar(proms, V)
 
     if strictbounds
         lst, fst = _bad, _bad
@@ -114,11 +110,11 @@ function peakwidth!(
         fst = firstindex(x)
     end
 
-    for i in eachindex(peaks, lower, upper)
+    for i in eachindex(peaks, ledge, redge)
         prom = proms[i]
         if ismissing(prom) || isnan(prom)
-            upper[i] = _bad
-            lower[i] = _bad
+            redge[i] = _bad
+            ledge[i] = _bad
         else
             ht = op(x[peaks[i]], relheight*proms[i])
             lo = findprev(v -> !ismissing(v) && cmp(v,ht), x, peaks[i])
@@ -138,23 +134,23 @@ function peakwidth!(
                 !isnothing(up) && (up -= (ht - x[up])/(x[up-1] - x[up]))
             end
 
-            upper[i] = something(up, lst)
-            lower[i] = something(lo, fst)
+            redge[i] = something(up, lst)
+            ledge[i] = something(lo, fst)
         end
     end
 
-    widths::Vector{V} = upper - lower
+    widths::Vector{V} = redge - ledge
 
     if !isnothing(minwidth) || !isnothing(maxwidth)
         lo = something(minwidth, zero(eltype(widths)))
         up = something(maxwidth, typemax(Base.nonmissingtype(eltype(widths))))
         matched = findall(x -> !ismissing(x) && !(lo ≤ x ≤ up), widths)
         deleteat!(peaks, matched)
-        deleteat!(lower, matched)
-        deleteat!(upper, matched)
+        deleteat!(ledge, matched)
+        deleteat!(redge, matched)
         deleteat!(widths, matched)
     end
 
-    return peaks, widths, lower, upper
+    return peaks, widths, ledge, redge
 end
 
