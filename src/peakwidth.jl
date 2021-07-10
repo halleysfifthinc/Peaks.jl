@@ -44,7 +44,7 @@ function peakwidth!(
            Float16 <: V1 ? NaN16 :
                            missing
 
-    V = promote_type(V, typeof(_bad))
+    V = promote_type(V1, typeof(_bad))
     lower = similar(proms, V)
     upper = similar(proms, V)
 
