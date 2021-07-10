@@ -5,7 +5,7 @@
         maxprom=nothing
     ) -> (peaks, proms)
 
-Calculate the prominences of `peaks` in `x`, filtering peaks and prominences less than
+Calculate the prominences of `peaks` in `x`, filtering peaks with prominences less than
 `minprom` and greater than `maxprom`, if either are given.
 
 Peak prominence is the absolute height difference between the current peak and the larger of
@@ -17,7 +17,7 @@ adjacent larger peaks will be `NaN` or `missing` if `strictbounds == true`, or i
 the larger of the smallest non-`NaN` or `missing` values between the current peak and
 adjacent larger peaks for `strictbounds == false`.
 
-See also: [`argminima`](@ref), [`argmaxima`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
+See also: [`findminima`](@ref), [`findmaxima`](@ref)
 
 # Examples
 ```jldoctest
@@ -38,7 +38,7 @@ julia> peakprom(xpks, x)
 ([2, 4, 7], Union{Missing, Int64}[missing, 1, 3])
 
 julia> peakprom(xpks, x; strictbounds=false)
-([2, 4, 7], Union{Missing, Int64}[4, 1, 3])
+([2, 4, 7], Union{Missing, Int64}[5, 1, 3])
 ```
 """
 function peakprom(peaks::AbstractVector{Int}, x::AbstractVector{T};
@@ -62,11 +62,11 @@ end
         maxprom=nothing
     ) -> (peaks, proms)
 
-Calculate the prominences of `peaks` in `x`, deleting `peaks` with prominences less than
-`minprom` and greater than `maxprom`, if either are given. Returns the modified `peaks` and
+Calculate the prominences of `peaks` in `x`, removing `peaks` with prominences less than
+`minprom` or greater than `maxprom`, if either are given. Returns the modified peaks and
 their prominences.
 
-See also: [`peakprom`](@ref), [`argminima`](@ref), [`argmaxima`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
+See also: [`peakprom`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
 """
 function peakprom!(peaks::AbstractVector{Int}, x::AbstractVector{T};
     strictbounds=true, minprom=nothing, maxprom=nothing
