@@ -1,3 +1,47 @@
+"""
+    peakwidth(peaks, x, proms;
+        strictbounds=true,
+        relheight=0.5,
+        minwidth=nothing,
+        maxwidth=nothing
+    ) -> (peaks, widths, leftedge, rightedge)
+
+Calculate the widths of `peaks` in `x` at a reference level based on `proms` and
+`relheight`, removing peaks with widths less than `minwidth` or greater than `maxwidth`, if
+either are given. Returns the modified peaks, widths, and the left and right edges at the
+reference level.
+
+Peak width is the distance between the signal crossing a reference level before and after
+the peak. Signal crossings are linearly interpolated between indices. The reference level is
+the difference between the peak height and `relheight` times the peak prominence. Width
+cannot be calculated for a `NaN` or `missing` prominence.
+
+The width for a peak with a gap in the signal (e.g. `NaN`, `missing`) at the reference level
+will match the value/type of the signal gap if `strictbounds == true`. For `strictbounds ==
+false`, the signal crossing will be linearly interpolated between the edges of the gap.
+
+See also: [`peakprom`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
+
+# Examples
+```jldoctest
+julia> x = [0,1,0,-1.];
+
+julia> xpks = argmaxima(x)
+1-element Vector{Int64}:
+ 2
+
+julia> peakwidth(xpks, x, [1])
+([2], [1.0], [1.5], [2.5])
+
+julia> x[3] = NaN;
+
+julia> peakwidth(xpks, x, [1])
+([2], [NaN], [1.5], [NaN])
+
+julia> peakwidth(xpks, x, [1]; strictbounds=false)
+([2], [1.0], [1.5], [2.5])
+```
+"""
 function peakwidth(
     peaks::AbstractVector{Int}, x::AbstractVector, proms::AbstractVector;
     strictbounds=true, relheight=0.5, minwidth=nothing, maxwidth=nothing,
@@ -18,6 +62,21 @@ function peakwidth(
         minwidth=minwidth, maxwidth=maxwidth)
 end
 
+"""
+    peakwidth!(peaks, x, proms;
+        strictbounds=true,
+        relheight=0.5,
+        minwidth=nothing,
+        maxwidth=nothing
+    ) -> (peaks, widths, leftedge, rightedge)
+
+Calculate the widths of `peaks` in `x` at a reference level based on `proms` and
+`relheight`, removing peaks with widths less than `minwidth` or greater than `maxwidth`, if
+either are given. Returns the modified peaks, widths, and the left and right edges at the
+reference level.
+
+See also: [`peakwidth`](@ref), [`peakprom`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
+"""
 function peakwidth!(
     peaks::AbstractVector{Int}, x::AbstractVector{T}, proms::AbstractVector{U};
     strictbounds=true, relheight=0.5, minwidth=nothing, maxwidth=nothing,
