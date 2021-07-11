@@ -2,6 +2,8 @@
 
 [![version](https://juliahub.com/docs/Peaks/version.svg)](https://juliahub.com/ui/Packages/Peaks/3TWUM)
 [![pkgeval](https://juliahub.com/docs/Peaks/pkgeval.svg)](https://juliahub.com/ui/Packages/Peaks/3TWUM)
+[![stable-docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://halleysfifthinc.github.io/Peaks.jl/stable)
+[![dev-docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://halleysfifthinc.github.io/Peaks.jl/dev)
 [![CI](https://github.com/halleysfifthinc/Peaks.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/halleysfifthinc/Peaks.jl/actions/workflows/CI.yml)
 [![codecov](https://codecov.io/gh/halleysfifthinc/Peaks.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/halleysfifthinc/Peaks.jl)
 ![Maintenance](https://img.shields.io/maintenance/yes/2021)
