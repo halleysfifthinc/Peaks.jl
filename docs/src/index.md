@@ -5,10 +5,10 @@ argmaxima
 argminima
 findmaxima
 findminima
-peakprom
-peakprom!
-peakwidth
-peakwidth!
+peakproms
+peakproms!
+peakwidths
+peakwidths!
 findnextmaxima
 findnextminima
 ```
