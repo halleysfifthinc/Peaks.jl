@@ -1,5 +1,5 @@
 """
-    peakwidth(peaks, x, proms;
+    peakwidths(peaks, x, proms;
         strict=true,
         relheight=0.5,
         minwidth=nothing,
@@ -30,19 +30,19 @@ julia> xpks = argmaxima(x)
 1-element Vector{Int64}:
  2
 
-julia> peakwidth(xpks, x, [1])
+julia> peakwidths(xpks, x, [1])
 ([2], [1.0], [1.5], [2.5])
 
 julia> x[3] = NaN;
 
-julia> peakwidth(xpks, x, [1])
+julia> peakwidths(xpks, x, [1])
 ([2], [NaN], [1.5], [NaN])
 
-julia> peakwidth(xpks, x, [1]; strict=false)
+julia> peakwidths(xpks, x, [1]; strict=false)
 ([2], [1.0], [1.5], [2.5])
 ```
 """
-function peakwidth(
+function peakwidths(
     peaks::AbstractVector{Int}, x::AbstractVector, proms::AbstractVector;
     strict=true, relheight=0.5, minwidth=nothing, maxwidth=nothing,
 )
@@ -52,12 +52,12 @@ function peakwidth(
         # peaks will not be modified
         _peaks = peaks
     end
-    peakwidth!(_peaks, x, proms; strict=strict, relheight=relheight,
+    peakwidths!(_peaks, x, proms; strict=strict, relheight=relheight,
         minwidth=minwidth, maxwidth=maxwidth)
 end
 
 """
-    peakwidth!(peaks, x, proms;
+    peakwidths!(peaks, x, proms;
         strict=true,
         relheight=0.5,
         minwidth=nothing,
@@ -69,9 +69,9 @@ Calculate the widths of `peaks` in `x` at a reference level based on `proms` and
 either are given. Returns the modified peaks, widths, and the left and right edges at the
 reference level.
 
-See also: [`peakwidth`](@ref), [`peakprom`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
+See also: [`peakwidths`](@ref), [`peakproms`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
 """
-function peakwidth!(
+function peakwidths!(
     peaks::AbstractVector{Int}, x::AbstractVector{T}, proms::AbstractVector{U};
     strict=true, relheight=0.5, minwidth=nothing, maxwidth=nothing,
 ) where {T, U}

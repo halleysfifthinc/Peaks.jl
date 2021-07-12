@@ -1,5 +1,5 @@
 """
-    peakprom(peaks, x;
+    peakproms(peaks, x;
         strict=true,
         minprom=nothing,
         maxprom=nothing
@@ -29,23 +29,23 @@ julia> xpks = argmaxima(x)
  4
  7
 
-julia> peakprom(xpks, x)
+julia> peakproms(xpks, x)
 ([2, 4, 7], Union{Missing, Int64}[5, 1, 3])
 
 julia> x = [missing,5,2,3,3,1,4,0];
 
-julia> peakprom(xpks, x)
+julia> peakproms(xpks, x)
 ([2, 4, 7], Union{Missing, Int64}[missing, 1, 3])
 
-julia> peakprom(xpks, x; strict=false)
+julia> peakproms(xpks, x; strict=false)
 ([2, 4, 7], Union{Missing, Int64}[5, 1, 3])
 ```
 """
-function peakprom(peaks::AbstractVector{Int}, x::AbstractVector{T};
+function peakproms(peaks::AbstractVector{Int}, x::AbstractVector{T};
     strict=true, minprom=nothing, maxprom=nothing, strictbounds=nothing
 ) where T
     if !isnothing(strictbounds)
-        Base.depwarn("Keyword `strictbounds` has been renamed to `strict`", :peakprom!)
+        Base.depwarn("Keyword `strictbounds` has been renamed to `strict`", :peakproms!)
         strict=strictbounds
     end
 
@@ -55,11 +55,11 @@ function peakprom(peaks::AbstractVector{Int}, x::AbstractVector{T};
         # peaks will not be modified
         _peaks = peaks
     end
-    return peakprom!(_peaks, x; strict=strict, minprom=minprom, maxprom=maxprom)
+    return peakproms!(_peaks, x; strict=strict, minprom=minprom, maxprom=maxprom)
 end
 
 """
-    peakprom!(peaks, x;
+    peakproms!(peaks, x;
         strict=true,
         minprom=nothing,
         maxprom=nothing
@@ -69,9 +69,9 @@ Calculate the prominences of `peaks` in `x`, removing `peaks` with prominences l
 `minprom` or greater than `maxprom`, if either are given. Returns the modified peaks and
 their prominences.
 
-See also: [`peakprom`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
+See also: [`peakproms`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
 """
-function peakprom!(peaks::AbstractVector{Int}, x::AbstractVector{T};
+function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
     strict=true, minprom=nothing, maxprom=nothing
 ) where T
     if !isnothing(minprom) && !isnothing(maxprom)
@@ -187,7 +187,7 @@ end
 struct Maxima; end
 struct Minima; end
 
-@deprecate peakprom(x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakprom(argmaxima(x, w; strict=strictbounds), x; strict=strictbounds, minprom=minprom)
-@deprecate peakprom(m::Minima, x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakprom(argminima(x, w; strict=strictbounds), x; strict=strictbounds, minprom=minprom)
-@deprecate peakprom(m::Maxima, x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakprom(argmaxima(x, w; strict=strictbounds), x; strict=strictbounds, minprom=minprom)
+@deprecate peakprom(x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakproms(argmaxima(x, w; strict=strictbounds), x; strict=strictbounds, minprom=minprom)
+@deprecate peakprom(m::Minima, x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakproms(argminima(x, w; strict=strictbounds), x; strict=strictbounds, minprom=minprom)
+@deprecate peakprom(m::Maxima, x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakproms(argmaxima(x, w; strict=strictbounds), x; strict=strictbounds, minprom=minprom)
 

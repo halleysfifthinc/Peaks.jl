@@ -3,7 +3,7 @@ module Peaks
 using Compat
 
 export argmaxima, argminima, findmaxima, findminima, findnextmaxima, findnextminima,
-    peakprom, peakprom!, peakwidth, peakwidth!
+    peakproms, peakproms!, peakwidths, peakwidths!
 
 export Maxima, Minima
 
