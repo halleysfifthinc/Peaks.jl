@@ -85,6 +85,11 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test p == [0.0]
     end
 
+    issue91ddaa9 = [1,2,3,2,3,1]
+    @test all(!iszero,
+        last(peakproms(argminima(issue91ddaa9; strict=false), issue91ddaa9; strict=false)))
+
+
     @test_deprecated peakprom(Minima(), x1)
     @test_deprecated peakprom(Maxima(), x1)
 
