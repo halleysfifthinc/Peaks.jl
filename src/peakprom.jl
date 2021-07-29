@@ -81,7 +81,8 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
         throw(ArgumentError("peaks contains invalid indices to x"))
     isempty(peaks) && return peaks, T[]
 
-    fp = first(peaks)
+    # if peaks was calculated with strict=false, first(peaks) could be minima at firstindex
+    fp = length(peaks) > 1 ? peaks[2] : first(peaks)
     if fp > 1 && ((x[fp] < x[fp-1]) === true)
         pktype = :minima
     else
