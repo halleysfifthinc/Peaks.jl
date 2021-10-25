@@ -258,6 +258,3 @@ function findminima(x, w::Int=1; strict::Bool=true, strictbounds=nothing)
     return (idxs, x[idxs])
 end
 
-# Deprecations
-@deprecate maxima(x::AbstractVector, w::Int=1, strictbounds::Bool=true) argmaxima(x, w; strict=strictbounds)
-@deprecate minima(x::AbstractVector, w::Int=1, strictbounds::Bool=true) argminima(x, w; strict=strictbounds)

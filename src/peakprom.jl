@@ -185,10 +185,3 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
     return peaks, proms
 end
 
-struct Maxima; end
-struct Minima; end
-
-@deprecate peakprom(x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakproms(argmaxima(x, w; strict=strictbounds), x; strict=strictbounds, minprom=minprom)
-@deprecate peakprom(m::Minima, x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakproms(argminima(x, w; strict=strictbounds), x; strict=strictbounds, minprom=minprom)
-@deprecate peakprom(m::Maxima, x::AbstractVector, w::Int=1; strictbounds=true, minprom=nothing) peakproms(argmaxima(x, w; strict=strictbounds), x; strict=strictbounds, minprom=minprom)
-

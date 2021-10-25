@@ -143,13 +143,4 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
     @test x1[pks] == vals
     pks, vals = @test_nowarn findminima(x1)
     @test x1[pks] == vals
-
-    @test_deprecated maxima(x1, 1, false)
-    @test_deprecated minima(x1, 1, false)
-
-    # Deprecated strictbounds
-    @test_deprecated r"renamed" argmaxima([0,1,0]; strictbounds=true)
-    @test_deprecated r"renamed" argminima([0,1,0]; strictbounds=true)
-    @test_deprecated r"renamed" findmaxima([0,1,0]; strictbounds=true)
-    @test_deprecated r"renamed" findminima([0,1,0]; strictbounds=true)
 end
