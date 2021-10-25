@@ -42,13 +42,8 @@ julia> peakproms(xpks, x; strict=false)
 ```
 """
 function peakproms(peaks::AbstractVector{Int}, x::AbstractVector{T};
-    strict=true, minprom=nothing, maxprom=nothing, strictbounds=nothing
+    strict=true, minprom=nothing, maxprom=nothing
 ) where T
-    if !isnothing(strictbounds)
-        Base.depwarn("Keyword `strictbounds` has been renamed to `strict`", :peakproms!)
-        strict=strictbounds
-    end
-
     if !isnothing(minprom) || !isnothing(maxprom)
         _peaks = copy(peaks)
     else

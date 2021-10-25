@@ -125,13 +125,8 @@ julia> argmaxima([2,0,1,1]; strict=false)
 ```
 """
 function argmaxima(
-    x::AbstractVector{T}, w::Int=1; strict::Bool=true, strictbounds=nothing
+    x::AbstractVector{T}, w::Int=1; strict::Bool=true
 ) where T
-    if !isnothing(strictbounds)
-        Base.depwarn("Keyword `strictbounds` has been renamed to `strict`", :argmaxima)
-        strict=strictbounds
-    end
-
     w > 0 || _smallwerr(w)
     pks = Int[]
 
@@ -153,12 +148,7 @@ Find the indices and values of the local maxima of `x` where each maxima `i` is 
 
 See also: [`argmaxima`](@ref), [`findnextmaxima`](@ref)
 """
-function findmaxima(x, w::Int=1; strict::Bool=true, strictbounds=nothing)
-    if !isnothing(strictbounds)
-        Base.depwarn("Keyword `strictbounds` has been renamed to `strict`", :findmaxima)
-        strict=strictbounds
-    end
-
+function findmaxima(x, w::Int=1; strict::Bool=true)
     idxs = argmaxima(x, w; strict=strict)
     return (idxs, x[idxs])
 end
@@ -220,13 +210,8 @@ julia> argminima([2,3,1,1]; strict=false)
 ```
 """
 function argminima(
-    x::AbstractVector{T}, w::Int=1; strict::Bool=true, strictbounds=nothing
+    x::AbstractVector{T}, w::Int=1; strict::Bool=true
 ) where T
-    if !isnothing(strictbounds)
-        Base.depwarn("Keyword `strictbounds` has been renamed to `strict`", :argminima)
-        strict=strictbounds
-    end
-
     w > 0 || _smallwerr(w)
     pks = Int[]
 
@@ -248,12 +233,7 @@ Find the indices and values of the local minima of `x` where each minima `i` is 
 
 See also: [`argminima`](@ref), [`findnextminima`](@ref)
 """
-function findminima(x, w::Int=1; strict::Bool=true, strictbounds=nothing)
-    if !isnothing(strictbounds)
-        Base.depwarn("Keyword `strictbounds` has been renamed to `strict`", :findminima)
-        strict=strictbounds
-    end
-
+function findminima(x, w::Int=1; strict::Bool=true)
     idxs = argminima(x, w; strict=strict)
     return (idxs, x[idxs])
 end
