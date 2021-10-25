@@ -13,6 +13,7 @@ t = T:T:fs
 x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
 
 @testset "argminima/argmaxima" begin
+    @test_throws DomainError Peaks.findnextextrema(<, x1, 1, 0, false)
     @test length(argmaxima(x1)) == 30
     @test length(argminima(x1)) == 30
 
