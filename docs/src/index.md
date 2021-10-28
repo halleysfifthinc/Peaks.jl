@@ -3,6 +3,8 @@
 ```@docs
 argmaxima
 argminima
+maxima
+minima
 findmaxima
 findminima
 peakproms
