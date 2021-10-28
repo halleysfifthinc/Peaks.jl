@@ -141,6 +141,21 @@ function argmaxima(
 end
 
 """
+    maxima(x[, w=1; strict=true])
+
+Find the values of the local maxima of `x` where each maxima `i` is either the maximum of
+`x[i-w:i+w]` or the first index of a plateau.
+
+See also: [`argmaxima`](@ref), [`findnextmaxima`](@ref)
+"""
+function maxima(
+    x::AbstractVector{T}, w::Int=1; strict::Bool=true
+) where T
+    idxs = argmaxima(x, w; strict=strict)
+    return x[idxs]
+end
+
+"""
     findmaxima(x[, w=1; strict=true]) -> (idxs, vals)
 
 Find the indices and values of the local maxima of `x` where each maxima `i` is either the maximum of
@@ -223,6 +238,21 @@ function argminima(
     end
 
     return pks
+end
+
+"""
+    minima(x[, w=1; strict=true])
+
+Find the values of the local minima of `x` where each minima `i` is either the minimum of
+`x[i-w:i+w]` or the first index of a plateau.
+
+See also: [`argminima`](@ref), [`findnextminima`](@ref)
+"""
+function minima(
+    x::AbstractVector{T}, w::Int=1; strict::Bool=true
+) where T
+    idxs = argminima(x, w; strict=strict)
+    return x[idxs]
 end
 
 """

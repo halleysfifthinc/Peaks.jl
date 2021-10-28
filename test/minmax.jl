@@ -142,6 +142,8 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
 
     pks, vals = @test_nowarn findmaxima(x1)
     @test x1[pks] == vals
+    @test x1[pks] == maxima(x1)
     pks, vals = @test_nowarn findminima(x1)
     @test x1[pks] == vals
+    @test x1[pks] == minima(x1)
 end
