@@ -8,5 +8,6 @@ export argmaxima, argminima, maxima, minima, findmaxima, findminima, findnextmax
 include("minmax.jl")
 include("peakprom.jl")
 include("peakwidth.jl")
+include("plot.jl")
 
 end # module Peaks
