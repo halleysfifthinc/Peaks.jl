@@ -8,7 +8,7 @@ let
         plt = peaksplot(t, y, peaks=pks)
 
         @test plt isa Plots.Plot
-        
+
         savepath_png = abspath(joinpath(@__DIR__, "..", "docs","src","assets","images","peaks_prom_width.png"))
         savefig(plt, savepath_png)
         @info "Plots saved to <$savepath_png>"
