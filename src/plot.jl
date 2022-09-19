@@ -38,7 +38,7 @@ end
     @series begin  # plot raw data
         linewidth --> 2
         seriestype := :path
-        label := "data"
+        label := "signal"
         linecolor --> :Black
         x, y
     end
@@ -58,6 +58,13 @@ end
         x := fullwidthlinesx
         y := fullwidthlinesy
     end
+    @series begin  # plot extrema points
+        seriestype := :scatter
+        label := ext_label
+        markercolor := ext_color
+        x := x[pks]
+        y := vals
+    end
     @series begin  # plot width lines
         seriestype := :path
         linewidth := 1
@@ -67,13 +74,6 @@ end
         linestyle := :dot
         x := halfwidthlinesx
         y := halfwidthlinesy
-    end
-    @series begin  # plot extrema points
-        seriestype := :scatter
-        label := ext_label
-        markercolor := ext_color
-        x := x[pks]
-        y := vals
     end
     @series begin  # plot width points
         seriestype := :scatter
