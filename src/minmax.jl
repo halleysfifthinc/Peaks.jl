@@ -96,6 +96,16 @@ julia> findnextmaxima([0,2,0,1,1,0], 3)
 findnextmaxima(x, i, w=1; strict=true) = findnextextrema(<, x, i, w, strict)
 
 """
+    ismaxima(i, x[, w=1; strict=true])
+
+Test if `i` is a maxima in `x`, where the maxima `i` is either the maximum of `x[i-w:i+w]`
+or the first index of a plateau.
+
+See also: [`findnextextrema`](@ref)
+"""
+ismaxima(i, x, w=1; strict=true)::Bool = findnextextrema(<, x, i, w, strict) === i
+
+"""
     argmaxima(x[, w=1; strict=true])
 
 Find the indices of the local maxima of `x` where each maxima `i` is either the maximum of
@@ -193,6 +203,16 @@ julia> findnextminima([3,2,3,1,1,3], 3)
 ```
 """
 findnextminima(x, i, w=1; strict=true) = findnextextrema(>, x, i, w, strict)
+
+"""
+    isminima(i, x[, w=1; strict=true])
+
+Test if `i` is a minima in `x`, where the minima `i` is either the minimum of `x[i-w:i+w]`
+or the first index of a plateau.
+
+See also: [`findnextextrema`](@ref)
+"""
+isminima(i, x, w=1; strict=true)::Bool = findnextextrema(>, x, i, w, strict) === i
 
 """
     argminima(x[, w=1; strict=false])
