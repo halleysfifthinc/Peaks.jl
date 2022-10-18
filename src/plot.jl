@@ -3,9 +3,9 @@ using RecipesBase
 "Get `x[idx::Float]` using linear interpolation."
 function interp(x::AbstractVector{<:Real}, idx::Real)
     isinteger(idx) && return x[Int(idx)]
-    idx1 = Int(floor(idx))
-    idx2 = Int(ceil(idx))
-    return x[idx1] + ((idx - idx1) * (x[idx2] - x[idx1])) / (idx2 - idx1)
+    prev = Int(floor(idx))
+    next = Int(ceil(idx))
+    return x[prev] + ((idx - prev) * (x[next] - x[prev])) / (next - prev)
 end
 
 function interp(x::AbstractVector{<:Real}, idx::AbstractVector{<:Real})
