@@ -20,8 +20,8 @@ function drop_irrelevant_side(i, peak, y, maxima)
     end
 end
 
-@shorthands peaksplot
-@recipe function f(::Type{Val{:peaksplot}}, x, y, z; peaks::AbstractVector{Int}, prominences=false, widths=false)
+@shorthands plotpeaks
+@recipe function f(::Type{Val{:plotpeaks}}, x, y, z; peaks::AbstractVector{Int}, prominences=false, widths=false)
     if ismaxima(first(peaks), y; strict=false)
         maxima = true
     elseif isminima(first(peaks), y; strict=false)
