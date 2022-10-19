@@ -13,12 +13,10 @@ let
 
         savepath_png = abspath(joinpath(@__DIR__, "..", "docs", "src", "assets", "images", "maxima_prom_width.png"))
         savefig(plt, savepath_png)
-        @info "Plots saved to <$savepath_png>"
 
         # add minima to plot
         pks, vals = findminima(y)
         pks, proms = peakproms!(pks, y; minprom=1)
-        @show pks
         plt = peaksplot!(t, y, peaks=pks, prominences=true, widths=true)
         @test plt isa Plots.Plot
         savepath_png = abspath(joinpath(@__DIR__, "..", "docs", "src", "assets", "images", "extrema_prom_width.png"))
@@ -27,7 +25,5 @@ let
         plt = plotpeaks(t, y, peaks=pks, prominences=true, widths=true)
         savepath_png = abspath(joinpath(@__DIR__, "..", "docs", "src", "assets", "images", "minima_prom_width.png"))
         savefig(plt, savepath_png)
-
-        @info "Plots saved to <$savepath_png>"
     end
 end
