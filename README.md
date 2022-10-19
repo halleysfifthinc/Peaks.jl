@@ -36,7 +36,7 @@ julia> _, proms = peakproms!(pks, y; minprom=1)
 ([8, 26, 48, 70, 88], [1.9441651653930858, 5.5693856245725195, 2.203426259167901, 6.0957723300230855, 2.195991801053836])
 
 julia> using Plots
-julia> peaksplot(t, y, peaks=pks, prominences=true, widths=true)  # see above plot for result
+julia> plotpeaks(t, y, peaks=pks, prominences=true, widths=true)  # see above plot for result
 ```
 
 ## Features
