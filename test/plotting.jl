@@ -8,7 +8,7 @@ let
         pks, vals = findmaxima(y)
         pks, proms = peakproms!(pks, y; minprom=1)
 
-        plt = peaksplot(t, y, peaks=pks, prominences=true, widths=true)
+        plt = plotpeaks(t, y, peaks=pks, prominences=true, widths=true)
         @test plt isa Plots.Plot
 
         savepath_png = abspath(joinpath(@__DIR__, "..", "docs", "src", "assets", "images", "maxima_prom_width.png"))
@@ -24,7 +24,7 @@ let
         savepath_png = abspath(joinpath(@__DIR__, "..", "docs", "src", "assets", "images", "extrema_prom_width.png"))
         savefig(plt, savepath_png)
 
-        plt = peaksplot(t, y, peaks=pks, prominences=true, widths=true)
+        plt = plotpeaks(t, y, peaks=pks, prominences=true, widths=true)
         savepath_png = abspath(joinpath(@__DIR__, "..", "docs", "src", "assets", "images", "minima_prom_width.png"))
         savefig(plt, savepath_png)
 
