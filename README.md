@@ -10,7 +10,7 @@
 
 Peaks.jl contains peak (local extrema) finding functions for vector data. Contributions welcome.
 
-[![signal-with-peaks-prominences-and-widths](docs/src/assets/images/peaks_prom_width.png)](#)
+[![signal-with-peaks-prominences-and-widths](docs/src/assets/images/maxima_prom_width.png)](#)
 
 ```julia
 julia> using Peaks
@@ -32,11 +32,11 @@ julia> pks, widths, leftedge, rightedge = peakwidths(pks, y, proms)
 7.663187146933097], [4.916043956211862, 18.50125024651451, 43.35170982447645, 63.83409366134414, 84.28425741824285],
 [12.084595468395447, 31.5266973673278, 51.61442547061563, 77.63968568254151, 91.94744456517594])
 
-julia> _, proms = peakproms!(pks, y; minprom=3)
-([26, 70], [5.5693856245725195, 6.0957723300230855])
+julia> _, proms = peakproms!(pks, y; minprom=1)
+([8, 26, 48, 70, 88], [1.9441651653930858, 5.5693856245725195, 2.203426259167901, 6.0957723300230855, 2.195991801053836])
 
 julia> using Plots
-julia> peaksplot(t, y, peaks=pks)  # see above plot for result
+julia> peaksplot(t, y, peaks=pks, prominences=true, widths=true)  # see above plot for result
 ```
 
 ## Features
