@@ -12,14 +12,22 @@ function interp(x::AbstractVector{<:Real}, idx::AbstractVector{<:Real})
     return interp.(Ref(x), idx)
 end
 
+function drop_irrelevant_side(i, peak, y, maxima)
+    if maxima
+        return ifelse(isminima(round(Int, i), y; strict=false), i, peak)
+    else
+        return ifelse(ismaxima(round(Int, i), y; strict=false), i, peak)
+    end
+end
+
 @shorthands peaksplot
 @recipe function f(::Type{Val{:peaksplot}}, x, y, z; peaks::AbstractVector{Int}, prominences=false, widths=false)
-    if all(ismaxima.(peaks, Ref(y); strict=false))
+    if ismaxima(first(peaks), y; strict=false)
         maxima = true
-    elseif all(isminima.(peaks, Ref(y); strict=false))
+    elseif isminima(first(peaks), y; strict=false)
         maxima = false
     else
-        throw(error("The peaks in `peaks` must *either* local maxima *or* minima."))
+        throw(error("The first peak in `peaks` is not a local extrema"))
     end
     sgn = maxima ? -1 : +1
     ext_color = maxima ? :Red : :Green
@@ -49,8 +57,13 @@ end
         _, _, lower, upper = peakwidths(peaks, y, proms;
             strict=false, relheight=prevfloat(1.0))
 
-        lower_x = interp(x, lower)
-        upper_x = interp(x, upper)
+        lower_x = interp(x, drop_irrelevant_side.(lower, peaks, Ref(y), maxima))
+        upper_x = interp(x, drop_irrelevant_side.(upper, peaks, Ref(y), maxima))
+
+        promwidthlinesx = vec([lower_x upper_x nans]')
+        promwidthlinesy = vec(vcat(
+            reshape(repeat(yvals + sgn * proms; inner=2), 2, length(peaks)),
+            nans'))
 
         @series begin  # plot vertical prominence lines
             seriestype := :path
@@ -60,12 +73,6 @@ end
             x := promlinesx
             y := promlinesy
         end
-
-        promwidthlinesx = vec([lower_x upper_x nans]')
-        promwidthlinesy = vec(vcat(
-            reshape(repeat(yvals + sgn * proms; inner=2), 2, length(peaks)),
-            nans'))
-
         @series begin  # plot horizontal prominence lines
             seriestype := :path
             linewidth := 1
