@@ -11,6 +11,8 @@ peakproms
 peakproms!
 peakwidths
 peakwidths!
+peakheights
+peakheights!
 findnextmaxima
 findnextminima
 ```
