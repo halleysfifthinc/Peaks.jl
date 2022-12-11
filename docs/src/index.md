@@ -15,4 +15,6 @@ peakheights
 peakheights!
 findnextmaxima
 findnextminima
+ismaxima
+isminima
 ```
