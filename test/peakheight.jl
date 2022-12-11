@@ -2,6 +2,7 @@
     x = [0,5,2,3,3,1,4,0]
     pks, heights = findmaxima(x)
 
+    @test_throws DimensionMismatch peakheights(pks, heights[1:end-1])
 
     filtpks, Y = peakheights(pks, heights)
     @test pks == filtpks

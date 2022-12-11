@@ -58,6 +58,7 @@ function peakheights!(
     peaks::Vector{Int}, heights::AbstractVector{T};
     minheight=nothing, maxheight=nothing
 ) where {T}
+    length(peaks) == length(heights) || throw(DimensionMismatch("length of `peaks`, $(length(peaks)), does not match the length of `heights`, $(length(heights))"))
     if !isnothing(minheight) || !isnothing(maxheight)
         lo = something(minheight, typemin(Base.nonmissingtype(T)))
         up = something(maxheight, typemax(Base.nonmissingtype(T)))
