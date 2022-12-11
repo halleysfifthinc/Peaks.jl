@@ -140,6 +140,21 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test isempty(argminima(reverse(mn)))
     end
 
+    @testset "is(minima|maxima)" begin
+        isx =  [0,0,3,1,2,0,4,4,0,5]
+        ispk = [0,0,1,0,1,0,1,0,0,1] # Not strict
+
+        pks = argmaxima(isx)
+        @test ismaxima(10, isx; strict=true) == false
+        @test ismaxima(10, isx; strict=false) == true
+        @test ismaxima.(eachindex(isx), Ref(isx); strict=false) == ispk
+
+        pks = argminima(-isx)
+        @test isminima(10, -isx; strict=true) == false
+        @test isminima(10, -isx; strict=false) == true
+        @test isminima.(eachindex(isx), Ref(-isx); strict=false) == ispk
+    end
+
     pks, vals = @test_nowarn findmaxima(x1)
     @test x1[pks] == vals
     @test x1[pks] == maxima(x1)
