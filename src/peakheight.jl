@@ -1,5 +1,5 @@
 """
-    peakheights(peaks, x;
+    peakheights(peaks, heights;
         minheight=nothing,
         maxheight=nothing
     ) -> (peaks, heights)
@@ -13,37 +13,25 @@ See also: [`peakprom`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref)
 ```jldoctest
 julia> x = [0,5,2,3,3,1,4,0];
 
-julia> xpks = argmaxima(x)
-3-element Vector{Int64}:
- 2
- 4
- 7
-
-julia> peakheights(xpks, x)
+julia> xpks, vals = findmaxima(x)
 ([2, 4, 7], [5, 3, 4])
 
-julia> peakheights(xpks, x; maxheight=4)
+julia> peakheights(xpks, vals; maxheight=4)
 ([4, 7], [3, 4])
 
-julia> peakheights(xpks, x; minheight=4.5)
+julia> peakheights(xpks, vals; minheight=4.5)
 ([2], [5])
 ```
 """
 function peakheights(
-    peaks::AbstractVector{Int}, x::AbstractVector;
-    minheight=nothing, maxheight=nothing,
+    peaks::AbstractVector{Int}, heights::AbstractVector;
+    minheight=nothing, maxheight=nothing
 )
-    if !isnothing(minheight) || !isnothing(maxheight)
-        _peaks = copy(peaks)
-    else
-        # peaks will not be modified
-        _peaks = peaks
-    end
-    peakheights!(_peaks, x; minheight=minheight, maxheight=maxheight)
+    peakheights!(copy(peaks), copy(heights); minheight=minheight, maxheight=maxheight)
 end
 
 """
-    peakheights(peaks, x;
+    peakheights!(peaks, heights;
         minheight=nothing,
         maxheight=nothing
     ) -> (peaks, heights)
@@ -52,19 +40,33 @@ Modify `peaks` by filtering peaks that are not between `minheight` and `maxheigh
 the modified `peaks` and the peak heights (e.g. `x[peaks]`).
 
 See also: [`peakprom`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref)
+
+# Examples
+```jldoctest
+julia> x = [0,5,2,3,3,1,4,0];
+
+julia> xpks, vals = findmaxima(x)
+([2, 4, 7], [5, 3, 4])
+
+julia> peakheights!(xpks, vals; maxheight=4);
+
+julia> xpks, vals
+([4, 7], [3, 4])
+```
 """
 function peakheights!(
-    peaks::Vector{Int}, x::AbstractVector{T};
+    peaks::Vector{Int}, heights::AbstractVector{T};
     minheight=nothing, maxheight=nothing
-) where T
+) where {T}
     if !isnothing(minheight) || !isnothing(maxheight)
         lo = something(minheight, typemin(Base.nonmissingtype(T)))
         up = something(maxheight, typemax(Base.nonmissingtype(T)))
-        matched = findall(x -> !(lo ≤ x ≤ up), @view x[peaks])
+        matched = findall(x -> !(lo ≤ x ≤ up), heights)
         deleteat!(peaks, matched)
+        deleteat!(heights, matched)
     end
 
-    return peaks, x[peaks]
+    return peaks, heights
 end
 
 
