@@ -101,7 +101,7 @@ findnextmaxima(x, i, w=1; strict=true) = findnextextrema(<, x, i, w, strict)
 Test if `i` is a maxima in `x`, where the maxima `i` is either the maximum of `x[i-w:i+w]`
 or the first index of a plateau.
 
-See also: [`findnextextrema`](@ref)
+See also: [`findnextmaxima`](@ref)
 """
 ismaxima(i, x, w=1; strict=true)::Bool = findnextextrema(<, x, i, w, strict) === i
 
@@ -210,7 +210,7 @@ findnextminima(x, i, w=1; strict=true) = findnextextrema(>, x, i, w, strict)
 Test if `i` is a minima in `x`, where the minima `i` is either the minimum of `x[i-w:i+w]`
 or the first index of a plateau.
 
-See also: [`findnextextrema`](@ref)
+See also: [`findnextminima`](@ref)
 """
 isminima(i, x, w=1; strict=true)::Bool = findnextextrema(>, x, i, w, strict) === i
 
