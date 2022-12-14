@@ -11,19 +11,14 @@ let
         plt = plotpeaks(t, y, peaks=pks, prominences=true, widths=true)
         @test plt isa Plots.Plot
 
-        savepath_png = abspath(joinpath(@__DIR__, "..", "docs", "src", "assets", "images", "maxima_prom_width.png"))
-        savefig(plt, savepath_png)
-
         # add minima to plot
         pks, vals = findminima(y)
         pks, proms = peakproms!(pks, y; minprom=1)
         plt = plotpeaks!(t, y, peaks=pks, prominences=true, widths=true)
         @test plt isa Plots.Plot
-        savepath_png = abspath(joinpath(@__DIR__, "..", "docs", "src", "assets", "images", "extrema_prom_width.png"))
-        savefig(plt, savepath_png)
 
-        plt = plotpeaks(t, y, peaks=pks, prominences=true, widths=true)
-        savepath_png = abspath(joinpath(@__DIR__, "..", "docs", "src", "assets", "images", "minima_prom_width.png"))
-        savefig(plt, savepath_png)
+        # plt = plotpeaks(t, y, peaks=pks, prominences=true, widths=true)
+        # savepath_png = abspath(joinpath(@__DIR__, "..", "docs", "src", "assets", "images", "minima_prom_width.png"))
+        # savefig(plt, savepath_png)
     end
 end
