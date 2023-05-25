@@ -6,7 +6,7 @@
 [![dev-docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://halleysfifthinc.github.io/Peaks.jl/dev)
 [![CI](https://github.com/halleysfifthinc/Peaks.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/halleysfifthinc/Peaks.jl/actions/workflows/CI.yml)
 [![codecov](https://codecov.io/gh/halleysfifthinc/Peaks.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/halleysfifthinc/Peaks.jl)
-[![Maintenance](https://img.shields.io/maintenance/yes/2022)](#)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 
 Peaks.jl contains peak (local extrema) finding functions for vector data. Contributions welcome.
 
