@@ -18,7 +18,7 @@ function findnextextrema(cmp, x::AbstractVector, i::Int, w::Int, strict::Bool)
                     peak &= false
                     i = j > i ? j : i + 1
                     break # No reason to continue checking if the rest of the elements qualify
-                elseif xi === xj # plateau
+                elseif xi === xj # potential plateau
                     k = findnext(p -> xi !== p, x, j+1)
                     # @show k i j
                     if strict
@@ -26,7 +26,13 @@ function findnextextrema(cmp, x::AbstractVector, i::Int, w::Int, strict::Bool)
                             xi1 = x[i-1]
                             xk = x[k]
                             # @show xi1 xi xk i j k
-                            if !ismissing(xi1) && !isnan(xi1) && cmp(xi1, xi) &&
+                            if k < i
+                                # elements of equal value are allowed within x[i-w:i+w] when
+                                # `strict == true` (as long as the immediately previous
+                                # element is less than `x[i]`, etc as tested on the next
+                                # line)
+                                continue
+                            elseif !ismissing(xi1) && !isnan(xi1) && cmp(xi1, xi) &&
                                 !ismissing(xk) && !isnan(xk) && cmp(xk, xi)
                                 # plateau begins and ends with elements less than the current
                                 return i
@@ -44,7 +50,7 @@ function findnextextrema(cmp, x::AbstractVector, i::Int, w::Int, strict::Bool)
                     else
                         xk = isnothing(k) ? NaN : x[k]
                         xi1 = i-1 ≥ firstindex(x) ? x[i-1] : NaN
-                        if something(k, lastindex(x)+1) ≥ i+w &&
+                        if i+w ≤ something(k, lastindex(x)+1) &&
                             (ismissing(xi1) || isnan(xi1) || cmp(xi1, xi)) &&
                             (ismissing(xk) || isnan(xk) || cmp(xk, xi))
                             return i
