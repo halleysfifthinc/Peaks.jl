@@ -83,6 +83,10 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         # issue #4
         @test isempty(argmaxima(zeros(10)))
         @test argmaxima(zeros(10), 1; strict=false) == [1]
+
+        # issue #30
+        y = [12.452637, 12.389122, 12.452637, 12.512817, 48.756142, 48.410103, 45.00222]
+        @test findnextmaxima(y, 3, 2) === 5
     end
 
     # A missing or NaN should not occur within the `w` of the peak
