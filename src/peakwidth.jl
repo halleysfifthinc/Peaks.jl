@@ -7,9 +7,8 @@
     ) -> (peaks, widths, leftedge, rightedge)
 
 Calculate the widths of `peaks` in `x` at a reference level based on `proms` and
-`relheight`, removing peaks with widths less than `minwidth` or greater than `maxwidth`, if
-either are given. Returns the modified peaks, widths, and the left and right edges at the
-reference level.
+`relheight`, and removing peaks with widths less than `minwidth` and/or greater than
+`maxwidth`. Returns the peaks, widths, and the left and right edges at the reference level.
 
 Peak width is the distance between the signal crossing a reference level before and after
 the peak. Signal crossings are linearly interpolated between indices. The reference level is
@@ -65,9 +64,8 @@ end
     ) -> (peaks, widths, leftedge, rightedge)
 
 Calculate the widths of `peaks` in `x` at a reference level based on `proms` and
-`relheight`, removing peaks with widths less than `minwidth` or greater than `maxwidth`, if
-either are given. Returns the modified peaks, widths, and the left and right edges at the
-reference level.
+`relheight`, removing peaks with widths less than `minwidth` and/or greater than `maxwidth`.
+Returns the modified peaks, widths, and the left and right edges at the reference level.
 
 See also: [`peakwidths`](@ref), [`peakproms`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
 """
