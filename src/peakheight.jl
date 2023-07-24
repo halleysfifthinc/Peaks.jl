@@ -4,8 +4,8 @@
         maxheight=nothing
     ) -> (peaks, heights)
 
-Return a filtered copy of `peaks` and `heights` where peak heights that are less than
-`minheight` or greater than `maxheight` (inclusive) are removed.
+Return a copy of `peaks` and `heights` where peak heights are removed if less than
+`minheight` and/or greater than `maxheight`.
 
 See also: [`peakprom`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref)
 
@@ -36,8 +36,8 @@ end
         maxheight=nothing
     ) -> (peaks, heights)
 
-Modify `peaks` and `heights` by removing peaks that are less than `minheight` or greater
-than `maxheight`. Return the modified `peaks` and `heights`.
+Modify and return `peaks` and `heights` by removing peaks that are less than `minheight` or greater
+than `maxheight`.
 
 See also: [`peakprom`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref)
 

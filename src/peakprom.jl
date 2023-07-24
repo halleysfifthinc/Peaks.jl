@@ -5,8 +5,8 @@
         maxprom=nothing
     ) -> (peaks, proms)
 
-Calculate the prominences of `peaks` in `x`, filtering peaks with prominences less than
-`minprom` and greater than `maxprom`, if either are given.
+Calculate the prominences of `peaks` in `x`, and removing peaks with prominences less than
+`minprom` and/or greater than `maxprom`.
 
 Peak prominence is the absolute height difference between the current peak and the larger of
 the two adjacent smallest magnitude points between the current peak and adjacent larger
@@ -17,7 +17,7 @@ adjacent larger peaks will be `NaN` or `missing` if `strict == true`, or it will
 the larger of the smallest non-`NaN` or `missing` values between the current peak and
 adjacent larger peaks for `strict == false`.
 
-See also: [`findminima`](@ref), [`findmaxima`](@ref)
+See also: [`findminima`](@ref), [`findmaxima`](@ref), [`peakproms!`](@ref)
 
 # Examples
 ```jldoctest
@@ -60,9 +60,9 @@ end
         maxprom=nothing
     ) -> (peaks, proms)
 
-Calculate the prominences of `peaks` in `x`, removing `peaks` with prominences less than
-`minprom` or greater than `maxprom`, if either are given. Returns the modified peaks and
-their prominences.
+Calculate the prominences of `peaks` in `x`, and removing `peaks` with prominences less than
+`minprom` and/or greater than `maxprom`. Returns the modified arrays peaks and their
+prominences.
 
 See also: [`peakproms`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
 """
