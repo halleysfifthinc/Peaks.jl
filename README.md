@@ -43,6 +43,7 @@ julia> plotpeaks(t, y, peaks=pks, prominences=true, widths=true)  # see above pl
 
 - Find peaks (maxima or minima), peak prominence, and peak width
     - Filter peaks by peak spacing (window size), prominence, and width
+    - Compute "Full Width Half Maximum" (FWHM) of discrete or sampled functions using `peakwidths`
 - Fully supports `NaN`/`missing` with optional tolerance using keyword arg `strict`:
     - Conventional handling/propagation of `NaN`/`missing` when `strict = true` (the default)
       ```julia
@@ -69,10 +70,6 @@ julia> plotpeaks(t, y, peaks=pks, prominences=true, widths=true)  # see above pl
       julia> peakwidths([2,4], [NaN,2,0,1,1,0], [2,1]; strict=false)
       ([2, 4], [1.5, 2.0], [1.0, 3.5], [2.5, 5.5])
       ```
-
-It is worth pointing out that `peakwidths` has a keyword argument `relheight` that determines how far up 
-the peak width is "measured". It defaults to `0.5` meaning the **"Full Width Half Maximum" (FWHM)** is calculated. 
-To calculate the FWHM of a continous function, you could sample it and use `peakwidths`.
 
 ## Related
 
