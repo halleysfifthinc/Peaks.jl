@@ -23,11 +23,11 @@ julia> peakheights(xpks, vals; minheight=4.5)
 ([2], [5])
 ```
 """
-function peakheights(
+function _peakheights(
     peaks::AbstractVector{Int}, heights::AbstractVector;
     minheight=nothing, maxheight=nothing
 )
-    peakheights!(copy(peaks), copy(heights); minheight=minheight, maxheight=maxheight)
+    _peakheights!(copy(peaks), copy(heights); minheight=minheight, maxheight=maxheight)
 end
 
 """
@@ -54,7 +54,7 @@ julia> xpks, vals
 ([4, 7], [3, 4])
 ```
 """
-function peakheights!(
+function _peakheights!(
     peaks::Vector{Int}, heights::AbstractVector{T};
     minheight=nothing, maxheight=nothing
 ) where {T}

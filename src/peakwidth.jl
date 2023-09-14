@@ -41,9 +41,9 @@ julia> peakwidths(xpks, x, [1]; strict=false)
 ([2], [1.0], [1.5], [2.5])
 ```
 """
-function peakwidths(
+function _peakwidths(
     peaks::AbstractVector{Int}, x::AbstractVector, proms::AbstractVector;
-    strict=true, relheight=0.5, minwidth=nothing, maxwidth=nothing,
+    strict=true, relheight=0.5, minwidth=nothing, maxwidth=nothing
 )
     if !isnothing(minwidth) || !isnothing(maxwidth)
         _peaks = copy(peaks)
@@ -51,7 +51,7 @@ function peakwidths(
         # peaks will not be modified
         _peaks = peaks
     end
-    peakwidths!(_peaks, x, proms; strict=strict, relheight=relheight,
+    _peakwidths!(_peaks, x, proms; strict=strict, relheight=relheight,
         minwidth=minwidth, maxwidth=maxwidth)
 end
 
@@ -69,10 +69,10 @@ Returns the modified peaks, widths, and the left and right edges at the referenc
 
 See also: [`peakwidths`](@ref), [`peakproms`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
 """
-function peakwidths!(
+function _peakwidths!(
     peaks::AbstractVector{Int}, x::AbstractVector{T}, proms::AbstractVector{U};
-    strict=true, relheight=0.5, minwidth=nothing, maxwidth=nothing,
-) where {T, U}
+    strict=true, relheight=0.5, minwidth=nothing, maxwidth=nothing
+) where {T,U}
     if !isnothing(minwidth) && !isnothing(maxwidth)
         minwidth < maxwidth || throw(ArgumentError("maxwidth must be greater than minwidth"))
     end
@@ -89,7 +89,7 @@ function peakwidths!(
     cmp = pktype === :maxima ? (≤) : (≥)
     op = pktype === :maxima ? (-) : (+)
 
-    V1 = promote_type(T,U)
+    V1 = promote_type(T, U)
     _bad = Missing <: V1 ? missing : float(Int)(NaN)
 
     V = promote_type(V1, typeof(_bad))
@@ -109,22 +109,22 @@ function peakwidths!(
             redge[i] = _bad
             ledge[i] = _bad
         else
-            ht = op(x[peaks[i]], relheight*proms[i])
-            lo = findprev(v -> !ismissing(v) && cmp(v,ht), x, peaks[i])
-            up = findnext(v -> !ismissing(v) && cmp(v,ht), x, peaks[i])
+            ht = op(x[peaks[i]], relheight * proms[i])
+            lo = findprev(v -> !ismissing(v) && cmp(v, ht), x, peaks[i])
+            up = findnext(v -> !ismissing(v) && cmp(v, ht), x, peaks[i])
 
             if !strict
                 if !isnothing(lo)
-                    lo1 = findnext(v -> !ismissing(v) && cmp(ht,v), x, lo+1)
-                    lo += (ht - x[lo])/(x[lo1] - x[lo])*(lo1 - lo)
+                    lo1 = findnext(v -> !ismissing(v) && cmp(ht, v), x, lo + 1)
+                    lo += (ht - x[lo]) / (x[lo1] - x[lo]) * (lo1 - lo)
                 end
                 if !isnothing(up)
-                    up1 = findprev(v -> !ismissing(v) && cmp(ht,v), x, up-1)
-                    up -= (ht - x[up])/(x[up1] - x[up])*(up - up1)
+                    up1 = findprev(v -> !ismissing(v) && cmp(ht, v), x, up - 1)
+                    up -= (ht - x[up]) / (x[up1] - x[up]) * (up - up1)
                 end
             else
-                !isnothing(lo) && (lo += (ht - x[lo])/(x[lo+1] - x[lo]))
-                !isnothing(up) && (up -= (ht - x[up])/(x[up-1] - x[up]))
+                !isnothing(lo) && (lo += (ht - x[lo]) / (x[lo+1] - x[lo]))
+                !isnothing(up) && (up -= (ht - x[up]) / (x[up-1] - x[up]))
             end
 
             redge[i] = something(up, lst)

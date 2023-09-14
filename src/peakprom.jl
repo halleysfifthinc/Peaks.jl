@@ -41,16 +41,16 @@ julia> peakproms(xpks, x; strict=false)
 ([2, 4, 7], Union{Missing, Int64}[5, 1, 3])
 ```
 """
-function peakproms(peaks::AbstractVector{Int}, x::AbstractVector{T};
+function _peakproms(peaks::AbstractVector{Int}, x::AbstractVector{T};
     strict=true, minprom=nothing, maxprom=nothing
-) where T
+) where {T}
     if !isnothing(minprom) || !isnothing(maxprom)
         _peaks = copy(peaks)
     else
         # peaks will not be modified
         _peaks = peaks
     end
-    return peakproms!(_peaks, x; strict=strict, minprom=minprom, maxprom=maxprom)
+    return _peakproms!(_peaks, x; strict=strict, minprom=minprom, maxprom=maxprom)
 end
 
 """
@@ -66,9 +66,9 @@ prominences.
 
 See also: [`peakproms`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
 """
-function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
+function _peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
     strict=true, minprom=nothing, maxprom=nothing
-) where T
+) where {T}
     if !isnothing(minprom) && !isnothing(maxprom)
         minprom < maxprom || throw(ArgumentError("minprom must be less than maxprom"))
     end
@@ -91,9 +91,9 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
            Float64 <: T ? NaN :
            Float32 <: T ? NaN32 :
            Float16 <: T ? NaN16 :
-                          missing
+           missing
 
-    proms = similar(peaks,promote_type(T,typeof(_ref)))
+    proms = similar(peaks, promote_type(T, typeof(_ref)))
 
     if strict
         lbegin, lend = firstindex(x), lastindex(x)
@@ -106,16 +106,16 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
                 lend)
 
             # Find extremum of left and right bounds
-            if isempty(lb:(peaks[i] - 1))
+            if isempty(lb:(peaks[i]-1))
                 lref = _ref
             else
-                lref = exm(view(x, lb:(peaks[i] - 1)))
+                lref = exm(view(x, lb:(peaks[i]-1)))
             end
 
-            if isempty((peaks[i] + 1):rb)
+            if isempty((peaks[i]+1):rb)
                 rref = _ref
             else
-                rref = exm(view(x, (peaks[i] + 1):rb))
+                rref = exm(view(x, (peaks[i]+1):rb))
             end
 
             proms[i] = abs(x[peaks[i]] - exa(lref, rref))
@@ -140,15 +140,15 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
             j = searchsorted(peaks′, peaks[i])
 
             # Find left and right bounding peaks
-            _lb = findprev(y -> cmp(x[y], x[peaks[i]]) === true, peaks′, first(j)-1)
+            _lb = findprev(y -> cmp(x[y], x[peaks[i]]) === true, peaks′, first(j) - 1)
             peaks′[j] === peaks[i] && (j += 1)
-            _rb = findnext(y -> cmp(x[y], x[peaks[i]]) === true, peaks′, last(j)+1)
+            _rb = findnext(y -> cmp(x[y], x[peaks[i]]) === true, peaks′, last(j) + 1)
 
             # Find left and right reverse peaks just inside the bounding peaks
             lb = isnothing(_lb) ? firstindex(notm) :
-                                  searchsortedfirst(notm, peaks′[_lb])
+                 searchsortedfirst(notm, peaks′[_lb])
             rb = isnothing(_rb) ? lastindex(notm) :
-                                  searchsortedlast(notm, peaks′[_rb])
+                 searchsortedlast(notm, peaks′[_rb])
 
             k = searchsortedfirst(notm, peaks[i])
 
