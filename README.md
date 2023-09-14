@@ -1,5 +1,16 @@
 # Peaks.jl
 
+## Temporary content
+ToDo:
+* Agree on API (exported functions, function names etc)
+* Improve docstrings (Add examples, refs)
+* Clean up internals (Remove move content of `_function` inside `function`)
+* Optimize internals (Remove redundant allocations, make checks)
+* Add/update tests
+* Update readme
+* Write docs
+
+## Old content below
 [![version](https://juliahub.com/docs/Peaks/version.svg)](https://juliahub.com/ui/Packages/Peaks/3TWUM)
 [![pkgeval](https://juliahub.com/docs/Peaks/pkgeval.svg)](https://juliahub.com/ui/Packages/Peaks/3TWUM)
 [![stable-docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://halleysfifthinc.github.io/Peaks.jl/stable)
