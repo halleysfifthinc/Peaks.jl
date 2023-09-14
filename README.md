@@ -1,7 +1,6 @@
 # Peaks.jl
 
-## Temporary content
-ToDo:
+## ToDo for api_rework
 * Agree on API (exported functions, function names etc)
 * Improve docstrings (Add examples, refs)
 * Clean up internals (Remove move content of `_function` inside `function`)
@@ -9,6 +8,8 @@ ToDo:
 * Add/update tests
 * Update readme
 * Write docs
+
+For the last 2 points make it clear that the exclamation mark indicates that the vectors (values) of the tuple `pks` are mutated, but that the tuple itself is not, which is why you need to rebind the variable you bind to the tuple. Just use better words than I did here.
 
 ## Old content below
 [![version](https://juliahub.com/docs/Peaks/version.svg)](https://juliahub.com/ui/Packages/Peaks/3TWUM)
