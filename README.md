@@ -1,7 +1,7 @@
 # Peaks.jl
 
 ## ToDo for api_rework
-* Agree on API (exported functions, function names etc)
+* Agree on API (exported functions, function names etc. Should Peaks.jl provide minima-finding functionality? Is it sufficient to ask the user to swap sign of the data?)
 * Improve docstrings (Add examples, refs)
 * Clean up internals (Remove move content of `_function` inside `function`)
 * Optimize internals (Remove redundant allocations, make checks)
