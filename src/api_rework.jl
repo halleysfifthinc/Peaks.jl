@@ -10,11 +10,7 @@ in the field `inds`.
 This function serves as the entry-point for other 
 functions such as `peakproms!` and `peakwidths!`
 """
-function findpeaks(x::AbstractVector)
-    data = x
-    inds, _ = findmaxima(x)
-    return (data=x, inds=inds)
-end
+findpeaks(x::AbstractVector) = (data=x, inds=findmaxima(x)[1])
 
 """
     _filter_fields!(pks, new_inds)
