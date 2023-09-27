@@ -68,7 +68,7 @@ function peakproms!(pks::NamedTuple; minprom=nothing, maxprom=nothing, min=minpr
     if !hasproperty(pks, :proms)
         # Avoid filtering by min/max/strict here, so that it always happens outside if-statement.
         # Pro: one less edge case. Con: More internal allocations
-        _, proms = _peakproms(pks.indices, pks.data)
+        _, proms = _peakproms(pks.indices, pks.data; strict)
         pks = merge(pks, (; proms))
     end
     if !isnothing(min) || !isnothing(max)
@@ -99,7 +99,7 @@ because it is needed to calculate the peak width.
 """
 function peakwidths!(pks::NamedTuple; minwidth=nothing, maxwidth=nothing, min=minwidth, max=maxwidth, relheight=0.5, strict=true)
     if !hasproperty(pks, :proms)  # Add proms if needed
-        pks = peakproms!(pks)
+        pks = peakproms!(pks; strict)
     end
     if xor(hasproperty(pks, :widths), hasproperty(pks, :edges))
         throw(ArgumentError("The named tuple `pks` (first argument to `peakwidths!` is expected have both the fields `:widths` and `:edges`, or to have neither of them. The provided `pks` only has one of them."))
