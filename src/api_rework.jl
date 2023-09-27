@@ -10,7 +10,10 @@ in the field `inds`.
 This function serves as the entry-point for other 
 functions such as `peakproms!` and `peakwidths!`
 """
-findpeaks(x::AbstractVector) = (data=x, inds=findmaxima(x)[1])
+function findpeaks(x::AbstractVector)
+    indices, heights = findmaxima(x)
+    return (data=x, indices=indices, heights=heights)
+end
 
 """
     _filter_fields!(pks, new_inds)
@@ -19,9 +22,8 @@ Internal function to mutate the vectors in all fields of `pks`
 to remove any element with a corresponding `pks.inds` entry 
 not present in `new_inds`.
 """
-function _filter_fields!(pks, new_inds)
+function _filter_fields!(pks, mask)
     # Add checks on `pks` to see if it has fields "data" and "inds"?
-    mask = pks.inds .∉ Ref(new_inds)
     for field in filter(!=(:data), propertynames(pks)) # Do not want to mutate data vector
         v_to_be_mutated = getfield(pks, field)
         if length(v_to_be_mutated) != length(mask)
@@ -109,8 +111,30 @@ function peakheights!(pks::NamedTuple; min=0, max=Inf)
         heights = pks.data[pks.inds]
         pks = merge(pks, (; heights))
     end
-    new_inds, _ = _peakheights(pks.inds, pks.heights; minheight=min, maxheight=max)
-    _filter_fields!(pks, new_inds)
+    if !isnothing(min) || !isnothing(max)
+        lo = something(min, zero(eltype(x)))
+        up = something(max, typemax(Base.nonmissingtype(eltype(x))))
+        matched = findall(x -> !ismissing(x) && !(lo ≤ x ≤ up), pks.proms)
+        _filter_fields!(pks, matched)
+    end
     return pks
 end
 peakheights!(; kwargs...) = pks -> peakheights!(pks; kwargs...)
+
+
+
+##==##
+function _filter_fields!(pks, mask)
+    # Add checks on `pks` to see if it has fields "data" and "inds"?
+    for field in (:inds, :proms, :heights, :widths, :edges)  # Only risk mutating fields added by this package
+        hasfield(pks, field) || continue  # Do nothing if field is not present
+        v_to_be_mutated = getfield(pks, field)
+        if length(v_to_be_mutated) != length(mask)  # Some performance overhead, but good test to have. Remove once tests are in place?
+            error("Internal error: The length of the vector in field `$field` is $(length(v_to_be_mutated)), but was expected to be $(length(mask))")
+        end
+        deleteat!(v_to_be_mutated, mask)
+    end
+    return nothing
+end
+
+   
