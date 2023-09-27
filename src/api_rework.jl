@@ -29,12 +29,13 @@ as keeping a peak if it has a certain height _or_ a certain width.
 # Examples:
 ToDo: Make example
 """
-function filterpeaks!(pks, mask::BitVector)
+function filterpeaks!(pks, mask::Union{BitVector, Vector{Bool}})
     features_to_filter = (:indices, :proms, :heights, :widths, :edges)
 
     # Check lengths first to avoid a dimension mismatch 
     # after having filtered some features.
     for field in features_to_filter
+        hasproperty(pks, field) || continue  # Do nothing if field is not present
         if length(mask) != length(getfield(pks, field))
             throw(DimensionMismatch(
             "Length of `mask` is ($(length(mask))), but the length 
@@ -45,7 +46,7 @@ function filterpeaks!(pks, mask::BitVector)
     end
 
     for field in features_to_filter  # Only risk mutating fields added by this package
-        hasfield(pks, field) || continue  # Do nothing if field is not present
+        hasproperty(pks, field) || continue  # Do nothing if field is not present
         v_to_be_mutated = getfield(pks, field)
         deleteat!(v_to_be_mutated, mask)
     end
@@ -72,9 +73,9 @@ function peakproms!(pks::NamedTuple; minprom=nothing, maxprom=nothing, min=minpr
         pks = merge(pks, (; proms))
     end
     if !isnothing(min) || !isnothing(max)
-        lo = something(min, zero(eltype(x)))
-        up = something(max, typemax(Base.nonmissingtype(eltype(x))))
-        mask = findall(x -> !ismissing(x) && !(lo ≤ x ≤ up), pks.proms)
+        lo = something(min, zero(eltype(pks.data)))
+        up = something(max, typemax(Base.nonmissingtype(eltype(pks.data))))
+        mask = map(x -> !ismissing(x) && !(lo ≤ x ≤ up), pks.proms)
         filterpeaks!(pks, mask)
     end
     return pks
@@ -111,9 +112,9 @@ function peakwidths!(pks::NamedTuple; minwidth=nothing, maxwidth=nothing, min=mi
         pks = merge(pks, (; widths, edges=collect(zip(leftedges, rightedges))))
     end
     if !isnothing(min) || !isnothing(max)
-        lo = something(min, zero(eltype(x)))
-        up = something(max, typemax(Base.nonmissingtype(eltype(x))))
-        mask = findall(x -> !ismissing(x) && !(lo ≤ x ≤ up), pks.widths)
+        lo = something(min, zero(eltype(pks.data)))
+        up = something(max, typemax(Base.nonmissingtype(eltype(pks.data))))
+        mask = map(x -> !ismissing(x) && !(lo ≤ x ≤ up), pks.widths)
         filterpeaks!(pks, mask)
     end
     return pks
@@ -134,9 +135,9 @@ If the positional argument `pks` is omitted, an anonymus function is returned th
 """
 function peakheights!(pks::NamedTuple; minheight=nothing, maxheight=nothing, min=minheight, max=maxheight)
     if !isnothing(min) || !isnothing(max)
-        lo = something(min, zero(eltype(x)))
-        up = something(max, typemax(Base.nonmissingtype(eltype(x))))
-        mask = findall(x -> !ismissing(x) && !(lo ≤ x ≤ up), pks.heights)
+        lo = something(min, zero(eltype(pks.data)))
+        up = something(max, typemax(Base.nonmissingtype(eltype(pks.data))))
+        mask = map(x -> !ismissing(x) && !(lo ≤ x ≤ up), pks.heights)
         filterpeaks!(pks, mask)
     end
     return pks
