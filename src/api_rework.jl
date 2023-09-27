@@ -36,7 +36,11 @@ function filterpeaks!(pks, mask::BitVector)
     # after having filtered some features.
     for field in features_to_filter
         if length(mask) != length(getfield(pks, field))
-            throw(DimensionMismatch("Length of `mask` is ($(length(mask))), but the length of `pks.$field` is $(length(getfield(pks, field))). This means that the given mask can not be used to filter the field `$field`."))
+            throw(DimensionMismatch(
+            "Length of `mask` is ($(length(mask))), but the length 
+            of `pks.$field` is $(length(getfield(pks, field))). 
+            This means that the given mask can not be used to filter 
+            the field `$field`."))
         end
     end
 
