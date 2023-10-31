@@ -18,8 +18,11 @@
     @test widths == [1.]
     _, widths, _, _ = peakwidths([2], [0.,1.,0.], [NaN])
     @test widths[1] === NaN
-    _, widths, _, _ = peakwidths([2], [0.,1.,0.], [missing])
-    @test widths[1] === missing
+    # the line below errors with the error:
+    # "ERROR: MethodError: Cannot `convert` an object of type Missing to an object of type Float64"
+    #_, widths, _, _ = peakwidths([2], [0.,1.,0.], [missing])
+    #@test widths[1] === missing
+    @test false  # to flag commented-out test
     _, widths, _, _ = peakwidths([2], [0.,1.,NaN], [1.]; strict=true)
     @test widths[1] === NaN
     _, widths, _, _ = peakwidths([2], [0.,1.,0.,-1.], [1.]; strict=false)
