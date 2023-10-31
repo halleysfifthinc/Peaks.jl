@@ -198,8 +198,9 @@ See also: [`argmaxima`](@ref), [`findnextmaxima`](@ref)
 """
 function findmaxima(x, w::Int=1; strict::Bool=true)
     idxs = argmaxima(x, w; strict=strict)
-    return (idxs, x[idxs])
+    return (indices=idxs, heights=x[idxs], data=x)
 end
+export findmaxima
 
 """
     findnextminima(x, i[, w=1, strict=true]) -> Int
@@ -325,6 +326,6 @@ See also: [`argminima`](@ref), [`findnextminima`](@ref)
 """
 function findminima(x, w::Int=1; strict::Bool=true)
     idxs = argminima(x, w; strict=strict)
-    return (idxs, x[idxs])
+    return (indices=idxs, heights=x[idxs], data=x)
 end
-
+export findminima

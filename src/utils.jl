@@ -39,7 +39,16 @@ function filterpeaks!(pks::NamedTuple, mask::Union{BitVector, Vector{Bool}})
 end
 export filterpeaks!
 
-
+# This method gets no docstring, as it is intended for internal use.
+function filterpeaks!(pks::NamedTuple, min, max, feature::Symbol)
+    if !isnothing(min) || !isnothing(max)
+        lo = something(min, zero(eltype(pks.data)))
+        up = something(max, typemax(Base.nonmissingtype(eltype(pks.data))))
+        mask = map(x -> !ismissing(x) && !(lo ≤ x ≤ up), getproperty(pks, feature))
+        filterpeaks!(pks, mask)
+    end
+    return nothing
+end
 
 #====================================================================
 We store a version of findpeak here, as it might be implemented soon, 

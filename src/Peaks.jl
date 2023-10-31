@@ -8,6 +8,7 @@ using Compat
 export findpeaks, peakproms!, peakwidths!, peakheights!
 
 include("minmax.jl")
+include("utils.jl")
 include("peakprom.jl")
 include("peakwidth.jl")
 include("peakheight.jl")
