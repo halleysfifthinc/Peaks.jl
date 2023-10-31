@@ -14,7 +14,7 @@ See also: [`peakprom`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref)
 julia> x = [0,5,2,3,3,1,4,0];
 
 julia> xpks, vals = findmaxima(x)
-([2, 4, 7], [5, 3, 4])
+(indices = [2, 4, 7], heights = [5, 3, 4], data = [0, 5, 2, 3, 3, 1, 4, 0])
 
 julia> peakheights!(xpks, vals; maxheight=4);
 
@@ -56,7 +56,7 @@ See also: [`peakprom`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref)
 julia> x = [0,5,2,3,3,1,4,0];
 
 julia> xpks, vals = findmaxima(x)
-([2, 4, 7], [5, 3, 4])
+(indices = [2, 4, 7], heights = [5, 3, 4], data = [0, 5, 2, 3, 3, 1, 4, 0])
 
 julia> peakheights(xpks, vals; maxheight=4)
 ([4, 7], [3, 4])
