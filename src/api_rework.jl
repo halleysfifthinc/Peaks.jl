@@ -1,62 +1,14 @@
 # I am putting everything in here for now. The contents of this file should be moved around in the future.
-"""
-    findpeaks(x) -> NamedTuple
-    findpeaks(x, w=1; strict=true) -> NamedTuple
-
-Find the peaks in a vector `x`, where each maxima i is either 
-the maximum of x[i-w:i+w] or the first index of a plateau.
-A `NamedTuple` is returned with the original vector 
-in the field `data`, and the indices of the peaks 
-in the field `indices`.
-
-This function serves as the entry-point for other 
-functions such as `peakproms!` and `peakwidths!`
-"""
-function findpeaks(x::AbstractVector, w::Int=1; strict=true)
-    indices, heights = findmaxima(x, w; strict)
-    return (data=x, indices=indices, heights=heights)
-end
 
 """
-    filterpeaks!(pks, mask) -> Nothing
+    peakproms!(pks) --> NamedTuple
+    peakproms!() --> Function
 
-Given a NamedTuple `pks` (as returned by `findpeaks`), filter 
-the peaks according to the given `mask` (A `BitVector` or `Vector{Bool}`. The functions `peakheights`, `peakproms` and `peakwidths` allow 
-filtering for a max/min limit of the relevant peak feature.
-This function can be used to perform more complicated filtering, such 
-as keeping a peak if it has a certain height _or_ a certain width.
-
-# Examples:
-ToDo: Make example
-"""
-function filterpeaks!(pks, mask::Union{BitVector, Vector{Bool}})
-    features_to_filter = (:indices, :proms, :heights, :widths, :edges)
-
-    # Check lengths first to avoid a dimension mismatch 
-    # after having filtered some features.
-    for field in features_to_filter
-        hasproperty(pks, field) || continue  # Do nothing if field is not present
-        if length(mask) != length(getfield(pks, field))
-            throw(DimensionMismatch(
-            "Length of `mask` is ($(length(mask))), but the length 
-            of `pks.$field` is $(length(getfield(pks, field))). 
-            This means that the given mask can not be used to filter 
-            the field `$field`."))
-        end
-    end
-
-    for field in features_to_filter  # Only risk mutating fields added by this package
-        hasproperty(pks, field) || continue  # Do nothing if field is not present
-        v_to_be_mutated = getfield(pks, field)
-        deleteat!(v_to_be_mutated, mask)
-    end
-    return nothing
-end
-export filterpeaks!
-
-"""
-    peakproms!(pks::NamedTuple; min=0, max=Inf, strict=true)
-    peakproms!(; min=0, max=Inf, strict=true)
+# Optional keyword arguments
+- `min`: Filter out any peak with a height smaller than `min`
+- `max`: Filter out any peak with a height greater than `min`
+- `relheight`: BLABLA. Defaults to `0.5`
+- `strict`: BLABLA. Default to `true`
 
 Find the prominences of the peaks in `pks`, and filter out any peak 
 with a prominence smaller than `min` or greater than `max`.
@@ -82,10 +34,15 @@ function peakproms!(pks::NamedTuple; minprom=nothing, maxprom=nothing, min=minpr
 end
 peakproms!(; kwargs...) = pks -> peakproms!(pks; kwargs...)
 
-
 """
-    peakwidths!(pks::NamedTuple; min=0, max=Inf, relheight=0.5, strict=true)
-    peakwidths!(; min=0, max=Inf, relheight=0.5, strict=true)
+    peakwidths!(pks) --> NamedTuple
+    peakwidths!() --> Function
+
+# Optional keyword arguments
+- `min`: Filter out any peak with a height smaller than `min`
+- `max`: Filter out any peak with a height greater than `min`
+- `relheight`: BLABLA. Defaults to `0.5`
+- `strict`: BLABLA. Default to `true`
 
 Find the widths of the peaks in `pks`, and filter out any peak 
 with a width smaller than `min` or greater than `max`.
@@ -122,8 +79,12 @@ end
 peakwidths!(; kwargs...) = pks -> peakwidths!(pks; kwargs...)
 
 """
-    peakheights!(pks::NamedTuple; min=0, max=Inf)
-    peakheights!(; min=0, max=Inf)
+    peakheights!(pks) --> NamedTuple
+    peakheights!() --> Function
+
+# Optional keyword arguments
+- `min`: Filter out any peak with a height smaller than `min`
+- `max`: Filter out any peak with a height greater than `min`
 
 Find the heights of the peaks in `pks`, and filter out any peak 
 with a heights smaller than `min` or greater than `max`.

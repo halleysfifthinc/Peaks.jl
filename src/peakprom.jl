@@ -1,59 +1,4 @@
 """
-    peakproms(peaks, x;
-        strict=true,
-        minprom=nothing,
-        maxprom=nothing
-    ) -> (peaks, proms)
-
-Calculate the prominences of `peaks` in `x`, and removing peaks with prominences less than
-`minprom` and/or greater than `maxprom`.
-
-Peak prominence is the absolute height difference between the current peak and the larger of
-the two adjacent smallest magnitude points between the current peak and adjacent larger
-peaks or signal ends.
-
-The prominence for a peak with a `NaN` or `missing` between the current peak and either
-adjacent larger peaks will be `NaN` or `missing` if `strict == true`, or it will be
-the larger of the smallest non-`NaN` or `missing` values between the current peak and
-adjacent larger peaks for `strict == false`.
-
-See also: [`findminima`](@ref), [`findmaxima`](@ref), [`peakproms!`](@ref)
-
-# Examples
-```jldoctest
-julia> x = [0,5,2,3,3,1,4,0];
-
-julia> xpks = argmaxima(x)
-3-element Vector{Int64}:
- 2
- 4
- 7
-
-julia> peakproms(xpks, x)
-([2, 4, 7], Union{Missing, Int64}[5, 1, 3])
-
-julia> x = [missing,5,2,3,3,1,4,0];
-
-julia> peakproms(xpks, x)
-([2, 4, 7], Union{Missing, Int64}[missing, 1, 3])
-
-julia> peakproms(xpks, x; strict=false)
-([2, 4, 7], Union{Missing, Int64}[5, 1, 3])
-```
-"""
-function _peakproms(peaks::AbstractVector{Int}, x::AbstractVector{T};
-    strict=true, minprom=nothing, maxprom=nothing
-) where {T}
-    if !isnothing(minprom) || !isnothing(maxprom)
-        _peaks = copy(peaks)
-    else
-        # peaks will not be modified
-        _peaks = peaks
-    end
-    return _peakproms!(_peaks, x; strict=strict, minprom=minprom, maxprom=maxprom)
-end
-
-"""
     peakproms!(peaks, x;
         strict=true,
         minprom=nothing,
@@ -66,7 +11,7 @@ prominences.
 
 See also: [`peakproms`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
 """
-function _peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
+function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
     strict=true, minprom=nothing, maxprom=nothing
 ) where {T}
     if !isnothing(minprom) && !isnothing(maxprom)
@@ -179,4 +124,61 @@ function _peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
 
     return peaks, proms
 end
+export peakproms!
+
+"""
+    peakproms(peaks, x;
+        strict=true,
+        minprom=nothing,
+        maxprom=nothing
+    ) -> (peaks, proms)
+
+Calculate the prominences of `peaks` in `x`, and removing peaks with prominences less than
+`minprom` and/or greater than `maxprom`.
+
+Peak prominence is the absolute height difference between the current peak and the larger of
+the two adjacent smallest magnitude points between the current peak and adjacent larger
+peaks or signal ends.
+
+The prominence for a peak with a `NaN` or `missing` between the current peak and either
+adjacent larger peaks will be `NaN` or `missing` if `strict == true`, or it will be
+the larger of the smallest non-`NaN` or `missing` values between the current peak and
+adjacent larger peaks for `strict == false`.
+
+See also: [`findminima`](@ref), [`findmaxima`](@ref), [`peakproms!`](@ref)
+
+# Examples
+```jldoctest
+julia> x = [0,5,2,3,3,1,4,0];
+
+julia> xpks = argmaxima(x)
+3-element Vector{Int64}:
+ 2
+ 4
+ 7
+
+julia> peakproms(xpks, x)
+([2, 4, 7], Union{Missing, Int64}[5, 1, 3])
+
+julia> x = [missing,5,2,3,3,1,4,0];
+
+julia> peakproms(xpks, x)
+([2, 4, 7], Union{Missing, Int64}[missing, 1, 3])
+
+julia> peakproms(xpks, x; strict=false)
+([2, 4, 7], Union{Missing, Int64}[5, 1, 3])
+```
+"""
+function peakproms(peaks::AbstractVector{Int}, x::AbstractVector{T};
+    strict=true, minprom=nothing, maxprom=nothing
+) where {T}
+    if !isnothing(minprom) || !isnothing(maxprom)
+        _peaks = copy(peaks)
+    else
+        # peaks will not be modified
+        _peaks = peaks
+    end
+    return peakproms!(_peaks, x; strict=strict, minprom=minprom, maxprom=maxprom)
+end
+export peakproms
 
