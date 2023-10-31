@@ -14,13 +14,25 @@ with a prominence smaller than `min` or greater than `max`.
 The prominences are returned in the field `:proms` of the returned named tuple.
 
 If the positional argument `pks` is omitted, a function is returned such
-that `peakproms!(pks)` is equivalent to `pks|>peakproms!`.
+that `peakproms!(pks)` is equivalent to `pks |> peakproms!`.
 
 Note: This function mutates the vectors stored in the NamedTuple `pks`, 
 and not the named tuple itself.
 
+See also: [`peakwidths!`](@ref), [`peakheights!`](@ref)
+
 # Examples
-Write examples
+```jldoctest
+julia> data = [1, 5, 1, 3, 2];
+
+julia> pks = findmaxima(data);
+
+julia> pks = peakproms!(pks)
+(indices = [2, 4], heights = [5, 3], data = [1, 5, 1, 3, 2], proms = Union{Missing, Int64}[4, 1])
+
+julia> data |> findmaxima |> peakproms!
+(indices = [2, 4], heights = [5, 3], data = [1, 5, 1, 3, 2], proms = Union{Missing, Int64}[4, 1])
+```
 """
 function peakproms!(pks::NamedTuple; minprom=nothing, maxprom=nothing, min=minprom, max=maxprom, strict=true)
     if !hasproperty(pks, :proms)
@@ -43,9 +55,10 @@ peakproms!(; kwargs...) = pks -> peakproms!(pks; kwargs...)
 - `max`: Filter out any peak with a height greater than `min`.
 - `strict`: How to handle `NaN` and `missing` values. See documentation for more details. Default to `true`.
 
-Non-mutation version of `peakproms!`. Note that this copies all vectors 
-in `pks`, meaning that it is less performant. 
-See the docstring for `peakproms!` for more information.
+Non-mutation version of `peakproms!`. Note that 
+this copies all vectors in `pks`, meaning that 
+it is less performant. See the docstring for 
+`peakproms!` for more information.
 """
 peakproms(pks::NamedTuple; kwargs...) = peakproms!(deepcopy(pks); kwargs...)
 
@@ -65,7 +78,7 @@ The widths are returned in the field `:widths` of the returned named tuple.
 The edges of the peaks are also added in the field `:edges`.
 
 If the positional argument `pks` is omitted, a function is returned such
-that `peakwidths!(pks)` is equivalent to `pks|>peakwidths!`.
+that `peakwidths!(pks)` is equivalent to `pks |> peakwidths!`.
 
 Note: If `pks` does not have a field `proms`, it is added. This is 
 because it is needed to calculate the peak width.
@@ -73,8 +86,20 @@ because it is needed to calculate the peak width.
 Note: This function mutates the vectors stored in the NamedTuple `pks`, 
 and not the named tuple itself.
 
+See also: [`peakproms!`](@ref), [`peakheights!`](@ref)
+
 # Examples
-Write examples
+```jldoctest
+julia> data = [1, 5, 1, 3, 2];
+
+julia> pks = findmaxima(data);
+
+julia> pks = peakwidths!(pks)
+(indices = [2, 4], heights = [5, 3], data = [1, 5, 1, 3, 2], proms = Union{Missing, Int64}[4, 1], widths = [1.0, 0.75], edges = [(1.5, 2.5), (3.75, 4.5)])
+
+julia> data |> findmaxima |> peakwidths!
+(indices = [2, 4], heights = [5, 3], data = [1, 5, 1, 3, 2], proms = Union{Missing, Int64}[4, 1], widths = [1.0, 0.75], edges = [(1.5, 2.5), (3.75, 4.5)])
+```
 """
 function peakwidths!(pks::NamedTuple; minwidth=nothing, maxwidth=nothing, min=minwidth, max=maxwidth, relheight=0.5, strict=true)
     if !hasproperty(pks, :proms)  # Add proms if needed
@@ -104,9 +129,10 @@ peakwidths!(; kwargs...) = pks -> peakwidths!(pks; kwargs...)
 - `relheight`: How far up to measure width, as fraction of the peak prominence. Defaults to `0.5`.
 - `strict`: How to handle `NaN` and `missing` values. See documentation for more details. Default to `true`.
 
-Non-mutation version of `peakwidths!`. Note that this copies all vectors 
-in `pks`, meaning that it is less performant. 
-See the docstring for `peakwidths!` for more information.
+Non-mutation version of `peakwidths!`. Note that 
+this copies all vectors in `pks`, meaning that 
+it is less performant. See the docstring for 
+`peakwidths!` for more information.
 """
 peakwidths(pks::NamedTuple; kwargs...) = peakwidths!(deepcopy(pks); kwargs...)
 
@@ -126,7 +152,25 @@ the feature `heights` calculated, this function is mainly useful to
 filter peaks by a minimum and/or maximum height.
 
 If the positional argument `pks` is omitted, a function is returned such
-that `peakheights!(pks)` is equivalent to `pks|>peakheights!`.
+that `peakheights!(pks)` is equivalent to `pks |> peakheights!`.
+
+Note: This function mutates the vectors stored in the NamedTuple `pks`, 
+and not the named tuple itself.
+
+See also: [`peakproms!`](@ref), [`peakwidths!`](@ref)
+
+# Examples
+```jldoctest
+julia> data = [1, 5, 1, 3, 2];
+
+julia> pks = findmaxima(data);
+
+julia> pks = peakheights!(pks, min=4)
+(indices = [2], heights = [5], data = [1, 5, 1, 3, 2])
+
+julia> data |> findmaxima |> peakheights!(min=4)
+(indices = [2], heights = [5], data = [1, 5, 1, 3, 2])
+```
 """
 function peakheights!(pks::NamedTuple; minheight=nothing, maxheight=nothing, min=minheight, max=maxheight)
     filterpeaks!(pks, min, max, :heights)
@@ -142,8 +186,9 @@ peakheights!(; kwargs...) = pks -> peakheights!(pks; kwargs...)
 - `min`: Filter out any peak with a height smaller than `min`.
 - `max`: Filter out any peak with a height greater than `min`.
 
-Non-mutation version of `peakheights!`. Note that this copies all vectors 
-in `pks`, meaning that it is less performant. 
-See the docstring for `peakheights!` for more information.
+Non-mutation version of `peakheights!`. Note that 
+this copies all vectors in `pks`, meaning that 
+it is less performant. See the docstring for 
+`peakheights!` for more information.
 """
 peakheights(pks::NamedTuple; kwargs...) = peakheights!(deepcopy(pks); kwargs...)

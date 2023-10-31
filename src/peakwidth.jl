@@ -35,9 +35,10 @@ function peakwidths!(
     V1 = promote_type(T, U)
     _bad = Missing <: V1 ? missing : float(Int)(NaN)
 
-    V = promote_type(V1, typeof(_bad))
-    ledge = similar(proms, typeof(one(V)/one(V)))  # typeof(one(V)/one(V)) because the 
-    redge = similar(proms, typeof(one(V)/one(V)))  # vector eltype need to survive division
+    V_ = promote_type(V1, typeof(_bad)) # temp variable used in next line
+    V = typeof(one(V_)/one(V_))         # We will insert the results of divisions.
+    ledge = similar(proms, V)
+    redge = similar(proms, V)
 
     if strict
         lst, fst = _bad, _bad
