@@ -13,9 +13,14 @@ Find the prominences of the peaks in `pks`, and filter out any peak
 with a prominence smaller than `min` or greater than `max`.
 The prominences are returned in the field `:proms` of the returned named tuple.
 
-If the positional argument `pks` is omitted, an anonymus function is returned 
-that performs the action (adding field `:proms` and filtering) to its input.
-This means that `peakproms!(pks)` is equivalent to `pks|>peakproms!`.
+If the positional argument `pks` is omitted, a function is returned such
+that `peakproms!(pks)` is equivalent to `pks|>peakproms!`.
+
+Note: This function mutates the vectors stored in the NamedTuple `pks`, 
+and not the named tuple itself.
+
+# Examples
+Write examples
 """
 function peakproms!(pks::NamedTuple; minprom=nothing, maxprom=nothing, min=minprom, max=maxprom, strict=true)
     if !hasproperty(pks, :proms)
@@ -59,12 +64,17 @@ with a width smaller than `min` or greater than `max`.
 The widths are returned in the field `:widths` of the returned named tuple.
 The edges of the peaks are also added in the field `:edges`.
 
-If the positional argument `pks` is omitted, an anonymus function is returned 
-that performs the action (adding fields `:widths` and `:edges` and filtering) to its input.
-This means that `peakwidths!(pks)` is equivalent to `pks|>peakwidths!`.
+If the positional argument `pks` is omitted, a function is returned such
+that `peakwidths!(pks)` is equivalent to `pks|>peakwidths!`.
 
 Note: If `pks` does not have a field `proms`, it is added. This is 
 because it is needed to calculate the peak width.
+
+Note: This function mutates the vectors stored in the NamedTuple `pks`, 
+and not the named tuple itself.
+
+# Examples
+Write examples
 """
 function peakwidths!(pks::NamedTuple; minwidth=nothing, maxwidth=nothing, min=minwidth, max=maxwidth, relheight=0.5, strict=true)
     if !hasproperty(pks, :proms)  # Add proms if needed
@@ -115,9 +125,8 @@ Note that because the peaks returned by `findpeaks` already have
 the feature `heights` calculated, this function is mainly useful to 
 filter peaks by a minimum and/or maximum height.
 
-If the positional argument `pks` is omitted, an anonymus function is returned 
-that performs the action (adding field `heights` and filtering) to its input.
-This means that `peakheights!(pks)` is equivalent to `pks|>peakheights!`.
+If the positional argument `pks` is omitted, a function is returned such
+that `peakheights!(pks)` is equivalent to `pks|>peakheights!`.
 """
 function peakheights!(pks::NamedTuple; minheight=nothing, maxheight=nothing, min=minheight, max=maxheight)
     filterpeaks!(pks, min, max, :heights)
