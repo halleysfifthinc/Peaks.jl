@@ -12,10 +12,17 @@ prominences.
 See also: [`peakproms`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
 """
 function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
-    strict=true, minprom=nothing, maxprom=nothing
+    strict=true, minprom=nothing, maxprom=nothing, 
+    min=minprom, max=maxprom
 ) where {T}
-    if !isnothing(minprom) && !isnothing(maxprom)
-        minprom < maxprom || throw(ArgumentError("minprom must be less than maxprom"))
+    if !isnothing(minprom)
+        Base.depwarn("Keyword `minprom` has been renamed to `min`", :peakproms!)
+    end
+    if !isnothing(maxprom)
+        Base.depwarn("Keyword `maxprom` has been renamed to `max`", :peakproms!)
+    end
+    if !isnothing(min) && !isnothing(max)
+        min < max || throw(ArgumentError("minimal prominence must be less than maximal prominence"))
     end
     all(∈(eachindex(x)), peaks) ||
         throw(ArgumentError("peaks contains invalid indices to x"))
@@ -36,7 +43,7 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
            Float64 <: T ? NaN :
            Float32 <: T ? NaN32 :
            Float16 <: T ? NaN16 :
-           missing
+                          missing
 
     proms = similar(peaks, promote_type(T, typeof(_ref)))
 
@@ -114,9 +121,9 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
         end
     end
 
-    if !isnothing(minprom) || !isnothing(maxprom)
-        lo = something(minprom, zero(eltype(x)))
-        up = something(maxprom, typemax(Base.nonmissingtype(eltype(x))))
+    if !isnothing(min) || !isnothing(max)
+        lo = something(min, zero(eltype(x)))
+        up = something(max, typemax(Base.nonmissingtype(eltype(x))))
         matched = findall(x -> !ismissing(x) && !(lo ≤ x ≤ up), proms)
         deleteat!(peaks, matched)
         deleteat!(proms, matched)
@@ -170,15 +177,22 @@ julia> peakproms(xpks, x; strict=false)
 ```
 """
 function peakproms(peaks::AbstractVector{Int}, x::AbstractVector{T};
-    strict=true, minprom=nothing, maxprom=nothing
+    strict=true, minprom=nothing, maxprom=nothing,
+    min=minprom, max=maxprom
 ) where {T}
-    if !isnothing(minprom) || !isnothing(maxprom)
+    if !isnothing(minprom)
+        Base.depwarn("Keyword `minprom` has been renamed to `min`", :peakproms)
+    end
+    if !isnothing(maxprom)
+        Base.depwarn("Keyword `maxprom` has been renamed to `max`", :peakproms)
+    end
+    if !isnothing(min) || !isnothing(max)
         _peaks = copy(peaks)
     else
         # peaks will not be modified
         _peaks = peaks
     end
-    return peakproms!(_peaks, x; strict=strict, minprom=minprom, maxprom=maxprom)
+    return peakproms!(_peaks, x; strict=strict, min=min, max=max)
 end
 export peakproms
 

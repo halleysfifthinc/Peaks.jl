@@ -1,7 +1,7 @@
 name = "Peaks"
 uuid = "18e31ff7-3703-566c-8e60-38913d67486b"
 authors = ["Allen Hill <allenofthehills@gmail.com>"]
-version = "0.5.0"
+version = "0.4.4"
 
 [deps]
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"

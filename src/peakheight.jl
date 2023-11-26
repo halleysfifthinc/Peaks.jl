@@ -24,12 +24,19 @@ julia> xpks, vals
 """
 function peakheights!(
     peaks::Vector{Int}, heights::AbstractVector{T};
-    minheight=nothing, maxheight=nothing
+    minheight=nothing, maxheight=nothing, 
+    min=minheight, max=maxheight
 ) where {T}
+    if !isnothing(minprom)
+        Base.depwarn("Keyword `minheight` has been renamed to `min`", :peakheights!)
+    end
+    if !isnothing(maxprom)
+        Base.depwarn("Keyword `maxheight` has been renamed to `max`", :peakheights!)
+    end
     length(peaks) == length(heights) || throw(DimensionMismatch("length of `peaks`, $(length(peaks)), does not match the length of `heights`, $(length(heights))"))
-    if !isnothing(minheight) || !isnothing(maxheight)
-        lo = something(minheight, typemin(Base.nonmissingtype(T)))
-        up = something(maxheight, typemax(Base.nonmissingtype(T)))
+    if !isnothing(min) || !isnothing(max)
+        lo = something(min, typemin(Base.nonmissingtype(T)))
+        up = something(max, typemax(Base.nonmissingtype(T)))
         matched = findall(x -> !(lo ≤ x ≤ up), heights)
         deleteat!(peaks, matched)
         deleteat!(heights, matched)
@@ -67,8 +74,15 @@ julia> peakheights(xpks, vals; minheight=4.5)
 """
 function peakheights(
     peaks::AbstractVector{Int}, heights::AbstractVector;
-    minheight=nothing, maxheight=nothing
+    minheight=nothing, maxheight=nothing, 
+    min=minheight, max=maxheight
 )
-    peakheights!(copy(peaks), copy(heights); minheight=minheight, maxheight=maxheight)
+    if !isnothing(minprom)
+        Base.depwarn("Keyword `minheight` has been renamed to `min`", :peakheights!)
+    end
+    if !isnothing(maxprom)
+        Base.depwarn("Keyword `maxheight` has been renamed to `max`", :peakheights!)
+    end
+    peakheights!(copy(peaks), copy(heights); min=min, max=max)
 end
 export peakheights

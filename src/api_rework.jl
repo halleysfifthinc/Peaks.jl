@@ -35,6 +35,12 @@ julia> data |> findmaxima |> peakproms!
 ```
 """
 function peakproms!(pks::NamedTuple; minprom=nothing, maxprom=nothing, min=minprom, max=maxprom, strict=true)
+    if !isnothing(minprom)
+        Base.depwarn("Keyword `minprom` has been renamed to `min`", :peakproms!)
+    end
+    if !isnothing(maxprom)
+        Base.depwarn("Keyword `maxprom` has been renamed to `max`", :peakproms!)
+    end
     if !hasproperty(pks, :proms)
         # Avoid filtering by min/max/strict here, so that it always happens outside if-statement.
         # Pro: one less edge case. Con: More internal allocations
@@ -102,6 +108,12 @@ julia> data |> findmaxima |> peakwidths!
 ```
 """
 function peakwidths!(pks::NamedTuple; minwidth=nothing, maxwidth=nothing, min=minwidth, max=maxwidth, relheight=0.5, strict=true)
+    if !isnothing(minprom)
+        Base.depwarn("Keyword `minprom` has been renamed to `min`", :peakwidths!)
+    end
+    if !isnothing(maxprom)
+        Base.depwarn("Keyword `maxprom` has been renamed to `max`", :peakwidths!)
+    end
     if !hasproperty(pks, :proms)  # Add proms if needed
         pks = peakproms!(pks; strict)
     end
@@ -173,6 +185,12 @@ julia> data |> findmaxima |> peakheights!(min=4)
 ```
 """
 function peakheights!(pks::NamedTuple; minheight=nothing, maxheight=nothing, min=minheight, max=maxheight)
+    if !isnothing(minprom)
+        Base.depwarn("Keyword `minprom` has been renamed to `min`", :peakheights!)
+    end
+    if !isnothing(maxprom)
+        Base.depwarn("Keyword `maxprom` has been renamed to `max`", :peakheights!)
+    end
     filterpeaks!(pks, min, max, :heights)
     return pks
 end

@@ -14,10 +14,17 @@ See also: [`peakwidths`](@ref), [`peakproms`](@ref), [`findminima`](@ref), [`fin
 """
 function peakwidths!(
     peaks::AbstractVector{Int}, x::AbstractVector{T}, proms::AbstractVector{U};
-    strict=true, relheight=0.5, minwidth=nothing, maxwidth=nothing
+    strict=true, relheight=0.5, minwidth=nothing, maxwidth=nothing,
+    min=minwidth, max=maxwidth
 ) where {T,U}
-    if !isnothing(minwidth) && !isnothing(maxwidth)
-        minwidth < maxwidth || throw(ArgumentError("maxwidth must be greater than minwidth"))
+    if !isnothing(minwidth)
+        Base.depwarn("Keyword `minwidth` has been renamed to `min`", :peakwidths!)
+    end
+    if !isnothing(maxwidth)
+        Base.depwarn("Keyword `maxwidth` has been renamed to `max`", :peakwidths!)
+    end
+    if !isnothing(min) && !isnothing(max)
+        min < max || throw(ArgumentError("max width must be greater than min width"))
     end
     all(∈(eachindex(x)), peaks) ||
         throw(ArgumentError("peaks contains invalid indices to x"))
@@ -77,9 +84,9 @@ function peakwidths!(
 
     widths::Vector{V} = redge - ledge
 
-    if !isnothing(minwidth) || !isnothing(maxwidth)
-        lo = something(minwidth, zero(eltype(widths)))
-        up = something(maxwidth, typemax(Base.nonmissingtype(eltype(widths))))
+    if !isnothing(min) || !isnothing(max)
+        lo = something(min, zero(eltype(widths)))
+        up = something(max, typemax(Base.nonmissingtype(eltype(widths))))
         matched = findall(x -> !ismissing(x) && !(lo ≤ x ≤ up), widths)
         deleteat!(peaks, matched)
         deleteat!(ledge, matched)
@@ -136,15 +143,22 @@ julia> peakwidths(xpks, x, [1]; strict=false)
 """
 function peakwidths(
     peaks::AbstractVector{Int}, x::AbstractVector, proms::AbstractVector;
-    strict=true, relheight=0.5, minwidth=nothing, maxwidth=nothing
+    strict=true, relheight=0.5, minwidth=nothing, maxwidth=nothing,
+    min=minwidth, max=maxwidth
 )
-    if !isnothing(minwidth) || !isnothing(maxwidth)
+    if !isnothing(minwidth)
+        Base.depwarn("Keyword `minwidth` has been renamed to `min`", :peakwidths)
+    end
+    if !isnothing(maxwidth)
+        Base.depwarn("Keyword `maxwidth` has been renamed to `max`", :peakwidths)
+    end
+    if !isnothing(min) || !isnothing(max)
         _peaks = copy(peaks)
     else
         # peaks will not be modified
         _peaks = peaks
     end
     peakwidths!(_peaks, x, proms; strict=strict, relheight=relheight,
-        minwidth=minwidth, maxwidth=maxwidth)
+        min=min, max=max)
 end
 export peakwidths
