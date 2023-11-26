@@ -1,8 +1,8 @@
 # I am putting everything in here for now. The contents of this file should be moved around in the future.
 
 """
-    peakproms!(pks) --> NamedTuple
-    peakproms!() --> Function
+    peakproms!(pks) -> NamedTuple
+    peakproms!() -> Function
 
 # Optional keyword arguments
 - `min`: Filter out any peak with a height smaller than `min`.
@@ -47,8 +47,8 @@ end
 peakproms!(; kwargs...) = pks -> peakproms!(pks; kwargs...)
 
 """
-    peakproms(pks) --> NamedTuple
-    peakproms() --> Function
+    peakproms(pks) -> NamedTuple
+    peakproms() -> Function
 
 # Optional keyword arguments
 - `min`: Filter out any peak with a height smaller than `min`.
@@ -63,8 +63,8 @@ This means that it is less performant. See the docstring for
 peakproms(pks::NamedTuple; kwargs...) = peakproms!(deepcopy(pks); kwargs...)
 
 """
-    peakwidths!(pks) --> NamedTuple
-    peakwidths!() --> Function
+    peakwidths!(pks) -> NamedTuple
+    peakwidths!() -> Function
 
 # Optional keyword arguments
 - `min`: Filter out any peak with a height smaller than `min`.
@@ -120,8 +120,8 @@ end
 peakwidths!(; kwargs...) = pks -> peakwidths!(pks; kwargs...)
 
 """
-    peakwidths(pks) --> NamedTuple
-    peakwidths() --> Function
+    peakwidths(pks) -> NamedTuple
+    peakwidths() -> Function
 
 # Optional keyword arguments
 - `min`: Filter out any peak with a height smaller than `min`.
@@ -138,8 +138,8 @@ peakwidths(pks::NamedTuple; kwargs...) = peakwidths!(deepcopy(pks); kwargs...)
 
 
 """
-    peakheights!(pks) --> NamedTuple
-    peakheights!() --> Function
+    peakheights!(pks) -> NamedTuple
+    peakheights!() -> Function
 
 # Optional keyword arguments
 - `min`: Filter out any peak with a height smaller than `min`.
@@ -179,8 +179,8 @@ end
 peakheights!(; kwargs...) = pks -> peakheights!(pks; kwargs...)
 
 """
-    peakheights(pks) --> NamedTuple
-    peakheights() --> Function
+    peakheights(pks) -> NamedTuple
+    peakheights() -> Function
 
 # Optional keyword arguments
 - `min`: Filter out any peak with a height smaller than `min`.
