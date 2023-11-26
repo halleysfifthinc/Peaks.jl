@@ -1,3 +1,29 @@
+known_fields() = (:indices, :proms, :heights, :widths, :edges)
+
+function check_known_fields_equal_length(pks::NamedTuple)
+    features_to_filter = known_fields()
+
+    feature_lengths = [length(pks[feature]) for feature in features_to_filter if hasproperty(pks, feature)]
+
+    # We refrain from using `allequal` to support Julia < 1.8
+    if !all(first(feature_lengths) == feature_lengths[i] for i in eachindex(feature_lengths))
+        length_pairs = [feature=>length(pks[feature]) for feature in features_to_filter if hasproperty(pks, feature)]
+        throw(DimensionMismatch("Expected all known fields of `pks` to be of equal length. Instead found the following pairs of known field and length:\n$length_pairs
+        This should not happen, and indicates that the argument `pks` been created or modified by something outside Peaks.jl"))
+    end
+    return nothing
+end
+
+function check_has_known_field(pks::NamedTuple)
+    if !any(hasproperty(pks, prop) for prop in known_fields())
+        throw(ArgumentError(
+            "Attempting to filter a named tuple `pks` that contains none of the known fields $(known_fields()). Because 
+            this is thought to be an error, this error is thrown to help catch the original error."
+        ))
+    end
+    return nothing
+end
+
 """
     filterpeaks!(pks, mask) -> pks
 
@@ -8,7 +34,10 @@ of `pks` are `:indices`, `:proms`, `:heights`, `:widths`, `:edges`.
 The functions `peakheights`, `peakproms` and `peakwidths` already 
 allow filtering by maximal and minimal values for different peak features.
 This function can be used to perform more complicated filtering, such 
-as keeping a peak if it has a certain height _or_ a certain width. 
+as keeping a peak if it has a certain height _or_ a certain width.
+
+If you find it inconvenient to define the the mask, see also the 
+version of `filterpeaks!` that takes a function as its first argument.
 
 # Examples
 julia> data = [1, 2, 3, 2, 3, 4, 0];
@@ -32,29 +61,26 @@ julia> filterpeaks!(pks, my_mask)
 
 """
 function filterpeaks!(pks::NamedTuple, mask::Union{BitVector, Vector{Bool}})
-    features_to_filter = (:indices, :proms, :heights, :widths, :edges)
+
 
     # Check lengths first to avoid a dimension mismatch 
     # after having filtered some features.
     # feature_mask = hasproperty.(pks, features_to_filter)
-    feature_lengths = [length(pks[feature]) for feature in features_to_filter if hasproperty(pks, feature)]
-    if !all(first(feature_lengths) == feature_lengths[i] for i in eachindex(feature_lengths))
-        length_pairs = [feature=>length(pks[feature]) for feature in features_to_filter if hasproperty(pks, feature)]
-        throw(DimensionMismatch("Expected all known fields of `pks` to be of equal length. Instead found the following pairs of known field and length:\n$length_pairs
-        This should not happen, and indicates that the argument `pks` been created or modified by something outside Peaks.jl"))
-    end
+    check_known_fields_equal_length(pks)
+    check_has_known_field(pks)
+
     # At this point we know that all feature_length are equal, and do not need to check it again
-    if first(feature_lengths) != length(mask)
+    # pks[1] returns the indices.
+    if length(pks[1]) != length(mask)
         throw(DimensionMismatch(
-        "Length of `mask` is $(length(mask)), but the length of each of the known fields of `pks` is $(first(feature_lengths)). 
-        This means that the given mask can not be used to filter the given named tuple`pks`."
+        "Length of `mask` is $(length(mask)), but the length of each of the known fields of `pks` is $(length(pks[1])). 
+        This means that the given mask can not be used to filter the given named tuple `pks`."
         ))
     end
 
-    for field in features_to_filter  # Only risk mutating fields added by this package
+    for field in known_fields()  # Only risk mutating fields added by this package
         hasproperty(pks, field) || continue  # Do nothing if field is not present
-        v_to_be_mutated = pks[field]
-        deleteat!(v_to_be_mutated, .!mask)
+        deleteat!(pks[field], .!mask)
     end
     return pks
 end
@@ -81,38 +107,54 @@ function filterpeaks!(pks::NamedTuple, min, max, feature::Symbol)
     return nothing
 end
 
-
-#=
-! This is an idea for making it easier to create masks.
 """
-    peakmask(conds...)
+    filterpeaks!(pred, pks) -> NamedTuple
 
-Experimental function to make it easier to create masks intended 
-for use in `filterpeaks!(pks, mask)`. `Conds` is a variable number of 
-conditions that define the mask.
-
-The each condition in `conds` is expected to be a tuple that contains 
-`(s::Symbol`, f::`Function`, n::`Number`). It is used to find the 
-peaks in `pks` for which `f([:symbol][i], n)`.
+Apply a predicate function `pred` to named tuple slices to get a filter-mask.
+By "named tuple slice" we refer to 
+If `pred` returns `false` for peak number `i`, element `i` is removed from 
+the known fields of `pks`. 
 
 # Examples
+julia> data = [1, 2, 3, 2, 3, 4, 0];
+
+julia> pks = findmaxima(data)
+(indices = [3, 6], heights = [3, 4], data = [1, 2, 3, 2, 3, 4, 0])
+
+julia> pks = peakwidths!(pks);
+
+julia> data = [1, 2, 3, 2, 3, 4, 0];
+
+julia> pks = findmaxima(data)
+(indices = [3, 6], heights = [3, 4], data = [1, 2, 3, 2, 3, 4, 0])
+
+julia> pks = peakwidths!(pks)
+(indices = [3, 6], heights = [3, 4], data = [1, 2, 3, 2, 3, 4, 0], proms = Union{Missing, Int64}[1, 3], widths = [1.0, 1.875], edges = [(2.5, 3.5), (4.5, 6.375)])
+
+julia> filterpeaks!(pks) do nt_slice
+           nt_slice.heights > 3.5  &&  nt_slice.widths > 1.8
+       end
+(indices = [6], heights = [4], data = [1, 2, 3, 2, 3, 4, 0], proms = Union{Missing, Int64}[3], widths = [1.875], edges = [(4.5, 6.375)])
 
 """
-function peakmask(conds::Tuple{Symbol, Function, <:Real}...)
-    function f(pks)
-        mask = trues(length(pks[:indices]))
+function filterpeaks!(pred::Function, pks::NamedTuple)
+    check_known_fields_equal_length(pks)
+    check_has_known_field(pks)
 
-        for cond in conds
-            for i in eachindex(pks[:indices])
-                mask[i] = mask[i] && cond[2](pks[cond[1]][i], cond[3])
-            end
-        end
-        return mask
+    mask = map(eachindex(pks[1])) do i
+        # :data is included in the nt_slice, but that should not be a problem
+        itr = zip(keys(pks), getindex.(values(pks), i))
+        nt_slice = NamedTuple(itr)
+        return pred(nt_slice)
     end
-    return f
+
+    for field in known_fields()  # Only risk mutating fields added by this package
+        hasproperty(pks, field) || continue  # Do nothing if field is not present
+        deleteat!(pks[field], .!mask)
+    end
+    return pks
 end
-export peakmask
-=#
+
 
 #====================================================================
 We store a version of findpeak here, as it might be implemented soon, 
