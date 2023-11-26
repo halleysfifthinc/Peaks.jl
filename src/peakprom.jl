@@ -131,7 +131,6 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
 
     return peaks, proms
 end
-export peakproms!
 
 """
     peakproms(peaks, x;
@@ -194,5 +193,78 @@ function peakproms(peaks::AbstractVector{Int}, x::AbstractVector{T};
     end
     return peakproms!(_peaks, x; strict=strict, min=min, max=max)
 end
-export peakproms
 
+
+##!===============================================================================================!##
+##!==========================================  New API  ==========================================!##
+##!===============================================================================================!##
+
+
+
+"""
+    peakproms!(pks) -> NamedTuple
+    peakproms!() -> Function
+
+# Optional keyword arguments
+- `min`: Filter out any peak with a height smaller than `min`.
+- `max`: Filter out any peak with a height greater than `min`.
+- `strict`: How to handle `NaN` and `missing` values. See documentation for more details. Default to `true`.
+
+Find the prominences of the peaks in `pks`, and filter out any peak 
+with a prominence smaller than `min` or greater than `max`.
+The prominences are returned in the field `:proms` of the returned named tuple.
+
+If the positional argument `pks` is omitted, a function is returned such
+that `peakproms!(pks)` is equivalent to `pks |> peakproms!`.
+
+Note: This function mutates the vectors stored in the NamedTuple `pks`, 
+and not the named tuple itself.
+
+See also: [`peakwidths!`](@ref), [`peakheights!`](@ref)
+
+# Examples
+```jldoctest
+julia> data = [1, 5, 1, 3, 2];
+
+julia> pks = findmaxima(data);
+
+julia> pks = peakproms!(pks)
+(indices = [2, 4], heights = [5, 3], data = [1, 5, 1, 3, 2], proms = Union{Missing, Int64}[4, 1])
+
+julia> data |> findmaxima |> peakproms!
+(indices = [2, 4], heights = [5, 3], data = [1, 5, 1, 3, 2], proms = Union{Missing, Int64}[4, 1])
+```
+"""
+function peakproms!(pks::NamedTuple; minprom=nothing, maxprom=nothing, min=minprom, max=maxprom, strict=true)
+    if !isnothing(minprom)
+        Base.depwarn("Keyword `minprom` has been renamed to `min`", :peakproms!)
+    end
+    if !isnothing(maxprom)
+        Base.depwarn("Keyword `maxprom` has been renamed to `max`", :peakproms!)
+    end
+    if !hasproperty(pks, :proms)
+        # Avoid filtering by min/max/strict here, so that it always happens outside if-statement.
+        # Pro: one less edge case. Con: More internal allocations
+        _, proms = peakproms(pks.indices, pks.data; strict)
+        pks = merge(pks, (; proms))
+    end
+    filterpeaks!(pks, min, max, :proms)
+    return pks
+end
+peakproms!(; kwargs...) = pks -> peakproms!(pks; kwargs...)
+
+"""
+    peakproms(pks) -> NamedTuple
+    peakproms() -> Function
+
+# Optional keyword arguments
+- `min`: Filter out any peak with a height smaller than `min`.
+- `max`: Filter out any peak with a height greater than `min`.
+- `strict`: How to handle `NaN` and `missing` values. See documentation for more details. Default to `true`.
+
+Non-mutation version of `peakproms!`. Note that 
+this copies all vectors in `pks`, including the data. 
+This means that it is less performant. See the docstring for 
+`peakproms!` for more information.
+"""
+peakproms(pks::NamedTuple; kwargs...) = peakproms!(deepcopy(pks); kwargs...)

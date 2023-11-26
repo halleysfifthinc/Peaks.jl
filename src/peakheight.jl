@@ -44,7 +44,6 @@ function peakheights!(
 
     return peaks, heights
 end
-export peakheights!
 
 
 """
@@ -85,4 +84,70 @@ function peakheights(
     end
     peakheights!(copy(peaks), copy(heights); min=min, max=max)
 end
-export peakheights
+
+##!===============================================================================================!##
+##!==========================================  New API  ==========================================!##
+##!===============================================================================================!##
+
+"""
+    peakheights!(pks) -> NamedTuple
+    peakheights!() -> Function
+
+# Optional keyword arguments
+- `min`: Filter out any peak with a height smaller than `min`.
+- `max`: Filter out any peak with a height greater than `min`.
+
+Find the heights of the peaks in `pks`, and filter out any peak 
+with a heights smaller than `min` or greater than `max`.
+Note that because the peaks returned by `findpeaks` already have 
+the feature `heights` calculated, this function is mainly useful to 
+filter peaks by a minimum and/or maximum height.
+
+If the positional argument `pks` is omitted, a function is returned such
+that `peakheights!(pks)` is equivalent to `pks |> peakheights!`.
+
+Note: This function mutates the vectors stored in the NamedTuple `pks`, 
+and not the named tuple itself.
+
+See also: [`peakproms!`](@ref), [`peakwidths!`](@ref)
+
+# Examples
+```jldoctest
+julia> data = [1, 5, 1, 3, 2];
+
+julia> pks = findmaxima(data)
+(indices = [2, 4], heights = [5, 3], data = [1, 5, 1, 3, 2])
+
+julia> pks = peakheights!(pks, min=4)
+(indices = [2], heights = [5], data = [1, 5, 1, 3, 2])
+
+julia> data |> findmaxima |> peakheights!(min=4)
+(indices = [2], heights = [5], data = [1, 5, 1, 3, 2])
+```
+"""
+function peakheights!(pks::NamedTuple; minheight=nothing, maxheight=nothing, min=minheight, max=maxheight)
+    if !isnothing(minheight)
+        Base.depwarn("Keyword `minheight` has been renamed to `min`", :peakheights!)
+    end
+    if !isnothing(maxheight)
+        Base.depwarn("Keyword `maxheight` has been renamed to `max`", :peakheights!)
+    end
+    filterpeaks!(pks, min, max, :heights)
+    return pks
+end
+peakheights!(; kwargs...) = pks -> peakheights!(pks; kwargs...)
+
+"""
+    peakheights(pks) -> NamedTuple
+    peakheights() -> Function
+
+# Optional keyword arguments
+- `min`: Filter out any peak with a height smaller than `min`.
+- `max`: Filter out any peak with a height greater than `min`.
+
+Non-mutation version of `peakheights!`. Note that 
+this copies all vectors in `pks`, including the data. 
+This means that it is less performant. See the docstring for 
+`peakheights!` for more information.
+"""
+peakheights(pks::NamedTuple; kwargs...) = peakheights!(deepcopy(pks); kwargs...)

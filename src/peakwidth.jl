@@ -96,7 +96,6 @@ function peakwidths!(
 
     return peaks, widths, ledge, redge
 end
-export peakwidths!
 
 """
     peakwidths(peaks, x, proms;
@@ -161,4 +160,87 @@ function peakwidths(
     peakwidths!(_peaks, x, proms; strict=strict, relheight=relheight,
         min=min, max=max)
 end
-export peakwidths
+
+##!===============================================================================================!##
+##!==========================================  New API  ==========================================!##
+##!===============================================================================================!##
+
+"""
+    peakwidths!(pks) -> NamedTuple
+    peakwidths!() -> Function
+
+# Optional keyword arguments
+- `min`: Filter out any peak with a height smaller than `min`.
+- `max`: Filter out any peak with a height greater than `min`.
+- `relheight`: How far up to measure width, as fraction of the peak prominence. Defaults to `0.5`.
+- `strict`: How to handle `NaN` and `missing` values. See documentation for more details. Default to `true`.
+
+Find the widths of the peaks in `pks`, and filter out any peak 
+with a width smaller than `min` or greater than `max`.
+The widths are returned in the field `:widths` of the returned named tuple.
+The edges of the peaks are also added in the field `:edges`.
+
+If the positional argument `pks` is omitted, a function is returned such
+that `peakwidths!(pks)` is equivalent to `pks |> peakwidths!`.
+
+Note: If `pks` does not have a field `proms`, it is added. This is 
+because it is needed to calculate the peak width.
+
+Note: This function mutates the vectors stored in the NamedTuple `pks`, 
+and not the named tuple itself.
+
+See also: [`peakproms!`](@ref), [`peakheights!`](@ref)
+
+# Examples
+```jldoctest
+julia> data = [1, 5, 1, 3, 2];
+
+julia> pks = findmaxima(data);
+
+julia> pks = peakwidths!(pks)
+(indices = [2, 4], heights = [5, 3], data = [1, 5, 1, 3, 2], proms = Union{Missing, Int64}[4, 1], widths = [1.0, 0.75], edges = [(1.5, 2.5), (3.75, 4.5)])
+
+julia> data |> findmaxima |> peakwidths!
+(indices = [2, 4], heights = [5, 3], data = [1, 5, 1, 3, 2], proms = Union{Missing, Int64}[4, 1], widths = [1.0, 0.75], edges = [(1.5, 2.5), (3.75, 4.5)])
+```
+"""
+function peakwidths!(pks::NamedTuple; minwidth=nothing, maxwidth=nothing, min=minwidth, max=maxwidth, relheight=0.5, strict=true)
+    if !isnothing(minwidth)
+        Base.depwarn("Keyword `minwidth` has been renamed to `min`", :peakwidths!)
+    end
+    if !isnothing(maxwidth)
+        Base.depwarn("Keyword `maxwidth` has been renamed to `max`", :peakwidths!)
+    end
+    if !hasproperty(pks, :proms)  # Add proms if needed
+        pks = peakproms!(pks; strict)
+    end
+    if xor(hasproperty(pks, :widths), hasproperty(pks, :edges))
+        throw(ArgumentError("The named tuple `pks` (first argument to `peakwidths!` is expected have both the fields `:widths` and `:edges`, or to have neither of them. The provided `pks` only has one of them."))
+    end
+    if !hasproperty(pks, :widths)
+        # Avoid filtering by min/max/strict here, so that it always happens outside if-statement.
+        # Pro: one less edge case. Con: More internal allocations
+        _, widths, leftedges, rightedges = peakwidths(pks.indices, pks.data, pks.proms; relheight, strict)
+        pks = merge(pks, (; widths, edges=collect(zip(leftedges, rightedges))))
+    end
+    filterpeaks!(pks, min, max, :widths)
+    return pks
+end
+peakwidths!(; kwargs...) = pks -> peakwidths!(pks; kwargs...)
+
+"""
+    peakwidths(pks) -> NamedTuple
+    peakwidths() -> Function
+
+# Optional keyword arguments
+- `min`: Filter out any peak with a height smaller than `min`.
+- `max`: Filter out any peak with a height greater than `min`.
+- `relheight`: How far up to measure width, as fraction of the peak prominence. Defaults to `0.5`.
+- `strict`: How to handle `NaN` and `missing` values. See documentation for more details. Default to `true`.
+
+Non-mutation version of `peakwidths!`. Note that 
+this copies all vectors in `pks`, including the data. 
+This means that it is less performant. See the docstring for 
+`peakwidths!` for more information.
+"""
+peakwidths(pks::NamedTuple; kwargs...) = peakwidths!(deepcopy(pks); kwargs...)
