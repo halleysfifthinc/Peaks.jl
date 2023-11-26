@@ -56,8 +56,8 @@ peakproms!(; kwargs...) = pks -> peakproms!(pks; kwargs...)
 - `strict`: How to handle `NaN` and `missing` values. See documentation for more details. Default to `true`.
 
 Non-mutation version of `peakproms!`. Note that 
-this copies all vectors in `pks`, meaning that 
-it is less performant. See the docstring for 
+this copies all vectors in `pks`, including the data. 
+This means that it is less performant. See the docstring for 
 `peakproms!` for more information.
 """
 peakproms(pks::NamedTuple; kwargs...) = peakproms!(deepcopy(pks); kwargs...)
@@ -130,8 +130,8 @@ peakwidths!(; kwargs...) = pks -> peakwidths!(pks; kwargs...)
 - `strict`: How to handle `NaN` and `missing` values. See documentation for more details. Default to `true`.
 
 Non-mutation version of `peakwidths!`. Note that 
-this copies all vectors in `pks`, meaning that 
-it is less performant. See the docstring for 
+this copies all vectors in `pks`, including the data. 
+This means that it is less performant. See the docstring for 
 `peakwidths!` for more information.
 """
 peakwidths(pks::NamedTuple; kwargs...) = peakwidths!(deepcopy(pks); kwargs...)
@@ -187,8 +187,8 @@ peakheights!(; kwargs...) = pks -> peakheights!(pks; kwargs...)
 - `max`: Filter out any peak with a height greater than `min`.
 
 Non-mutation version of `peakheights!`. Note that 
-this copies all vectors in `pks`, meaning that 
-it is less performant. See the docstring for 
+this copies all vectors in `pks`, including the data. 
+This means that it is less performant. See the docstring for 
 `peakheights!` for more information.
 """
 peakheights(pks::NamedTuple; kwargs...) = peakheights!(deepcopy(pks); kwargs...)
