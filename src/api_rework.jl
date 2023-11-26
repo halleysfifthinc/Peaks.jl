@@ -108,11 +108,11 @@ julia> data |> findmaxima |> peakwidths!
 ```
 """
 function peakwidths!(pks::NamedTuple; minwidth=nothing, maxwidth=nothing, min=minwidth, max=maxwidth, relheight=0.5, strict=true)
-    if !isnothing(minprom)
-        Base.depwarn("Keyword `minprom` has been renamed to `min`", :peakwidths!)
+    if !isnothing(minwidth)
+        Base.depwarn("Keyword `minwidth` has been renamed to `min`", :peakwidths!)
     end
-    if !isnothing(maxprom)
-        Base.depwarn("Keyword `maxprom` has been renamed to `max`", :peakwidths!)
+    if !isnothing(maxwidth)
+        Base.depwarn("Keyword `maxwidth` has been renamed to `max`", :peakwidths!)
     end
     if !hasproperty(pks, :proms)  # Add proms if needed
         pks = peakproms!(pks; strict)
@@ -175,7 +175,8 @@ See also: [`peakproms!`](@ref), [`peakwidths!`](@ref)
 ```jldoctest
 julia> data = [1, 5, 1, 3, 2];
 
-julia> pks = findmaxima(data);
+julia> pks = findmaxima(data)
+(indices = [2, 4], heights = [5, 3], data = [1, 5, 1, 3, 2])
 
 julia> pks = peakheights!(pks, min=4)
 (indices = [2], heights = [5], data = [1, 5, 1, 3, 2])
@@ -185,11 +186,11 @@ julia> data |> findmaxima |> peakheights!(min=4)
 ```
 """
 function peakheights!(pks::NamedTuple; minheight=nothing, maxheight=nothing, min=minheight, max=maxheight)
-    if !isnothing(minprom)
-        Base.depwarn("Keyword `minprom` has been renamed to `min`", :peakheights!)
+    if !isnothing(minheight)
+        Base.depwarn("Keyword `minheight` has been renamed to `min`", :peakheights!)
     end
-    if !isnothing(maxprom)
-        Base.depwarn("Keyword `maxprom` has been renamed to `max`", :peakheights!)
+    if !isnothing(maxheight)
+        Base.depwarn("Keyword `maxheight` has been renamed to `max`", :peakheights!)
     end
     filterpeaks!(pks, min, max, :heights)
     return pks

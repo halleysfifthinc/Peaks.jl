@@ -37,7 +37,7 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
     end
     cmp = pktype === :maxima ? (≥) : (≤)
     exm = pktype === :maxima ? minimum : maximum
-    exa = pktype === :maxima ? max : min
+    exa = pktype === :maxima ? Base.max : Base.min
 
     _ref = Missing <: T ? missing :
            Float64 <: T ? NaN :
