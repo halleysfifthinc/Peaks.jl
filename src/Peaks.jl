@@ -2,7 +2,7 @@ module Peaks
 
 using Compat
 
-export argmaxima, argminima, maxima, minima, findmaxima, findminima, findnextmaxima, findnextminima, peakproms, peakproms!, peakwidths, peakwidths!, peakheights, peakheights!, ismaxima, isminima, findpeaks
+export argmaxima, argminima, maxima, minima, findmaxima, findminima, findnextmaxima, findnextminima, peakproms, peakproms!, peakwidths, peakwidths!, peakheights, peakheights!, ismaxima, isminima, findpeaks, filterpeaks!
 
 include("minmax.jl")
 include("utils.jl")

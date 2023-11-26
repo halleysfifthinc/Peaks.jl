@@ -37,7 +37,6 @@ function filterpeaks!(pks::NamedTuple, mask::Union{BitVector, Vector{Bool}})
     end
     return nothing
 end
-export filterpeaks!
 
 # This method gets no docstring, as it is intended for internal use.
 function filterpeaks!(pks::NamedTuple, min, max, feature::Symbol)
