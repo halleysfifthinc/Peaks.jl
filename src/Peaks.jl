@@ -20,7 +20,6 @@ include("utils.jl")
 include("peakprom.jl")
 include("peakwidth.jl")
 include("peakheight.jl")
-include("api_rework.jl")
 include("plot.jl")
 
 end # module Peaks
