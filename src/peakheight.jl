@@ -27,10 +27,10 @@ function peakheights!(
     minheight=nothing, maxheight=nothing, 
     min=minheight, max=maxheight
 ) where {T}
-    if !isnothing(minprom)
+    if !isnothing(minheight)
         Base.depwarn("Keyword `minheight` has been renamed to `min`", :peakheights!)
     end
-    if !isnothing(maxprom)
+    if !isnothing(maxheight)
         Base.depwarn("Keyword `maxheight` has been renamed to `max`", :peakheights!)
     end
     length(peaks) == length(heights) || throw(DimensionMismatch("length of `peaks`, $(length(peaks)), does not match the length of `heights`, $(length(heights))"))
@@ -76,10 +76,10 @@ function peakheights(
     minheight=nothing, maxheight=nothing, 
     min=minheight, max=maxheight
 )
-    if !isnothing(minprom)
+    if !isnothing(minheight)
         Base.depwarn("Keyword `minheight` has been renamed to `min`", :peakheights!)
     end
-    if !isnothing(maxprom)
+    if !isnothing(maxheight)
         Base.depwarn("Keyword `maxheight` has been renamed to `max`", :peakheights!)
     end
     peakheights!(copy(peaks), copy(heights); min=min, max=max)

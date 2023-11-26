@@ -32,7 +32,7 @@ data|>findmaxima|>peakheights!
 run_tests = true
 if run_tests
     using Pkg
-    pkg_path = joinpath(homedir(), ".julia", "dev", "Peaks")
+    pkg_path = joinpath(homedir(), ".julia", "dev", "Peaks.jl")
     Pkg.activate("PeaksTestEnv"; shared=true)
     Pkg.develop(path=pkg_path)
     Pkg.add(["OffsetArrays", "Plots"])
