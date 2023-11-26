@@ -104,7 +104,6 @@ julia> findnextmaxima([0,2,0,1,1,0], 3)
 ```
 """
 findnextmaxima(x, i, w=1; strict=true) = findnextextrema(<, x, i, w, strict)
-export findnextmaxima
 
 """
     ismaxima(i, x[, w=1; strict=true]) -> Bool
@@ -118,7 +117,6 @@ are bounded by lesser values immediately before and after the consecutive maxima
 See also: [`findnextmaxima`](@ref)
 """
 ismaxima(i, x, w=1; strict=true)::Bool = findnextextrema(<, x, i, w, strict) === i
-export ismaxima
 
 """
     argmaxima(x[, w=1; strict=true]) -> Vector{Int}
@@ -168,7 +166,6 @@ function argmaxima(
 
     return pks
 end
-export argmaxima
 
 """
     maxima(x[, w=1; strict=true]) -> Vector{eltype(x)}
@@ -187,7 +184,6 @@ function maxima(
     idxs = argmaxima(x, w; strict=strict)
     return x[idxs]
 end
-export maxima
 
 """
     findmaxima(x[, w=1; strict=true]) -> NamedTuple
@@ -214,7 +210,6 @@ function findmaxima(x, w::Int=1; strict::Bool=true)
     idxs = argmaxima(x, w; strict=strict)
     return (indices=idxs, heights=x[idxs], data=x)
 end
-export findmaxima
 
 """
     findnextminima(x, i[, w=1, strict=true]) -> Int
@@ -245,7 +240,6 @@ julia> findnextminima([3,2,3,1,1,3], 3)
 ```
 """
 findnextminima(x, i, w=1; strict=true) = findnextextrema(>, x, i, w, strict)
-export findnextminima
 """
     isminima(i, x[, w=1; strict=true]) -> Bool
 
@@ -258,7 +252,6 @@ are bounded by greater values immediately before and after the consecutive minim
 See also: [`findnextminima`](@ref)
 """
 isminima(i, x, w=1; strict=true)::Bool = findnextextrema(>, x, i, w, strict) === i
-export isminima
 
 """
     argminima(x[, w=1; strict=false]) -> Vector{Int}
@@ -309,7 +302,6 @@ function argminima(
 
     return pks
 end
-export argminima
 
 """
     minima(x[, w=1; strict=true]) -> Vector{eltype(x)}
@@ -328,7 +320,6 @@ function minima(
     idxs = argminima(x, w; strict=strict)
     return x[idxs]
 end
-export minima
 
 """
     findminima(x[, w=1; strict=true]) -> NamedTuple
@@ -355,4 +346,3 @@ function findminima(x, w::Int=1; strict::Bool=true)
     idxs = argminima(x, w; strict=strict)
     return (indices=idxs, heights=x[idxs], data=x)
 end
-export findminima
