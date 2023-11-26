@@ -190,8 +190,9 @@ end
 
 Find the indices and values of local maxima in `x`, where each maxima `i` is 
 either the maximum of `x[i-w:i+w]` or the first index of a plateau. The 
-returned named tuple contains the fields `indices, heights, data`, 
-and contains what the fieldnames suggest.
+returned named tuple contains the fields `indices, heights, data`, and 
+contains what the fieldnames suggest. Note that the vector stored 
+in the field `:data` is the original data vector, and not a copy.
 
 A plateau is defined as a maxima with consecutive equal (`===`/egal) maximal values which
 are bounded by lesser values immediately before and after the consecutive maximal values.
@@ -326,8 +327,9 @@ end
 
 Find the indices and values of local minima in `x`, where each minima `i` is 
 either the minimum of `x[i-w:i+w]` or the first index of a plateau. The 
-returned named tuple contains the fields `indices, heights, data`, 
-and contains what the fieldnames suggest.
+returned named tuple contains the fields `indices, heights, data`, and 
+contains what the fieldnames suggest. Note that the vector stored 
+in the field `:data` is the original data vector, and not a copy.
 
 A plateau is defined as a minima with consecutive equal (`===`/egal) minimal values which
 are bounded by greater values immediately before and after the consecutive minimal values.
