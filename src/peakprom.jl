@@ -1,4 +1,66 @@
 """
+    peakproms(peaks, x;
+        strict=true,
+        minprom=nothing,
+        maxprom=nothing
+    ) -> (peaks, proms)
+
+Calculate the prominences of `peaks` in `x`, and removing peaks with prominences less than
+`minprom` and/or greater than `maxprom`.
+
+Peak prominence is the absolute height difference between the current peak and the larger of
+the two adjacent smallest magnitude points between the current peak and adjacent larger
+peaks or signal ends.
+
+The prominence for a peak with a `NaN` or `missing` between the current peak and either
+adjacent larger peaks will be `NaN` or `missing` if `strict == true`, or it will be
+the larger of the smallest non-`NaN` or `missing` values between the current peak and
+adjacent larger peaks for `strict == false`.
+
+See also: [`findminima`](@ref), [`findmaxima`](@ref), [`peakproms!`](@ref)
+
+# Examples
+```jldoctest
+julia> x = [0,5,2,3,3,1,4,0];
+
+julia> xpks = argmaxima(x)
+3-element Vector{Int64}:
+ 2
+ 4
+ 7
+
+julia> peakproms(xpks, x)
+([2, 4, 7], Union{Missing, Int64}[5, 1, 3])
+
+julia> x = [missing,5,2,3,3,1,4,0];
+
+julia> peakproms(xpks, x)
+([2, 4, 7], Union{Missing, Int64}[missing, 1, 3])
+
+julia> peakproms(xpks, x; strict=false)
+([2, 4, 7], Union{Missing, Int64}[5, 1, 3])
+```
+"""
+function peakproms(peaks::AbstractVector{Int}, x::AbstractVector{T};
+    strict=true, minprom=nothing, maxprom=nothing,
+    min=minprom, max=maxprom
+) where {T}
+    if !isnothing(minprom)
+        Base.depwarn("Keyword `minprom` has been renamed to `min`", :peakproms)
+    end
+    if !isnothing(maxprom)
+        Base.depwarn("Keyword `maxprom` has been renamed to `max`", :peakproms)
+    end
+    if !isnothing(min) || !isnothing(max)
+        _peaks = copy(peaks)
+    else
+        # peaks will not be modified
+        _peaks = peaks
+    end
+    return peakproms!(_peaks, x; strict=strict, min=min, max=max)
+end
+
+"""
     peakproms!(peaks, x;
         strict=true,
         minprom=nothing,
@@ -12,7 +74,7 @@ prominences.
 See also: [`peakproms`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
 """
 function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
-    strict=true, minprom=nothing, maxprom=nothing, 
+    strict=true, minprom=nothing, maxprom=nothing,
     min=minprom, max=maxprom
 ) where {T}
     if !isnothing(minprom)
@@ -133,75 +195,6 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
 end
 
 """
-    peakproms(peaks, x;
-        strict=true,
-        minprom=nothing,
-        maxprom=nothing
-    ) -> (peaks, proms)
-
-Calculate the prominences of `peaks` in `x`, and removing peaks with prominences less than
-`minprom` and/or greater than `maxprom`.
-
-Peak prominence is the absolute height difference between the current peak and the larger of
-the two adjacent smallest magnitude points between the current peak and adjacent larger
-peaks or signal ends.
-
-The prominence for a peak with a `NaN` or `missing` between the current peak and either
-adjacent larger peaks will be `NaN` or `missing` if `strict == true`, or it will be
-the larger of the smallest non-`NaN` or `missing` values between the current peak and
-adjacent larger peaks for `strict == false`.
-
-See also: [`findminima`](@ref), [`findmaxima`](@ref), [`peakproms!`](@ref)
-
-# Examples
-```jldoctest
-julia> x = [0,5,2,3,3,1,4,0];
-
-julia> xpks = argmaxima(x)
-3-element Vector{Int64}:
- 2
- 4
- 7
-
-julia> peakproms(xpks, x)
-([2, 4, 7], Union{Missing, Int64}[5, 1, 3])
-
-julia> x = [missing,5,2,3,3,1,4,0];
-
-julia> peakproms(xpks, x)
-([2, 4, 7], Union{Missing, Int64}[missing, 1, 3])
-
-julia> peakproms(xpks, x; strict=false)
-([2, 4, 7], Union{Missing, Int64}[5, 1, 3])
-```
-"""
-function peakproms(peaks::AbstractVector{Int}, x::AbstractVector{T};
-    strict=true, minprom=nothing, maxprom=nothing,
-    min=minprom, max=maxprom
-) where {T}
-    if !isnothing(minprom)
-        Base.depwarn("Keyword `minprom` has been renamed to `min`", :peakproms)
-    end
-    if !isnothing(maxprom)
-        Base.depwarn("Keyword `maxprom` has been renamed to `max`", :peakproms)
-    end
-    if !isnothing(min) || !isnothing(max)
-        _peaks = copy(peaks)
-    else
-        # peaks will not be modified
-        _peaks = peaks
-    end
-    return peakproms!(_peaks, x; strict=strict, min=min, max=max)
-end
-
-
-##!===============================================================================================!##
-##!==========================================  New API  ==========================================!##
-##!===============================================================================================!##
-
-
-
-"""
     peakproms!(pks) -> NamedTuple
     peakproms!() -> Function
 
@@ -210,14 +203,14 @@ end
 - `max`: Filter out any peak with a height greater than `min`.
 - `strict`: How to handle `NaN` and `missing` values. See documentation for more details. Default to `true`.
 
-Find the prominences of the peaks in `pks`, and filter out any peak 
+Find the prominences of the peaks in `pks`, and filter out any peak
 with a prominence smaller than `min` or greater than `max`.
 The prominences are returned in the field `:proms` of the returned named tuple.
 
 If the positional argument `pks` is omitted, a function is returned such
 that `peakproms!(pks)` is equivalent to `pks |> peakproms!`.
 
-Note: This function mutates the vectors stored in the NamedTuple `pks`, 
+Note: This function mutates the vectors stored in the NamedTuple `pks`,
 and not the named tuple itself.
 
 See also: [`peakwidths!`](@ref), [`peakheights!`](@ref)
@@ -262,9 +255,9 @@ peakproms!(; kwargs...) = pks -> peakproms!(pks; kwargs...)
 - `max`: Filter out any peak with a height greater than `min`.
 - `strict`: How to handle `NaN` and `missing` values. See documentation for more details. Default to `true`.
 
-Non-mutation version of `peakproms!`. Note that 
-this copies all vectors in `pks`, including the data. 
-This means that it is less performant. See the docstring for 
+Non-mutation version of `peakproms!`. Note that
+this copies all vectors in `pks`, including the data.
+This means that it is less performant. See the docstring for
 `peakproms!` for more information.
 """
 peakproms(pks::NamedTuple; kwargs...) = peakproms!(deepcopy(pks); kwargs...)

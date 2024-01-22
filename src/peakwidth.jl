@@ -1,4 +1,68 @@
 """
+    peakwidths(peaks, x, proms;
+        strict=true,
+        relheight=0.5,
+        minwidth=nothing,
+        maxwidth=nothing
+    ) -> (peaks, widths, leftedge, rightedge)
+
+Calculate the widths of `peaks` in `x` at a reference level based on `proms` and
+`relheight`, and removing peaks with widths less than `minwidth` and/or greater than
+`maxwidth`. Returns the peaks, widths, and the left and right edges at the reference level.
+
+Peak width is the distance between the signal crossing a reference level before and after
+the peak. Signal crossings are linearly interpolated between indices. The reference level is
+the difference between the peak height and `relheight` times the peak prominence. Width
+cannot be calculated for a `NaN` or `missing` prominence.
+
+The width for a peak with a gap in the signal (e.g. `NaN`, `missing`) at the reference level
+will match the value/type of the signal gap if `strict == true`. For `strict ==
+false`, the signal crossing will be linearly interpolated between the edges of the gap.
+
+See also: [`peakprom`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
+
+# Examples
+```jldoctest
+julia> x = [0,1,0,-1.];
+
+julia> xpks = argmaxima(x)
+1-element Vector{Int64}:
+ 2
+
+julia> peakwidths(xpks, x, [1])
+([2], [1.0], [1.5], [2.5])
+
+julia> x[3] = NaN;
+
+julia> peakwidths(xpks, x, [1])
+([2], [NaN], [1.5], [NaN])
+
+julia> peakwidths(xpks, x, [1]; strict=false)
+([2], [1.0], [1.5], [2.5])
+```
+"""
+function peakwidths(
+    peaks::AbstractVector{Int}, x::AbstractVector, proms::AbstractVector;
+    strict=true, relheight=0.5, minwidth=nothing, maxwidth=nothing,
+    min=minwidth, max=maxwidth
+)
+    if !isnothing(minwidth)
+        Base.depwarn("Keyword `minwidth` has been renamed to `min`", :peakwidths)
+    end
+    if !isnothing(maxwidth)
+        Base.depwarn("Keyword `maxwidth` has been renamed to `max`", :peakwidths)
+    end
+    if !isnothing(min) || !isnothing(max)
+        _peaks = copy(peaks)
+    else
+        # peaks will not be modified
+        _peaks = peaks
+    end
+    peakwidths!(_peaks, x, proms; strict=strict, relheight=relheight,
+        min=min, max=max)
+end
+
+"""
     peakwidths!(peaks, x, proms;
         strict=true,
         relheight=0.5,
@@ -98,74 +162,6 @@ function peakwidths!(
 end
 
 """
-    peakwidths(peaks, x, proms;
-        strict=true,
-        relheight=0.5,
-        minwidth=nothing,
-        maxwidth=nothing
-    ) -> (peaks, widths, leftedge, rightedge)
-
-Calculate the widths of `peaks` in `x` at a reference level based on `proms` and
-`relheight`, and removing peaks with widths less than `minwidth` and/or greater than
-`maxwidth`. Returns the peaks, widths, and the left and right edges at the reference level.
-
-Peak width is the distance between the signal crossing a reference level before and after
-the peak. Signal crossings are linearly interpolated between indices. The reference level is
-the difference between the peak height and `relheight` times the peak prominence. Width
-cannot be calculated for a `NaN` or `missing` prominence.
-
-The width for a peak with a gap in the signal (e.g. `NaN`, `missing`) at the reference level
-will match the value/type of the signal gap if `strict == true`. For `strict ==
-false`, the signal crossing will be linearly interpolated between the edges of the gap.
-
-See also: [`peakprom`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
-
-# Examples
-```jldoctest
-julia> x = [0,1,0,-1.];
-
-julia> xpks = argmaxima(x)
-1-element Vector{Int64}:
- 2
-
-julia> peakwidths(xpks, x, [1])
-([2], [1.0], [1.5], [2.5])
-
-julia> x[3] = NaN;
-
-julia> peakwidths(xpks, x, [1])
-([2], [NaN], [1.5], [NaN])
-
-julia> peakwidths(xpks, x, [1]; strict=false)
-([2], [1.0], [1.5], [2.5])
-```
-"""
-function peakwidths(
-    peaks::AbstractVector{Int}, x::AbstractVector, proms::AbstractVector;
-    strict=true, relheight=0.5, minwidth=nothing, maxwidth=nothing,
-    min=minwidth, max=maxwidth
-)
-    if !isnothing(minwidth)
-        Base.depwarn("Keyword `minwidth` has been renamed to `min`", :peakwidths)
-    end
-    if !isnothing(maxwidth)
-        Base.depwarn("Keyword `maxwidth` has been renamed to `max`", :peakwidths)
-    end
-    if !isnothing(min) || !isnothing(max)
-        _peaks = copy(peaks)
-    else
-        # peaks will not be modified
-        _peaks = peaks
-    end
-    peakwidths!(_peaks, x, proms; strict=strict, relheight=relheight,
-        min=min, max=max)
-end
-
-##!===============================================================================================!##
-##!==========================================  New API  ==========================================!##
-##!===============================================================================================!##
-
-"""
     peakwidths!(pks) -> NamedTuple
     peakwidths!() -> Function
 
@@ -175,7 +171,7 @@ end
 - `relheight`: How far up to measure width, as fraction of the peak prominence. Defaults to `0.5`.
 - `strict`: How to handle `NaN` and `missing` values. See documentation for more details. Default to `true`.
 
-Find the widths of the peaks in `pks`, and filter out any peak 
+Find the widths of the peaks in `pks`, and filter out any peak
 with a width smaller than `min` or greater than `max`.
 The widths are returned in the field `:widths` of the returned named tuple.
 The edges of the peaks are also added in the field `:edges`.
@@ -183,10 +179,10 @@ The edges of the peaks are also added in the field `:edges`.
 If the positional argument `pks` is omitted, a function is returned such
 that `peakwidths!(pks)` is equivalent to `pks |> peakwidths!`.
 
-Note: If `pks` does not have a field `proms`, it is added. This is 
+Note: If `pks` does not have a field `proms`, it is added. This is
 because it is needed to calculate the peak width.
 
-Note: This function mutates the vectors stored in the NamedTuple `pks`, 
+Note: This function mutates the vectors stored in the NamedTuple `pks`,
 and not the named tuple itself.
 
 See also: [`peakproms!`](@ref), [`peakheights!`](@ref)
@@ -238,9 +234,9 @@ peakwidths!(; kwargs...) = pks -> peakwidths!(pks; kwargs...)
 - `relheight`: How far up to measure width, as fraction of the peak prominence. Defaults to `0.5`.
 - `strict`: How to handle `NaN` and `missing` values. See documentation for more details. Default to `true`.
 
-Non-mutation version of `peakwidths!`. Note that 
-this copies all vectors in `pks`, including the data. 
-This means that it is less performant. See the docstring for 
+Non-mutation version of `peakwidths!`. Note that
+this copies all vectors in `pks`, including the data.
+This means that it is less performant. See the docstring for
 `peakwidths!` for more information.
 """
 peakwidths(pks::NamedTuple; kwargs...) = peakwidths!(deepcopy(pks); kwargs...)
