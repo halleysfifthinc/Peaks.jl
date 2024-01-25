@@ -57,15 +57,16 @@ peakheights(pks::NamedTuple; kwargs...) = peakheights!(deepcopy(pks); kwargs...)
 """
     peakheights(; min=nothing, max=nothing) -> Function
 
-Create a function that filters the fields of a copy of the singular NamedTuple argument
-`pks`.
-
-This allows for piping several `Peaks.jl` functions together.
+Return a function that acts just like the NamedTuple method for 
+`peakheights`, but with a not-yet-specified first argument (named tuple). 
+This allows a convenient workflow for chaining operations.
 
 ## Examples
-```julia-repl
-julia> pks |> peakheights(;min=4)
-(indices = [2], heights = [5], data = [1, 5, 1, 3, 2])
+```jldoctest
+julia> x = [0,5,2,3,3,1,4,0];
+
+julia> nt = findmaxima(x) |> peakheights(max=4)
+(indices = [4, 7], heights = [3, 4], data = [0, 5, 2, 3, 3, 1, 4, 0])
 ```
 """
 peakheights(; kwargs...) = function curried_peakheights(pks)
