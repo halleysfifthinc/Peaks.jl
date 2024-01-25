@@ -138,8 +138,8 @@ julia> filterpeaks!(pks) do nt_slice
 
 """
 function filterpeaks!(pred::Function, pks::NamedTuple)
-    check_known_fields_equal_length(pks)
     check_has_known_field(pks)
+    check_known_fields_equal_length(pks)
 
     mask = map(eachindex(pks[1])) do i
         # :data is included in the nt_slice, but that should not be a problem
