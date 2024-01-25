@@ -111,7 +111,7 @@ end
     filterpeaks!(pred, pks) -> NamedTuple
 
 Apply a predicate function `pred` to named tuple slices to get a filter-mask.
-By "named tuple slice" we refer to 
+An example of a "named tuple slice" is `(indices=5, heights=3, proms=2)`.
 If `pred` returns `false` for peak number `i`, element `i` is removed from 
 the known fields of `pks`. 
 
