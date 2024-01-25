@@ -66,8 +66,8 @@ function filterpeaks!(pks::NamedTuple, mask::Union{BitVector, Vector{Bool}})
     # Check lengths first to avoid a dimension mismatch 
     # after having filtered some features.
     # feature_mask = hasproperty.(pks, features_to_filter)
-    check_known_fields_equal_length(pks)
     check_has_known_field(pks)
+    check_known_fields_equal_length(pks)
 
     # At this point we know that all feature_length are equal, and do not need to check it again
     # pks[1] returns the indices.
