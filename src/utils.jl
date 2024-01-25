@@ -87,7 +87,7 @@ end
 
 # This method gets no docstring, as it is intended for internal use.
 """
-    filterpeaks!(pks, min, max, feature)
+    filterpeaks!(pks, feature; min=nothing, max=nothing)
 
 Calculate `mask` as `[min < x < max for x in pks.feature]`, 
 and call `filterpeaks!(pks, mask)`.
@@ -97,7 +97,7 @@ by a minimal or maximal value of some peak feature, concider using
 the keyword arguments `min` and `max` in the function that calculated 
 that feature, such as `peakproms!(pks, min=2)`.
 """
-function filterpeaks!(pks::NamedTuple, min, max, feature::Symbol)
+function filterpeaks!(pks::NamedTuple, feature::Symbol; min=nothing, max=nothing)
     if !isnothing(min) || !isnothing(max)
         lo = something(min, zero(eltype(pks.data)))
         up = something(max, typemax(Base.nonmissingtype(eltype(pks.data))))
