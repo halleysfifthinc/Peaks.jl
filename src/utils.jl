@@ -1,7 +1,7 @@
-known_fields() = (:indices, :proms, :heights, :widths, :edges)
+const known_fields = (:indices, :proms, :heights, :widths, :edges)
 
 function check_known_fields_equal_length(pks::NamedTuple)
-    features_to_filter = known_fields()
+    features_to_filter = known_fields
 
     feature_lengths = [length(pks[feature]) for feature in features_to_filter if hasproperty(pks, feature)]
 
@@ -15,9 +15,9 @@ function check_known_fields_equal_length(pks::NamedTuple)
 end
 
 function check_has_known_field(pks::NamedTuple)
-    if !any(hasproperty(pks, prop) for prop in known_fields())
+    if !any(hasproperty(pks, prop) for prop in known_fields)
         throw(ArgumentError(
-            "Attempting to filter a named tuple `pks` that contains none of the known fields $(known_fields()). Because 
+            "Attempting to filter a named tuple `pks` that contains none of the known fields $known_fields. Because 
             this is thought to be an error, this error is thrown to help catch the original error."
         ))
     end
@@ -78,7 +78,7 @@ function filterpeaks!(pks::NamedTuple, mask::Union{BitVector, Vector{Bool}})
         ))
     end
 
-    for field in known_fields()  # Only risk mutating fields added by this package
+    for field in known_fields  # Only risk mutating fields added by this package
         hasproperty(pks, field) || continue  # Do nothing if field is not present
         deleteat!(pks[field], .!mask)
     end
@@ -148,7 +148,7 @@ function filterpeaks!(pred::Function, pks::NamedTuple)
         return pred(nt_slice)
     end
 
-    for field in known_fields()  # Only risk mutating fields added by this package
+    for field in known_fields  # Only risk mutating fields added by this package
         hasproperty(pks, field) || continue  # Do nothing if field is not present
         deleteat!(pks[field], .!mask)
     end
