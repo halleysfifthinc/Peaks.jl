@@ -15,6 +15,19 @@ See also: [`peakprom`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref),
 [`filterpeaks`](@ref)
 
 # Examples
+
+## NamedTuple API:
+```jldoctest
+julia> x = [0,5,2,3,3,1,4,0];
+
+julia> nt = findmaxima(x)
+(indices = [2, 4, 7], heights = [5, 3, 4], data = [0, 5, 2, 3, 3, 1, 4, 0])
+
+julia> peakheights(nt; max=4)
+(indices = [4, 7], heights = [3, 4], data = [0, 5, 2, 3, 3, 1, 4, 0])
+```
+
+## Seperate vector API:
 ```jldoctest
 julia> x = [0,5,2,3,3,1,4,0];
 
@@ -23,9 +36,6 @@ julia> indices, heights = findmaxima(x)
 
 julia> peakheights(indices, heights; max=4)
 ([4, 7], [3, 4])
-
-julia> peakheights((;indices, heights, data=x); min=4)
-(indices = [2], heights = [5], data = [0, 5, 2, 3, 3, 1, 4, 0])
 ```
 """
 function peakheights(
