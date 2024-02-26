@@ -5,6 +5,7 @@ DocMeta.setdocmeta!(Peaks, :DocTestSetup, :(using Peaks); recursive=true)
 makedocs(
     sitename = "Peaks",
     modules = [Peaks],
+    checkdocs = :exports,
     format = Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
         canonical="https://halleysfifthinc.github.io/Peaks.jl",
