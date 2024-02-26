@@ -18,6 +18,6 @@ makedocs(
 # See "Hosting Documentation" and deploydocs() in the Documenter manual
 # for more information.
 deploydocs(
-    repo = Remotes.GitHub("halleysfifthinc", "Peaks.jl"),
+    repo = "github.com/halleysfifthinc/Peaks.jl",
     push_preview=true,
 )
