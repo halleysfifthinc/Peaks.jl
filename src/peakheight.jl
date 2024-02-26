@@ -7,7 +7,7 @@
 Return a copy of `peaks` and `heights` where peak heights are removed if less than
 `minheight` and/or greater than `maxheight`.
 
-See also: [`peakprom`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref)
+See also: [`peakproms`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref)
 
 # Examples
 ```jldoctest
@@ -39,7 +39,7 @@ end
 Modify and return `peaks` and `heights` by removing peaks that are less than `minheight` or greater
 than `maxheight`.
 
-See also: [`peakprom`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref)
+See also: [`peakproms`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref)
 
 # Examples
 ```jldoctest

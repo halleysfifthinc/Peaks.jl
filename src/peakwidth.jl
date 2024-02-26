@@ -19,7 +19,7 @@ The width for a peak with a gap in the signal (e.g. `NaN`, `missing`) at the ref
 will match the value/type of the signal gap if `strict == true`. For `strict ==
 false`, the signal crossing will be linearly interpolated between the edges of the gap.
 
-See also: [`peakprom`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
+See also: [`peakproms`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
 
 # Examples
 ```jldoctest
