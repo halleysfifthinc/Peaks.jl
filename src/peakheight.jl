@@ -11,7 +11,7 @@ fields in `pks`. `pks` must have `:indices` and `:heights` fields, at a minimum.
 The following fields will also be copied and filtered if they exist: `:proms`, `:widths`,
 and `:edges`.
 
-See also: [`peakprom`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref),
+See also: [`peakproms`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref)
 [`filterpeaks`](@ref)
 
 # Examples
@@ -57,8 +57,8 @@ peakheights(pks::NamedTuple; kwargs...) = peakheights!(deepcopy(pks); kwargs...)
 """
     peakheights(; min=nothing, max=nothing) -> Function
 
-Return a function that acts just like the NamedTuple method for 
-`peakheights`, but with a not-yet-specified first argument (named tuple). 
+Return a function that acts just like the NamedTuple method for
+`peakheights`, but with a not-yet-specified first argument (named tuple).
 This allows a convenient workflow for chaining operations.
 
 ## Examples
@@ -85,7 +85,7 @@ If a NamedTuple `pks` is given, a new NamedTuple is returned with the same field
 following fields will also be filtered (mutated), if they exist: `:proms`, `:widths`, and
 `:edges`.
 
-See also: [`peakprom`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref),
+See also: [`peakproms`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref)
 [`filterpeaks!`](@ref)
 
 # Examples
