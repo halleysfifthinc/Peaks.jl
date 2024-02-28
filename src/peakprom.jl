@@ -114,15 +114,16 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
     isempty(peaks) && return peaks, T[]
 
     # if peaks was calculated with strict=false, first(peaks) could be minima at firstindex
-    fp = length(peaks) > 1 ? peaks[2] : first(peaks)
-    if fp > 1 && ((x[fp] < x[fp-1]) === true)
-        pktype = :minima
+    if ismaxima(first(peaks), x; strict=false)
+        maxima = true
+    elseif isminima(first(peaks), x; strict=false)
+        maxima = false
     else
-        pktype = :maxima
+        throw(ArgumentError("The first peak in `indices` is not a local extrema"))
     end
-    cmp = pktype === :maxima ? (≥) : (≤)
-    exm = pktype === :maxima ? minimum : maximum
-    exa = pktype === :maxima ? Base.max : Base.min
+    cmp = maxima ? (≥) : (≤)
+    exm = maxima ? minimum : maximum
+    exa = maxima ? Base.max : Base.min
 
     _ref = Missing <: T ? missing :
            Float64 <: T ? NaN :
@@ -163,7 +164,7 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
         # finding all peaks/reverse peaks should be mitigated by the fact that
         # the same peaks/reverse peaks will be the pivotal elements for
         # numerous peaks.
-        if pktype === :maxima
+        if maxima
             peaks′ = argmaxima(x, 1; strict=false)
             notm = argminima(x, 1; strict=false)
         else

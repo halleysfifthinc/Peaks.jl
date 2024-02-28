@@ -125,14 +125,15 @@ function peakwidths!(
         throw(ArgumentError("peaks contains invalid indices to x"))
 
     # if peaks was calculated with strict=false, first(peaks) could be minima at firstindex
-    fp = length(peaks) > 1 ? peaks[2] : first(peaks)
-    if fp > 1 && ((x[fp] < x[fp-1]) === true)
-        pktype = :minima
+    if ismaxima(first(peaks), x; strict=false)
+        maxima = true
+    elseif isminima(first(peaks), x; strict=false)
+        maxima = false
     else
-        pktype = :maxima
+        throw(ArgumentError("The first peak in `indices` is not a local extrema"))
     end
-    cmp = pktype === :maxima ? (≤) : (≥)
-    op = pktype === :maxima ? (-) : (+)
+    cmp = maxima ? (≤) : (≥)
+    op = maxima ? (-) : (+)
 
     V1 = promote_type(T, U)
     _bad = Missing <: V1 ? missing : float(Int)(NaN)
