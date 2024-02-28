@@ -24,9 +24,7 @@ julia> pks = findmaxima(x)
 julia> peakheights(pks; max=4)
 (indices = [4, 7], heights = [3, 4], data = [0, 5, 2, 3, 3, 1, 4, 0])
 
-julia> inds, heights = pks;
-
-julia> inds, heights = peakheights(indices, heights; max=4)
+julia> inds, heights = peakheights(pks.indices, pks.heights; max=4)
 ([4, 7], [3, 4])
 ```
 """
@@ -87,9 +85,7 @@ julia> pks = findmaxima(x)
 julia> peakheights!(pks; max=4)
 (indices = [4, 7], heights = [3, 4], data = [0, 5, 2, 3, 3, 1, 4, 0])
 
-julia> inds, heights = pks;
-
-julia> inds, heights = peakheights!(indices, heights; min=3.5)
+julia> inds, heights = peakheights!(pks.indices, pks.heights; min=3.5)
 ([7], [4])
 ```
 """

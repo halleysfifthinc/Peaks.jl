@@ -29,15 +29,15 @@ julia> x = Float64[0,5,2,2,3,3,1,4,0];
 julia> pks = findmaxima(x) |> peakproms!(;max=2);
 
 julia> peakwidths(pks)
-(indices = [5], heights = [3], data = [0, 5, 2, 2, 3, 3, 1, 4, 0], proms = Union{Missing, Int64}[1], widths = Union{Missing, Float64}[1.75], edges = Tuple{Union{Missing, Float64}, Union{Missing, Float64}}[(4.5, 6.25)])
+(indices = [5], heights = [3.0], data = [0.0, 5.0, 2.0, 2.0, 3.0, 3.0, 1.0, 4.0, 0.0], proms = [1.0], widths = [1.75], edges = [(4.5, 6.25)])
 
 julia> x[4] = NaN;
 
 julia> peakwidths(pks.indices, x, pks.proms)
-([5], Union{Missing, Float64}[NaN], Union{Missing, Float64}[NaN], Union{Missing, Float64}[6.25])
+([5], [NaN], [NaN], [6.25])
 
 julia> peakwidths(pks.indices, x, pks.proms; strict=false)
-([5], Union{Missing, Float64}[2.25], Union{Missing, Float64}[4.0], Union{Missing, Float64}[6.25])
+([5], [2.25], [4.0], [6.25])
 ```
 """
 function peakwidths(
@@ -71,8 +71,8 @@ copy of its argument, `pks`, using any given keyword arguments.
 
 # Examples
 ```jldoctest
-julia> findmaxima([0,5,2,3,3,1,4,0]) |> peakproms() |> peakwidths(; min=2)
-(indices = [2, 7], heights = [5, 4], data = [0, 5, 2, 3, 3, 1, 4, 0], widths = Union{Missing, Int64}[5, 3])
+julia> findmaxima([0,5,2,3,3,1,4,0]) |> peakproms() |> peakwidths(; min=1.5)
+(indices = [4], heights = [3], data = [0, 5, 2, 3, 3, 1, 4, 0], proms = Union{Missing, Int64}[1], widths = Union{Missing, Float64}[1.75], edges = Tuple{Union{Missing, Float64}, Union{Missing, Float64}}[(3.5, 5.25)])
 ```
 """
 peakwidths(; kwargs...) = function _curried_peakwidths(pks)
@@ -95,7 +95,7 @@ remaining fields will be copied unmodified.
 See also: [`peakwidths`](@ref), [`peakproms`](@ref), [`findmaxima`](@ref)
 #
 # Examples
-```jldoctest ; filter = r"(\\d*)\\.(\\d{3})\\d+" => s"\\1.\\2***"
+```jldoctest ; filter = r"(\\d*)\\.(\\d{3})\\d*" => s"\\1.\\2***"
 julia> x = Float64[0,5,2,2,3,3,1,4,0];
 
 julia> pks = findmaxima(x) |> peakproms!();
@@ -216,7 +216,8 @@ widths and other fields of its argument, `pks`, using any given keyword argument
 
 # Examples
 ```jldoctest
-julia> findmaxima([0,5,2,3,3,1,4,0]) |> peakproms!() |> peakwidths!(; min=2)
+julia> findmaxima([0,5,2,3,3,1,4,0]) |> peakproms!() |> peakwidths!(; min=1.5)
+(indices = [4], heights = [3], data = [0, 5, 2, 3, 3, 1, 4, 0], proms = Union{Missing, Int64}[1], widths = Union{Missing, Float64}[1.75], edges = Tuple{Union{Missing, Float64}, Union{Missing, Float64}}[(3.5, 5.25)])
 ```
 """
 peakwidths!(; kwargs...) = function _curried_peakwidths!(pks)
