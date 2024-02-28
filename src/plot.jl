@@ -27,7 +27,7 @@ end
     elseif isminima(first(peaks), y; strict=false)
         maxima = false
     else
-        throw(error("The first peak in `peaks` is not a local extrema"))
+        throw(ArgumentError("The first peak in `peaks` is not a local extrema"))
     end
     sgn = maxima ? -1 : +1
     ext_color = maxima ? :Red : :Green

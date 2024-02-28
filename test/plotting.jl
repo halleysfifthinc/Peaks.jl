@@ -17,6 +17,9 @@ let
         plt = plotpeaks!(t, y, peaks=pks, prominences=true, widths=true)
         @test plt isa Plots.Plot
 
+        # first peak isn't an extrema
+        @test_throws ArgumentError plotpeaks(t, y; peaks=[2])
+
         # plt = plotpeaks(t, y, peaks=pks, prominences=true, widths=true)
         # savepath_png = abspath(joinpath(@__DIR__, "..", "docs", "src", "assets", "images", "minima_prom_width.png"))
         # savefig(plt, savepath_png)
