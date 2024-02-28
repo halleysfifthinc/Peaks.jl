@@ -8,12 +8,12 @@
     @test pks == filtpks
     @test Y == heights
 
-    _, Y = peakheights(pks, heights; maxheight=4)
+    _, Y = peakheights(pks, heights; max=4)
     @test all(≤(4), Y)
 
-    _, Y = peakheights(pks, heights; minheight=4)
+    _, Y = peakheights(pks, heights; min=4)
     @test all(≥(4), Y)
 
-    _, Y = peakheights(pks, heights; maxheight=4.5, minheight=3.5)
+    _, Y = peakheights(pks, heights; max=4.5, min=3.5)
     @test all(x -> 3.5 ≤ x ≤ 4.5, Y)
 end

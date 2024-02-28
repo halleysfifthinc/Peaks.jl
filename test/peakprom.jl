@@ -70,10 +70,10 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
     @testset "Min/max prominence" begin
         sint = sin.(T:T:6pi)
         maxs = argmaxima(sint)
-        @test length(first(peakproms(maxs, sint; minprom=1.5))) == 2
-        @test length(first(peakproms(maxs, sint; maxprom=1.5))) == 1
+        @test length(first(peakproms(maxs, sint; min=1.5))) == 2
+        @test length(first(peakproms(maxs, sint; max=1.5))) == 1
 
-        @test_throws ArgumentError peakproms([1,2,3], sint; maxprom=0.1, minprom=1)
+        @test_throws ArgumentError peakproms([1,2,3], sint; max=0.1, min=1)
     end
 
     # issue #4
