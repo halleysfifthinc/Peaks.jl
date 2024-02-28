@@ -38,10 +38,19 @@
         sinpks = argmaxima(sint)
         _, proms = peakproms(sinpks, sint)
 
-        @test length(first(peakwidths(sinpks, sint, proms; minwidth=pi*75))) == 2
-        @test length(first(peakwidths(sinpks, sint, proms; maxwidth=pi*75))) == 1
+        @test length(first(peakwidths(sinpks, sint, proms; min=pi*75))) == 2
+        @test length(first(peakwidths(sinpks, sint, proms; max=pi*75))) == 1
 
-        @test_throws ArgumentError peakwidths(1:3, ones(3), ones(3); maxwidth=0.1, minwidth=1)
+        @test_throws ArgumentError peakwidths(1:3, ones(3), ones(3); max=0.1, min=1)
+
+        # TODO: Remove after next breaking release (v0.5)
+        @test_logs (:warn, r"renamed") peakwidths(sinpks, sint, proms; maxwidth=1)
+        @test_logs (:warn, r"renamed") peakwidths(sinpks, sint, proms; minwidth=1)
+        @test_logs (:warn, r"renamed") peakwidths!(copy(sinpks), copy(sint), copy(proms); maxwidth=1)
+        @test_logs (:warn, r"renamed") peakwidths!(copy(sinpks), copy(sint), copy(proms); minwidth=1)
     end
 
+    @test_throws ArgumentError peakwidths([2], 1:10, [1])
+    @test_throws ArgumentError peakwidths!((;proms=[1], widths=[2]))
+    @test_throws ArgumentError peakwidths!((;proms=[1], edges=[2]))
 end

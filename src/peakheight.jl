@@ -1,11 +1,15 @@
 """
-    peakheights(peaks, heights;
-        minheight=nothing,
-        maxheight=nothing
-    ) -> (peaks, heights)
+    peakheights(indices, heights; [min, max]) -> (indices, heights)
+    peakheights(pks::NamedTuple; [min, max]) -> NamedTuple
 
-Return a copy of `peaks` and `heights` where peak heights are removed if less than
-`minheight` and/or greater than `maxheight`.
+
+Return a copy of `indices` and `heights` where peaks are removed if their height is less than
+`min` and/or greater than `max`.
+
+If a NamedTuple `pks` is given, a new NamedTuple is returned with filtered copies of fields
+from `pks`. `pks` must have `:indices` and `:heights` fields. The fields `:proms`,
+`:widths`, and `:edges` will be filtered if present, and any remaining fields will be
+copied unmodified.
 
 See also: [`peakproms`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref)
 
@@ -13,56 +17,93 @@ See also: [`peakproms`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref)
 ```jldoctest
 julia> x = [0,5,2,3,3,1,4,0];
 
-julia> xpks, vals = findmaxima(x)
-([2, 4, 7], [5, 3, 4])
+julia> pks = findmaxima(x)
+(indices = [2, 4, 7], heights = [5, 3, 4], data = [0, 5, 2, 3, 3, 1, 4, 0])
 
-julia> peakheights(xpks, vals; maxheight=4)
+julia> peakheights(pks; max=4)
+(indices = [4, 7], heights = [3, 4], data = [0, 5, 2, 3, 3, 1, 4, 0])
+
+julia> inds, heights = peakheights(pks.indices, pks.heights; max=4)
 ([4, 7], [3, 4])
-
-julia> peakheights(xpks, vals; minheight=4.5)
-([2], [5])
 ```
 """
 function peakheights(
-    peaks::AbstractVector{Int}, heights::AbstractVector;
-    minheight=nothing, maxheight=nothing
+    indices::AbstractVector{Int}, heights::AbstractVector;
+    minheight=nothing, maxheight=nothing,
+    min=minheight, max=maxheight
 )
-    peakheights!(copy(peaks), copy(heights); minheight=minheight, maxheight=maxheight)
+    if !isnothing(minheight)
+        Base.depwarn("Keyword `minheight` has been renamed to `min`", :peakheights!)
+    end
+    if !isnothing(maxheight)
+        Base.depwarn("Keyword `maxheight` has been renamed to `max`", :peakheights!)
+    end
+    peakheights!(copy(indices), copy(heights); min=min, max=max)
+end
+
+peakheights(pks::NamedTuple; kwargs...) = peakheights!(deepcopy(pks); kwargs...)
+
+"""
+    peakheights(; [min, max]) -> Function
+
+Create a function, `f(pks::NamedTuple)`, that copies and filters the peak heights of its
+argument, `pks`, using any given keyword arguments.
+
+# Examples
+```jldoctest
+julia> findmaxima([0, 5, 2, 3, 3, 1, 4, 0]) |> peakheights(; max=4)
+(indices = [4, 7], heights = [3, 4], data = [0, 5, 2, 3, 3, 1, 4, 0])
+```
+"""
+peakheights(; kwargs...) = function _curried_peakheights(pks)
+    return peakheights(deepcopy(pks); kwargs...)
 end
 
 """
-    peakheights!(peaks, heights;
-        minheight=nothing,
-        maxheight=nothing
-    ) -> (peaks, heights)
+    peakheights!(indices, heights; [min, max]) -> (indices, heights)
+    peakheights!(pks::NamedTuple; [min, max]) -> NamedTuple
 
-Modify and return `peaks` and `heights` by removing peaks that are less than `minheight` or greater
-than `maxheight`.
+Filter (mutate) and return `indices` and `heights` by removing peaks that are less than `min`
+and/or greater than `max`.
+
+If a NamedTuple `pks` is given, a new NamedTuple is returned with the same fields
+(references) from `pks`. `pks` must have `:indices` and `:heights` fields. The fields
+`:proms`, `:widths`, and `:edges` will be filtered (mutated) if present, and any remaining
+fields will be referenced unmodified.
 
 See also: [`peakproms`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref)
+[`filterpeaks!`](@ref)
 
 # Examples
 ```jldoctest
 julia> x = [0,5,2,3,3,1,4,0];
 
-julia> xpks, vals = findmaxima(x)
-([2, 4, 7], [5, 3, 4])
+julia> pks = findmaxima(x)
+(indices = [2, 4, 7], heights = [5, 3, 4], data = [0, 5, 2, 3, 3, 1, 4, 0])
 
-julia> peakheights!(xpks, vals; maxheight=4);
+julia> peakheights!(pks; max=4)
+(indices = [4, 7], heights = [3, 4], data = [0, 5, 2, 3, 3, 1, 4, 0])
 
-julia> xpks, vals
-([4, 7], [3, 4])
+julia> inds, heights = peakheights!(pks.indices, pks.heights; min=3.5)
+([7], [4])
 ```
 """
 function peakheights!(
     peaks::Vector{Int}, heights::AbstractVector{T};
-    minheight=nothing, maxheight=nothing
+    minheight=nothing, maxheight=nothing,
+    min=minheight, max=maxheight
 ) where {T}
+    if !isnothing(minheight)
+        Base.depwarn("Keyword `minheight` has been renamed to `min`", :peakheights!)
+    end
+    if !isnothing(maxheight)
+        Base.depwarn("Keyword `maxheight` has been renamed to `max`", :peakheights!)
+    end
     length(peaks) == length(heights) || throw(DimensionMismatch("length of `peaks`, $(length(peaks)), does not match the length of `heights`, $(length(heights))"))
-    if !isnothing(minheight) || !isnothing(maxheight)
-        lo = something(minheight, typemin(Base.nonmissingtype(T)))
-        up = something(maxheight, typemax(Base.nonmissingtype(T)))
-        matched = findall(x -> !(lo ≤ x ≤ up), heights)
+    if !isnothing(min) || !isnothing(max)
+        lo = something(min, typemin(Base.nonmissingtype(T)))
+        hi = something(max, typemax(Base.nonmissingtype(T)))
+        matched = findall(x -> !(lo ≤ x ≤ hi), heights)
         deleteat!(peaks, matched)
         deleteat!(heights, matched)
     end
@@ -70,4 +111,24 @@ function peakheights!(
     return peaks, heights
 end
 
+function peakheights!(pks::NamedTuple; min=nothing, max=nothing)
+    filterpeaks!(pks, :heights; min, max)
+    return pks
+end
+
+"""
+    peakheights!(; [min, max]) -> Function
+
+Create a function, `f(pks::NamedTuple)`, that calculates peak heights and then filters
+(mutates) the fields of its argument, `pks`, using any given keyword arguments.
+
+# Examples
+```jldoctest
+julia> findmaxima([0, 5, 2, 3, 3, 1, 4, 0]) |> peakheights!(; max=4)
+(indices = [4, 7], heights = [3, 4], data = [0, 5, 2, 3, 3, 1, 4, 0])
+```
+"""
+peakheights!(; kwargs...) = function _curried_peakheights!(pks)
+    return peakheights!(pks; kwargs...)
+end
 
