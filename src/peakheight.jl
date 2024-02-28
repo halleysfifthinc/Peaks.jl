@@ -12,7 +12,6 @@ from `pks`. `pks` must have `:indices` and `:heights` fields. The fields `:proms
 copied unmodified.
 
 See also: [`peakproms`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref)
-[`filterpeaks`](@ref)
 
 # Examples
 ```jldoctest
