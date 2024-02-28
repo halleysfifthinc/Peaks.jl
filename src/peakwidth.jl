@@ -119,7 +119,7 @@ function peakwidths!(
         Base.depwarn("Keyword `maxwidth` has been renamed to `max`", :peakwidths!)
     end
     if !isnothing(min) && !isnothing(max)
-        min < max || throw(ArgumentError("max width must be greater than min width"))
+        min < max || throw(ArgumentError("Keyword `min` must be less than `max`"))
     end
     all(∈(eachindex(x)), peaks) ||
         throw(ArgumentError("peaks contains invalid indices to x"))

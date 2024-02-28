@@ -107,7 +107,7 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
         Base.depwarn("Keyword `maxprom` has been renamed to `max`", :peakproms!)
     end
     if !isnothing(min) && !isnothing(max)
-        min < max || throw(ArgumentError("minimal prominence must be less than maximal prominence"))
+        min < max || throw(ArgumentError("Keyword `min` must be less than `max`"))
     end
     all(∈(eachindex(x)), peaks) ||
         throw(ArgumentError("peaks contains invalid indices to x"))
