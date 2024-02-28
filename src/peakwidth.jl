@@ -138,7 +138,7 @@ function peakwidths!(
     V1 = promote_type(T, U)
     _bad = Missing <: V1 ? missing : float(Int)(NaN)
 
-    V = promote_type(V1, typeof(_bad))
+    V = promote_type(V1, float(Int))
     ledge = similar(proms, V)
     redge = similar(proms, V)
 
