@@ -51,4 +51,6 @@
     end
 
     @test_throws ArgumentError peakwidths([2], 1:10, [1])
+    @test_throws ArgumentError peakwidths!((;proms=[1], widths=[2]))
+    @test_throws ArgumentError peakwidths!((;proms=[1], edges=[2]))
 end
