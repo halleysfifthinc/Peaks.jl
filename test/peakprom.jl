@@ -63,8 +63,6 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         p5 = [-1,6,3,4,2,4,2,5,-2,0]
         @test last(peakproms(argmaxima(p5, 3; strict=false), p5; strict=false)) == [7,3]
         @test last(peakproms(argmaxima(reverse(p5), 3; strict=false), reverse(p5); strict=false)) == [3,7]
-
-
     end
 
     @testset "Min/max prominence" begin
@@ -82,6 +80,8 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test_logs (:warn, r"renamed") peakproms!(copy(maxs), copy(sint); minprom=1)
     end
 
+    @test_throws ArgumentError peakproms([2], 1:10)
+
     # issue #4
     let i, p
         i, p = peakproms(Int[], zeros(10))
@@ -94,5 +94,5 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
     issue91ddaa9 = [1,2,3,2,3,1]
     @test all(!iszero,
         last(peakproms(argminima(issue91ddaa9; strict=false), issue91ddaa9; strict=false)))
-end
 
+end

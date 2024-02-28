@@ -50,4 +50,5 @@
         @test_logs (:warn, r"renamed") peakwidths!(copy(sinpks), copy(sint), copy(proms); minwidth=1)
     end
 
+    @test_throws ArgumentError peakwidths([2], 1:10, [1])
 end
