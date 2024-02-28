@@ -116,13 +116,7 @@ function peakheights!(
     return peaks, heights
 end
 
-function peakheights!(pks::NamedTuple; minheight=nothing, maxheight=nothing, min=minheight, max=maxheight)
-    if !isnothing(minheight)
-        Base.depwarn("Keyword `minheight` has been renamed to `min`", :peakheights!)
-    end
-    if !isnothing(maxheight)
-        Base.depwarn("Keyword `maxheight` has been renamed to `max`", :peakheights!)
-    end
+function peakheights!(pks::NamedTuple; min=nothing, max=nothing)
     filterpeaks!(pks, :heights; min, max)
     return pks
 end
