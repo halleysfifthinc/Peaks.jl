@@ -1,44 +1,36 @@
 """
-    peakproms(peaks, x;
-        strict=true,
-        minprom=nothing,
-        maxprom=nothing
-    ) -> (peaks, proms)
+    peakproms(indices, x; [strict=true, min, max]) -> (indices, proms)
+    peakproms(pks::NamedTuple; [strict=true, min, max]) -> NamedTuple
 
-Calculate the prominences of `peaks` in `x`, and removing peaks with prominences less than
-`minprom` and/or greater than `maxprom`.
+Calculate the prominences of peak `indices` in `x`, and remove peaks with prominences less
+than `min` and/or greater than `max`.
 
-Peak prominence is the absolute height difference between the current peak and the larger of
-the two adjacent smallest magnitude points between the current peak and adjacent larger
-peaks or signal ends.
+Peak prominence is the absolute height (value) difference between the current peak and the
+larger of the two adjacent smallest magnitude points between the current peak and adjacent
+larger peaks or signal ends.
 
-The prominence for a peak with a `NaN` or `missing` between the current peak and either
-adjacent larger peaks will be `NaN` or `missing` if `strict == true`, or it will be
-the larger of the smallest non-`NaN` or `missing` values between the current peak and
-adjacent larger peaks for `strict == false`.
+If a NamedTuple `pks` is given, a new NamedTuple is returned with filtered copies of fields
+from `pks`. `pks` must have `:indices` and `:heights` fields. If `pks` has a `:proms` field,
+prominences will only be filtered, and not be recalculated. The fields `:widths` and
+`:edges` will also be filtered if present, and any remaining fields will be copied
+unmodified.
 
-See also: [`findminima`](@ref), [`findmaxima`](@ref), [`peakproms!`](@ref)
+If `strict == true`, the prominence for a peak with a `NaN` or `missing` between the current
+peak and either adjacent larger peaks will be `NaN` or `missing`, otherwise, it will be the
+larger of the smallest non-`NaN` or `missing` values between the current peak and adjacent
+larger peaks for `strict == false`.
+
+See also: [`peakproms!`](@ref), [`findmaxima`](@ref)
 
 # Examples
 ```jldoctest
-julia> x = [0,5,2,3,3,1,4,0];
+julia> pks = findmaxima([0,5,2,3,3,1,4,0]);
 
-julia> xpks = argmaxima(x)
-3-element Vector{Int64}:
- 2
- 4
- 7
+julia> pks = peakproms(pks; min=2)
+(indices = [2, 7], heights = [5, 4], data = [0, 5, 2, 3, 3, 1, 4, 0], proms = Union{Missing, Int64}[5, 3])
 
-julia> peakproms(xpks, x)
-([2, 4, 7], Union{Missing, Int64}[5, 1, 3])
-
-julia> x = [missing,5,2,3,3,1,4,0];
-
-julia> peakproms(xpks, x)
-([2, 4, 7], Union{Missing, Int64}[missing, 1, 3])
-
-julia> peakproms(xpks, x; strict=false)
-([2, 4, 7], Union{Missing, Int64}[5, 1, 3])
+julia> inds, proms = peakproms(pks.indices, pks.data; max=4)
+([7], Union{Missing, Int64}[3])
 ```
 """
 function peakproms(peaks::AbstractVector{Int}, x::AbstractVector{T};
@@ -60,18 +52,49 @@ function peakproms(peaks::AbstractVector{Int}, x::AbstractVector{T};
     return peakproms!(_peaks, x; strict=strict, min=min, max=max)
 end
 
+peakproms(pks::NamedTuple; kwargs...) = peakproms!(deepcopy(pks); kwargs...)
+
 """
-    peakproms!(peaks, x;
-        strict=true,
-        minprom=nothing,
-        maxprom=nothing
-    ) -> (peaks, proms)
+    peakproms(; [strict, min, max]) -> Function
 
-Calculate the prominences of `peaks` in `x`, and removing `peaks` with prominences less than
-`minprom` and/or greater than `maxprom`. Returns the modified arrays peaks and their
-prominences.
+Create a function, `f(pks::NamedTuple)`, that calculates and filters the peak
+prominences of a copy of its argument, `pks`, using any given keyword arguments.
 
-See also: [`peakproms`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
+# Examples
+```jldoctest
+julia> findmaxima([0,5,2,3,3,1,4,0]) |> peakproms(; min=2)
+(indices = [2, 7], heights = [5, 4], data = [0, 5, 2, 3, 3, 1, 4, 0], proms = Union{Missing, Int64}[5, 3])
+```
+"""
+peakproms(; kwargs...) = function _curried_peakproms(pks)
+    return peakproms(pks; kwargs...)
+end
+
+"""
+    peakproms!(indices, x; [strict=true, min, max]) -> (indices, proms)
+    peakproms!(pks::NamedTuple; [strict=true, min, max]) -> NamedTuple
+
+Calculate the prominences of peak `indices` in `x`, and remove peaks with prominences less
+than `min` and/or greater than `max`.
+
+If a NamedTuple `pks` is given, a new NamedTuple is returned with the same fields
+(references) from `pks`. `pks` must have `:indices` and `:heights` fields. If `pks` has a
+`:proms` field, prominences will only be filtered, and not be recalculated. The fields
+`:widths` and `:edges` will also be filtered (mutated) if present, and any remaining fields
+will be copied unmodified.
+
+See also: [`peakproms`](@ref), [`findmaxima`](@ref)
+#
+# Examples
+```jldoctest
+julia> pks = findmaxima([0,5,2,3,3,1,4,0]);
+
+julia> pks = peakproms!(pks; min=2)
+(indices = [2, 7], heights = [5, 4], data = [0, 5, 2, 3, 3, 1, 4, 0], proms = Union{Missing, Int64}[5, 3])
+
+julia> inds, proms = peakproms!(pks.indices, pks.data; max=4)
+([7], Union{Missing, Int64}[3])
+```
 """
 function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
     strict=true, minprom=nothing, maxprom=nothing,
@@ -194,70 +217,30 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
     return peaks, proms
 end
 
-"""
-    peakproms!(pks) -> NamedTuple
-    peakproms!() -> Function
-
-# Optional keyword arguments
-- `min`: Filter out any peak with a height smaller than `min`.
-- `max`: Filter out any peak with a height greater than `min`.
-- `strict`: How to handle `NaN` and `missing` values. See documentation for more details. Default to `true`.
-
-Find the prominences of the peaks in `pks`, and filter out any peak
-with a prominence smaller than `min` or greater than `max`.
-The prominences are returned in the field `:proms` of the returned named tuple.
-
-If the positional argument `pks` is omitted, a function is returned such
-that `peakproms!(pks)` is equivalent to `pks |> peakproms!`.
-
-Note: This function mutates the vectors stored in the NamedTuple `pks`,
-and not the named tuple itself.
-
-See also: [`peakwidths!`](@ref), [`peakheights!`](@ref)
-
-# Examples
-```jldoctest
-julia> data = [1, 5, 1, 3, 2];
-
-julia> pks = findmaxima(data);
-
-julia> pks = peakproms!(pks)
-(indices = [2, 4], heights = [5, 3], data = [1, 5, 1, 3, 2], proms = Union{Missing, Int64}[4, 1])
-
-julia> data |> findmaxima |> peakproms!
-(indices = [2, 4], heights = [5, 3], data = [1, 5, 1, 3, 2], proms = Union{Missing, Int64}[4, 1])
-```
-"""
-function peakproms!(pks::NamedTuple; minprom=nothing, maxprom=nothing, min=minprom, max=maxprom, strict=true)
-    if !isnothing(minprom)
-        Base.depwarn("Keyword `minprom` has been renamed to `min`", :peakproms!)
-    end
-    if !isnothing(maxprom)
-        Base.depwarn("Keyword `maxprom` has been renamed to `max`", :peakproms!)
-    end
+function peakproms!(pks::NamedTuple; strict=true, min=nothing, max=nothing)
     if !hasproperty(pks, :proms)
         # Avoid filtering by min/max/strict here, so that it always happens outside if-statement.
         # Pro: one less edge case. Con: More internal allocations
         _, proms = peakproms(pks.indices, pks.data; strict)
         pks = merge(pks, (; proms))
     end
-    filterpeaks!(pks, min, max, :proms)
+    filterpeaks!(pks, :proms; min, max)
     return pks
 end
-peakproms!(; kwargs...) = pks -> peakproms!(pks; kwargs...)
 
 """
-    peakproms(pks) -> NamedTuple
-    peakproms() -> Function
+    peakproms!(; [strict, min, max]) -> Function
 
-# Optional keyword arguments
-- `min`: Filter out any peak with a height smaller than `min`.
-- `max`: Filter out any peak with a height greater than `min`.
-- `strict`: How to handle `NaN` and `missing` values. See documentation for more details. Default to `true`.
+Create a function, `f(pks::NamedTuple)`, that calculates and filters (mutates) the peak
+prominences and other fields of its argument, `pks`, using any given keyword arguments.
 
-Non-mutation version of `peakproms!`. Note that
-this copies all vectors in `pks`, including the data.
-This means that it is less performant. See the docstring for
-`peakproms!` for more information.
+# Examples
+```jldoctest
+julia> findmaxima([0,5,2,3,3,1,4,0]) |> peakproms!(; min=2)
+(indices = [2, 7], heights = [5, 4], data = [0, 5, 2, 3, 3, 1, 4, 0], proms = Union{Missing, Int64}[5, 3])
+```
 """
-peakproms(pks::NamedTuple; kwargs...) = peakproms!(deepcopy(pks); kwargs...)
+peakproms!(; kwargs...) = function _curried_peakproms!(pks)
+    return peakproms!(pks; kwargs...)
+end
+

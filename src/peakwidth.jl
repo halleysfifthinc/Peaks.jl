@@ -1,44 +1,43 @@
 """
-    peakwidths(peaks, x, proms;
-        strict=true,
-        relheight=0.5,
-        minwidth=nothing,
-        maxwidth=nothing
-    ) -> (peaks, widths, leftedge, rightedge)
+    peakwidths(indices, x, proms; [strict=true, relheight=0.5, min, max]) -> (indices, widths, ledge, redge)
+    peakwidths(pks::NamedTuple; [strict=true, relheight=0.5, min, max]) -> NamedTuple
 
-Calculate the widths of `peaks` in `x` at a reference level based on `proms` and
-`relheight`, and removing peaks with widths less than `minwidth` and/or greater than
-`maxwidth`. Returns the peaks, widths, and the left and right edges at the reference level.
+Calculate the widths of peak `indices` in `x` at a reference level based on `proms` and
+`relheight`, and removing peaks with widths less than `min` and/or greater than
+`max`. Returns the peaks, widths, and the left and right edges at the reference level.
 
 Peak width is the distance between the signal crossing a reference level before and after
 the peak. Signal crossings are linearly interpolated between indices. The reference level is
 the difference between the peak height and `relheight` times the peak prominence. Width
 cannot be calculated for a `NaN` or `missing` prominence.
 
-The width for a peak with a gap in the signal (e.g. `NaN`, `missing`) at the reference level
-will match the value/type of the signal gap if `strict == true`. For `strict ==
-false`, the signal crossing will be linearly interpolated between the edges of the gap.
+If a NamedTuple `pks` is given, a new NamedTuple is returned with filtered copies of fields
+from `pks`. `pks` must have `:indices`, `:heights`, and `:proms` fields. If `pks` has
+`:widths` and `:edges` fields, they will not be recalculated, but filtered only. Any
+remaining fields will be copied unmodified.
 
-See also: [`peakproms`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
+If `strict == true`, the width for a peak with a gap in the signal (e.g. `NaN`, `missing`)
+at the reference level will match the value/type of the signal gap. Otherwise, the signal
+crossing will be linearly interpolated between the edges of the gap.
+
+See also: [`peakwidths!`](@ref), [`peakproms`](@ref), [`findmaxima`](@ref)
 
 # Examples
 ```jldoctest
-julia> x = [0,1,0,-1.];
+julia> x = Float64[0,5,2,2,3,3,1,4,0];
 
-julia> xpks = argmaxima(x)
-1-element Vector{Int64}:
- 2
+julia> pks = findmaxima(x) |> peakproms!(;max=2);
 
-julia> peakwidths(xpks, x, [1])
-([2], [1.0], [1.5], [2.5])
+julia> peakwidths(pks)
+(indices = [5], heights = [3], data = [0, 5, 2, 2, 3, 3, 1, 4, 0], proms = Union{Missing, Int64}[1], widths = Union{Missing, Float64}[1.75], edges = Tuple{Union{Missing, Float64}, Union{Missing, Float64}}[(4.5, 6.25)])
 
-julia> x[3] = NaN;
+julia> x[4] = NaN;
 
-julia> peakwidths(xpks, x, [1])
-([2], [NaN], [1.5], [NaN])
+julia> peakwidths(pks.indices, x, pks.proms)
+([5], Union{Missing, Float64}[NaN], Union{Missing, Float64}[NaN], Union{Missing, Float64}[6.25])
 
-julia> peakwidths(xpks, x, [1]; strict=false)
-([2], [1.0], [1.5], [2.5])
+julia> peakwidths(pks.indices, x, pks.proms; strict=false)
+([5], Union{Missing, Float64}[2.25], Union{Missing, Float64}[4.0], Union{Missing, Float64}[6.25])
 ```
 """
 function peakwidths(
@@ -62,19 +61,51 @@ function peakwidths(
         min=min, max=max)
 end
 
-"""
-    peakwidths!(peaks, x, proms;
-        strict=true,
-        relheight=0.5,
-        minwidth=nothing,
-        maxwidth=nothing
-    ) -> (peaks, widths, leftedge, rightedge)
+peakwidths(pks::NamedTuple; kwargs...) = peakwidths!(deepcopy(pks); kwargs...)
 
-Calculate the widths of `peaks` in `x` at a reference level based on `proms` and
-`relheight`, removing peaks with widths less than `minwidth` and/or greater than `maxwidth`.
+"""
+    peakwidths(; [strict, relheight, min, max]) -> Function
+
+Create a function, `f(pks::NamedTuple)`, that calculates and filters the peak widths of a
+copy of its argument, `pks`, using any given keyword arguments.
+
+# Examples
+```jldoctest
+julia> findmaxima([0,5,2,3,3,1,4,0]) |> peakproms() |> peakwidths(; min=2)
+(indices = [2, 7], heights = [5, 4], data = [0, 5, 2, 3, 3, 1, 4, 0], widths = Union{Missing, Int64}[5, 3])
+```
+"""
+peakwidths(; kwargs...) = function _curried_peakwidths(pks)
+    return peakwidths(pks; kwargs...)
+end
+
+"""
+    peakwidths!(indices, x; [strict=true, relheight=0.5, min, max]) -> (indices, widths, ledge, redge)
+    peakwidths!(pks::NamedTuple; [strict=true, relheight=0.5, min, max]) -> NamedTuple
+
+Calculate the widths of peak `indices` in `x` at a reference level based on `proms` and
+`relheight`, removing peaks with widths less than `min` and/or greater than `max`.
 Returns the modified peaks, widths, and the left and right edges at the reference level.
 
-See also: [`peakwidths`](@ref), [`peakproms`](@ref), [`findminima`](@ref), [`findmaxima`](@ref)
+If a NamedTuple `pks` is given, a new NamedTuple is returned with the same fields (references)
+from `pks`. `pks` must have `:indices`, `:heights`, and `:proms` fields. If `pks` has
+`:widths` and `:edges` fields, they will not be recalculated, but filtered only. Any
+remaining fields will be copied unmodified.
+
+See also: [`peakwidths`](@ref), [`peakproms`](@ref), [`findmaxima`](@ref)
+#
+# Examples
+```jldoctest ; filter = r"(\\d*)\\.(\\d{3})\\d+" => s"\\1.\\2***"
+julia> x = Float64[0,5,2,2,3,3,1,4,0];
+
+julia> pks = findmaxima(x) |> peakproms!();
+
+julia> peakwidths!(pks; min=1)
+(indices = [2, 5], heights = [5.0, 3.0], data = [0.0, 5.0, 2.0, 2.0, 3.0, 3.0, 1.0, 4.0, 0.0], proms = [5.0, 1.0], widths = [1.333, 1.75], edges = [(1.5, 2.833), (4.5, 6.25)])
+
+julia> peakwidths!(pks.indices, pks.data, pks.proms; min=1)
+([2, 5], [1.333, 1.75], [1.5, 4.5], [2.833, 6.25])
+```
 """
 function peakwidths!(
     peaks::AbstractVector{Int}, x::AbstractVector{T}, proms::AbstractVector{U};
@@ -160,57 +191,11 @@ function peakwidths!(
     return peaks, widths, ledge, redge
 end
 
-"""
-    peakwidths!(pks) -> NamedTuple
-    peakwidths!() -> Function
-
-# Optional keyword arguments
-- `min`: Filter out any peak with a height smaller than `min`.
-- `max`: Filter out any peak with a height greater than `min`.
-- `relheight`: How far up to measure width, as fraction of the peak prominence. Defaults to `0.5`.
-- `strict`: How to handle `NaN` and `missing` values. See documentation for more details. Default to `true`.
-
-Find the widths of the peaks in `pks`, and filter out any peak
-with a width smaller than `min` or greater than `max`.
-The widths are returned in the field `:widths` of the returned named tuple.
-The edges of the peaks are also added in the field `:edges`.
-
-If the positional argument `pks` is omitted, a function is returned such
-that `peakwidths!(pks)` is equivalent to `pks |> peakwidths!`.
-
-Note: If `pks` does not have a field `proms`, it is added. This is
-because it is needed to calculate the peak width.
-
-Note: This function mutates the vectors stored in the NamedTuple `pks`,
-and not the named tuple itself.
-
-See also: [`peakproms!`](@ref), [`peakheights!`](@ref)
-
-# Examples
-```jldoctest
-julia> data = [1, 5, 1, 3, 2];
-
-julia> pks = findmaxima(data);
-
-julia> pks = peakwidths!(pks)
-(indices = [2, 4], heights = [5, 3], data = [1, 5, 1, 3, 2], proms = Union{Missing, Int64}[4, 1], widths = [1.0, 0.75], edges = [(1.5, 2.5), (3.75, 4.5)])
-
-julia> data |> findmaxima |> peakwidths!
-(indices = [2, 4], heights = [5, 3], data = [1, 5, 1, 3, 2], proms = Union{Missing, Int64}[4, 1], widths = [1.0, 0.75], edges = [(1.5, 2.5), (3.75, 4.5)])
-```
-"""
-function peakwidths!(pks::NamedTuple; minwidth=nothing, maxwidth=nothing, min=minwidth, max=maxwidth, relheight=0.5, strict=true)
-    if !isnothing(minwidth)
-        Base.depwarn("Keyword `minwidth` has been renamed to `min`", :peakwidths!)
-    end
-    if !isnothing(maxwidth)
-        Base.depwarn("Keyword `maxwidth` has been renamed to `max`", :peakwidths!)
-    end
-    if !hasproperty(pks, :proms)  # Add proms if needed
-        pks = peakproms!(pks; strict)
-    end
+function peakwidths!(pks::NamedTuple; strict=true, relheight=0.5, min=nothing, max=nothing)
+    !haskey(pks, :proms) && throw(ArgumentError(
+        "Argument `pks` is expected to have prominences (`:proms`) already calculated"))
     if xor(hasproperty(pks, :widths), hasproperty(pks, :edges))
-        throw(ArgumentError("The named tuple `pks` (first argument to `peakwidths!` is expected have both the fields `:widths` and `:edges`, or to have neither of them. The provided `pks` only has one of them."))
+        throw(ArgumentError("Argument `pks` is expected have neither or both of the fields `:widths` and `:edges`."))
     end
     if !hasproperty(pks, :widths)
         # Avoid filtering by min/max/strict here, so that it always happens outside if-statement.
@@ -218,24 +203,22 @@ function peakwidths!(pks::NamedTuple; minwidth=nothing, maxwidth=nothing, min=mi
         _, widths, leftedges, rightedges = peakwidths(pks.indices, pks.data, pks.proms; relheight, strict)
         pks = merge(pks, (; widths, edges=collect(zip(leftedges, rightedges))))
     end
-    filterpeaks!(pks, min, max, :widths)
+    filterpeaks!(pks, :widths; min, max)
     return pks
 end
-peakwidths!(; kwargs...) = pks -> peakwidths!(pks; kwargs...)
 
 """
-    peakwidths(pks) -> NamedTuple
-    peakwidths() -> Function
+    peakwidths!(; [strict, relheight, min, max]) -> Function
 
-# Optional keyword arguments
-- `min`: Filter out any peak with a height smaller than `min`.
-- `max`: Filter out any peak with a height greater than `min`.
-- `relheight`: How far up to measure width, as fraction of the peak prominence. Defaults to `0.5`.
-- `strict`: How to handle `NaN` and `missing` values. See documentation for more details. Default to `true`.
+Create a function, `f(pks::NamedTuple)`, that calculates and filters (mutates) the peak
+widths and other fields of its argument, `pks`, using any given keyword arguments.
 
-Non-mutation version of `peakwidths!`. Note that
-this copies all vectors in `pks`, including the data.
-This means that it is less performant. See the docstring for
-`peakwidths!` for more information.
+# Examples
+```jldoctest
+julia> findmaxima([0,5,2,3,3,1,4,0]) |> peakproms!() |> peakwidths!(; min=2)
+```
 """
-peakwidths(pks::NamedTuple; kwargs...) = peakwidths!(deepcopy(pks); kwargs...)
+peakwidths!(; kwargs...) = function _curried_peakwidths!(pks)
+    return peakwidths!(pks; kwargs...)
+end
+

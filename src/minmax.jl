@@ -186,13 +186,14 @@ function maxima(
 end
 
 """
-    findmaxima(x[, w=1; strict=true]) -> NamedTuple
+    findmaxima(x[, w=1; strict=true]) -> (;indices, heights, data)
 
-Find the indices and values of local maxima in `x`, where each maxima `i` is 
-either the maximum of `x[i-w:i+w]` or the first index of a plateau. The 
-returned named tuple contains the fields `indices, heights, data`, and 
-contains what the fieldnames suggest. Note that the vector stored 
-in the field `:data` is the original data vector, and not a copy.
+Find the indices and values of local maxima in `x`, where each maxima `i` is
+either the maximum of `x[i-w:i+w]` or the first index of a plateau.
+
+Returns a [`NamedTuple`](@ref) contains the fields `indices`, `heights`, `data`, which are
+equivalent to `heights = data[indices]`. The `data` field is a reference (not a copy) to
+the argument `x`.
 
 A plateau is defined as a maxima with consecutive equal (`===`/egal) maximal values which
 are bounded by lesser values immediately before and after the consecutive maximal values.
@@ -209,7 +210,7 @@ julia> pks = findmaxima(data)
 """
 function findmaxima(x, w::Int=1; strict::Bool=true)
     idxs = argmaxima(x, w; strict=strict)
-    return (indices=idxs, heights=x[idxs], data=x)
+    return (;indices=idxs, heights=x[idxs], data=x)
 end
 
 """
@@ -323,13 +324,14 @@ function minima(
 end
 
 """
-    findminima(x[, w=1; strict=true]) -> NamedTuple
+    findminima(x[, w=1; strict=true]) -> (;indices, heights, data)
 
-Find the indices and values of local minima in `x`, where each minima `i` is 
-either the minimum of `x[i-w:i+w]` or the first index of a plateau. The 
-returned named tuple contains the fields `indices, heights, data`, and 
-contains what the fieldnames suggest. Note that the vector stored 
-in the field `:data` is the original data vector, and not a copy.
+Find the indices and values of local minima in `x`, where each minima `i` is
+either the minimum of `x[i-w:i+w]` or the first index of a plateau.
+
+Returns a [`NamedTuple`](@ref) contains the fields `indices`, `heights`, `data`, which are
+equivalent to `heights = data[indices]`. The `data` field is a reference (not a copy) to
+the argument `x`.
 
 A plateau is defined as a minima with consecutive equal (`===`/egal) minimal values which
 are bounded by greater values immediately before and after the consecutive minimal values.
@@ -346,5 +348,5 @@ julia> valleys = findminima(data)
 """
 function findminima(x, w::Int=1; strict::Bool=true)
     idxs = argminima(x, w; strict=strict)
-    return (indices=idxs, heights=x[idxs], data=x)
+    return (;indices=idxs, heights=x[idxs], data=x)
 end
