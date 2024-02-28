@@ -107,8 +107,8 @@ function peakheights!(
     length(peaks) == length(heights) || throw(DimensionMismatch("length of `peaks`, $(length(peaks)), does not match the length of `heights`, $(length(heights))"))
     if !isnothing(min) || !isnothing(max)
         lo = something(min, typemin(Base.nonmissingtype(T)))
-        up = something(max, typemax(Base.nonmissingtype(T)))
-        matched = findall(x -> !(lo ≤ x ≤ up), heights)
+        hi = something(max, typemax(Base.nonmissingtype(T)))
+        matched = findall(x -> !(lo ≤ x ≤ hi), heights)
         deleteat!(peaks, matched)
         deleteat!(heights, matched)
     end

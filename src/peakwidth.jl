@@ -156,22 +156,22 @@ function peakwidths!(
         else
             ht = op(x[peaks[i]], relheight * proms[i])
             lo = findprev(v -> !ismissing(v) && cmp(v, ht), x, peaks[i])
-            up = findnext(v -> !ismissing(v) && cmp(v, ht), x, peaks[i])
+            hi = findnext(v -> !ismissing(v) && cmp(v, ht), x, peaks[i])
 
             if !strict
                 if !isnothing(lo)
                     lo1 = findnext(v -> !ismissing(v) && cmp(ht, v), x, lo + 1)
                     lo += (ht - x[lo]) / (x[lo1] - x[lo]) * (lo1 - lo)
                 end
-                if !isnothing(up)
-                    up1 = findprev(v -> !ismissing(v) && cmp(ht, v), x, up - 1)
-                    up -= (ht - x[up]) / (x[up1] - x[up]) * (up - up1)
+                if !isnothing(hi)
+                    hi1 = findprev(v -> !ismissing(v) && cmp(ht, v), x, hi - 1)
+                    hi -= (ht - x[hi]) / (x[hi1] - x[hi]) * (hi - hi1)
                 end
             else
                 !isnothing(lo) && (lo += (ht - x[lo]) / (x[lo+1] - x[lo]))
-                !isnothing(up) && (up -= (ht - x[up]) / (x[up-1] - x[up]))
+                !isnothing(hi) && (hi -= (ht - x[hi]) / (x[hi-1] - x[hi]))
             end
-            redge[i] = something(up, lst)
+            redge[i] = something(hi, lst)
             ledge[i] = something(lo, fst)
         end
     end
@@ -180,8 +180,8 @@ function peakwidths!(
 
     if !isnothing(min) || !isnothing(max)
         lo = something(min, zero(eltype(widths)))
-        up = something(max, typemax(Base.nonmissingtype(eltype(widths))))
-        matched = findall(x -> !ismissing(x) && !(lo ≤ x ≤ up), widths)
+        hi = something(max, typemax(Base.nonmissingtype(eltype(widths))))
+        matched = findall(x -> !ismissing(x) && !(lo ≤ x ≤ hi), widths)
         deleteat!(peaks, matched)
         deleteat!(ledge, matched)
         deleteat!(redge, matched)

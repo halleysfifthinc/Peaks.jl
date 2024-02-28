@@ -208,8 +208,8 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
 
     if !isnothing(min) || !isnothing(max)
         lo = something(min, zero(eltype(x)))
-        up = something(max, typemax(Base.nonmissingtype(eltype(x))))
-        matched = findall(x -> !ismissing(x) && !(lo ≤ x ≤ up), proms)
+        hi = something(max, typemax(Base.nonmissingtype(eltype(x))))
+        matched = findall(x -> !ismissing(x) && !(lo ≤ x ≤ hi), proms)
         deleteat!(peaks, matched)
         deleteat!(proms, matched)
     end
