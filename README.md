@@ -1,4 +1,5 @@
 # Peaks.jl
+
 [![version](https://juliahub.com/docs/Peaks/version.svg)](https://juliahub.com/ui/Packages/Peaks/3TWUM)
 [![pkgeval](https://juliahub.com/docs/Peaks/pkgeval.svg)](https://juliahub.com/ui/Packages/Peaks/3TWUM)
 [![stable-docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://halleysfifthinc.github.io/Peaks.jl/stable)
