@@ -4,6 +4,12 @@
 
     @test_throws DimensionMismatch peakheights(pks, heights[1:end-1])
 
+    # TODO: Remove after next breaking release (v0.5)
+    @test_logs (:warn, r"renamed") peakheights(pks, heights; maxheight=1)
+    @test_logs (:warn, r"renamed") peakheights(pks, heights; minheight=1)
+    @test_logs (:warn, r"renamed") peakheights!(copy(pks), copy(heights); maxheight=1)
+    @test_logs (:warn, r"renamed") peakheights!(copy(pks), copy(heights); minheight=1)
+
     filtpks, Y = peakheights(pks, heights)
     @test pks == filtpks
     @test Y == heights
