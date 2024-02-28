@@ -13,6 +13,7 @@ peakwidths
 peakwidths!
 peakheights
 peakheights!
+filterpeaks!
 findnextmaxima
 findnextminima
 ismaxima
