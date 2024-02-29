@@ -63,6 +63,10 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         p5 = [-1,6,3,4,2,4,2,5,-2,0]
         @test last(peakproms(argmaxima(p5, 3; strict=false), p5; strict=false)) == [7,3]
         @test last(peakproms(argmaxima(reverse(p5), 3; strict=false), reverse(p5); strict=false)) == [3,7]
+
+        # strict prominence on unstrict peaks give unknown prominence
+        p2_unstrict = argmaxima(p2; strict=false)
+        @test isequal(last(peakproms(p2_unstrict, p2)), [missing, 2, missing])
     end
 
     @testset "Min/max prominence" begin
