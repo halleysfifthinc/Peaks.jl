@@ -73,6 +73,7 @@ function filterpeaks!(pks::NamedTuple, mask::Union{BitVector, Vector{Bool}})
 end
 
 function filterpeaks!(pks::NamedTuple, feature::Symbol; min=nothing, max=nothing)
+    haskey(pks, feature) || throw(ArgumentError("`pks` does not have key `$feature`"))
     if !isnothing(min) || !isnothing(max)
         lo = something(min, zero(eltype(pks.data)))
         hi = something(max, typemax(Base.nonmissingtype(eltype(pks.data))))
