@@ -203,7 +203,17 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
                 rref = exm(view(notmval, k:rb)) # Slice corollary upper side
             end
 
-            proms[i] = abs(x[peaks[i]] - exa(coalesce(lref, rref), coalesce(rref, lref)))
+            proms[i] =  abs(x[peaks[i]] -
+                            # exa(coalesce(lref, rref), coalesce(rref, lref)))
+                            # we manually union-split this for better type-inference
+                            if ismissing(lref)
+                                rref
+                            elseif ismissing(rref)
+                                lref
+                            else
+                                exa(lref, rref)
+                            end
+                        )
         end
     end
 
