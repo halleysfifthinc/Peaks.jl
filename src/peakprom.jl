@@ -70,6 +70,43 @@ peakproms(; kwargs...) = function _curried_peakproms(pks)
     return peakproms(pks; kwargs...)
 end
 
+function _strict_inner_promscalcloop!(cmp::C, extremum::M, extrema::A, _ref::MT, x::AbstractVector{T}, peaks::AbstractVector{Int}, proms::AbstractVector{MT}) where {C,M,A,T,MT}
+        lbegin, lend = firstindex(x), lastindex(x)
+
+        @inbounds for i in eachindex(peaks, proms)
+            # Find left and right bound (self-intersections)
+            lb = something(findprev(y -> cmp(y, x[peaks[i]]) === true, x, peaks[i] - 2),
+                lbegin)
+            rb = something(findnext(y -> cmp(y, x[peaks[i]]) === true, x, peaks[i] + 2),
+                lend)
+
+            # Find extremum of left and right bounds
+            if isempty(lb:(peaks[i]-1))
+                lref = _ref
+            else
+                lref = extremum(view(x, lb:(peaks[i]-1)))
+            end
+
+            if isempty((peaks[i]+1):rb)
+                rref = _ref
+            else
+                rref = extremum(view(x, (peaks[i]+1):rb))
+            end
+
+            exa_ref = if ismissing(lref)
+                rref
+            elseif ismissing(rref)
+                lref
+            else
+                extrema(lref, rref)
+            end
+
+            proms[i] = abs(x[peaks[i]] - exa_ref)
+        end
+
+        return nothing
+end
+
 """
     peakproms!(indices, x; [strict=true, min, max]) -> (indices, proms)
     peakproms!(pks::NamedTuple; [strict=true, min, max]) -> NamedTuple
@@ -134,29 +171,11 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
     proms = similar(peaks, promote_type(T, typeof(_ref)))
 
     if strict
-        lbegin, lend = firstindex(x), lastindex(x)
-
-        @inbounds for i in eachindex(peaks, proms)
-            # Find left and right bound (self-intersections)
-            lb = something(findprev(y -> cmp(y, x[peaks[i]]) === true, x, peaks[i] - 2),
-                lbegin)
-            rb = something(findnext(y -> cmp(y, x[peaks[i]]) === true, x, peaks[i] + 2),
-                lend)
-
-            # Find extremum of left and right bounds
-            if isempty(lb:(peaks[i]-1))
-                lref = _ref
-            else
-                lref = exm(view(x, lb:(peaks[i]-1)))
-            end
-
-            if isempty((peaks[i]+1):rb)
-                rref = _ref
-            else
-                rref = exm(view(x, (peaks[i]+1):rb))
-            end
-
-            proms[i] = abs(x[peaks[i]] - exa(lref, rref))
+        # Add a function barrier and manually union-split the cmp/exm/exa functions
+        if maxima
+            _strict_inner_promscalcloop!(≥, minimum, Base.max, _ref, x, peaks, proms)
+        else
+            _strict_inner_promscalcloop!(≤, maximum, Base.min, _ref, x, peaks, proms)
         end
     else
         # The extremum search space in the bounding intervals can be reduced by
@@ -178,9 +197,15 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
             j = searchsorted(peaks′, peaks[i])
 
             # Find left and right bounding peaks
-            _lb = findprev(y -> cmp(x[y], x[peaks[i]]) === true, peaks′, first(j) - 1)
-            peaks′[j] === peaks[i] && (j += 1)
-            _rb = findnext(y -> cmp(x[y], x[peaks[i]]) === true, peaks′, last(j) + 1)
+            if maxima # cmp = ≥, manual union-splitting
+                _lb = findprev(y -> ≥(x[y], x[peaks[i]]) === true, peaks′, first(j) - 1)
+                peaks′[j] === peaks[i] && (j += 1)
+                _rb = findnext(y -> ≥(x[y], x[peaks[i]]) === true, peaks′, last(j) + 1)
+            else # cmp = ≤
+                _lb = findprev(y -> ≤(x[y], x[peaks[i]]) === true, peaks′, first(j) - 1)
+                peaks′[j] === peaks[i] && (j += 1)
+                _rb = findnext(y -> ≤(x[y], x[peaks[i]]) === true, peaks′, last(j) + 1)
+            end
 
             # Find left and right reverse peaks just inside the bounding peaks
             lb = isnothing(_lb) ? firstindex(notm) :
@@ -205,7 +230,7 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
 
             # exa(coalesce(lref, rref), coalesce(rref, lref)))
             # we manually union-split this for better type-inference
-            exa_lref_rref = if ismissing(lref)
+            exa_ref = if ismissing(lref)
                 rref
             elseif ismissing(rref)
                 lref
@@ -213,7 +238,7 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
                 exa(lref, rref)
             end
 
-            proms[i] =  abs(x[peaks[i]] - exa_lref_rref)
+            proms[i] =  abs(x[peaks[i]] - exa_ref)
         end
     end
 
