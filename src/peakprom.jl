@@ -205,7 +205,7 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
 
             # exa(coalesce(lref, rref), coalesce(rref, lref)))
             # we manually union-split this for better type-inference
-            exalrefrref = if ismissing(lref)
+            exa_lref_rref = if ismissing(lref)
                 rref
             elseif ismissing(rref)
                 lref
@@ -213,7 +213,7 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
                 exa(lref, rref)
             end
 
-            proms[i] =  abs(x[peaks[i]] - exalrefrref)
+            proms[i] =  abs(x[peaks[i]] - exa_lref_rref)
         end
     end
 
