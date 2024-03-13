@@ -1,24 +1,20 @@
 const known_fields = (:indices, :proms, :heights, :widths, :edges)
 
 function check_known_fields_equal_length(pks::NamedTuple)
-    features_to_filter = known_fields
-
-    feature_lengths = [length(pks[feature])
-        for feature in features_to_filter if hasproperty(pks, feature)]
-
-    # We refrain from using `allequal` to support Julia < 1.8
-    if !all(first(feature_lengths) == feature_lengths[i]
-            for i in eachindex(feature_lengths))
+    if !all(==(length(pks.indices))∘length, pks[k]
+            for k in keys(pks) if k in known_fields)
         length_pairs = [feature=>length(pks[feature])
-            for feature in features_to_filter if hasproperty(pks, feature)]
-        throw(DimensionMismatch("Expected all known fields of `pks` to be of equal length. Instead found the following pairs of known field and length: $length_pairs"))
+            for feature in known_fields if hasproperty(pks, feature)]
+        throw(DimensionMismatch(
+        "Expected all standard fields of `pks` (exc. `:data`) to be of equal length. Instead,"*
+        "found the following lengths: "*join(length_pairs, ", ", " and ")))
     end
     return nothing
 end
 
 function check_has_required_fields(pks::NamedTuple)
-    !haskey(pks, :indices) && throw(ArgumentError(
-        "`pks` is missing required field `:indices`"))
+    !hasproperty(pks, :indices) &&
+        throw(ArgumentError("`pks` is missing required field `:indices`"))
     return nothing
 end
 
@@ -51,7 +47,7 @@ julia> filterpeaks!(pks, mask)
 (indices = [7], heights = [4], data = [0, 5, 2, 3, 3, 1, 4, 0], proms = Union{Missing, Int64}[3])
 ```
 """
-function filterpeaks!(pks::NamedTuple, mask::Union{BitVector, Vector{Bool}})
+function filterpeaks!(pks::NamedTuple, mask::Union{BitVector, Vector{Bool}}; mutatemask=false)
     # Check lengths first to avoid a dimension mismatch
     # after having filtered some features.
     # feature_mask = hasproperty.(pks, features_to_filter)
@@ -65,20 +61,25 @@ function filterpeaks!(pks::NamedTuple, mask::Union{BitVector, Vector{Bool}})
         ))
     end
 
+    if mutatemask
+        mask .= .!mask
+    else
+        mask = .!mask
+    end
     for field in known_fields  # Only risk mutating fields added by this package
         hasproperty(pks, field) || continue  # Do nothing if field is not present
-        deleteat!(pks[field], .!mask)
+        deleteat!(pks[field], mask)
     end
     return pks
 end
 
 function filterpeaks!(pks::NamedTuple, feature::Symbol; min=nothing, max=nothing)
-    haskey(pks, feature) || throw(ArgumentError("`pks` does not have key `$feature`"))
+    hasproperty(pks, feature) || throw(ArgumentError("`pks` does not have key `$feature`"))
     if !isnothing(min) || !isnothing(max)
         lo = something(min, zero(eltype(pks.data)))
         hi = something(max, typemax(Base.nonmissingtype(eltype(pks.data))))
         mask = map(x -> !ismissing(x) && (lo ≤ x ≤ hi), pks[feature])
-        filterpeaks!(pks, mask)
+        filterpeaks!(pks, mask; mutatemask=true)
     end
     return pks
 end
@@ -87,8 +88,8 @@ end
     filterpeaks!(pred, pks) -> NamedTuple
 
 Apply a predicate function `pred` to NamedTuple slices (the scalar values related to each
-peak, e.g. `(indices=5, heights=3, proms=2)`)to get a filter-mask . A peak is removed if
-`pred` returns `false`.
+peak, e.g. `(indices=5, heights=3, proms=2)`) to and remove a peak if `pred` returns
+`false`.
 
 # Examples
 ```jldoctest
