@@ -186,7 +186,7 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
         notmval = x[notm]
 
         for i in eachindex(peaks, proms)
-            j = searchsorted(peaks′, peaks[i])
+            j = only(searchsorted(peaks′, peaks[i]))
 
             # Find left and right bounding peaks
             if maxima # cmp = ≥, manual union-splitting
