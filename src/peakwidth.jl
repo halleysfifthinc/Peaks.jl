@@ -79,6 +79,40 @@ peakwidths(; kwargs...) = function _curried_peakwidths(pks)
     return peakwidths(pks; kwargs...)
 end
 
+function _inner_widthscalcloop!(op::O, cmp::C, x::AbstractVector{T}, peaks::AbstractVector{Int}, proms::AbstractVector{P}, ledge::AbstractVector{V}, redge::AbstractVector{V}, relheight::U, _bad, fst, lst, strict::Bool) where {O,C,T,P,V,U}
+    for i in eachindex(peaks, ledge, redge)
+        prom = proms[i]
+        if ismissing(prom) || isnan(prom)
+            redge[i] = _bad
+            ledge[i] = _bad
+        else
+            ht = op(x[peaks[i]], relheight * prom)
+            lo = findprev(v -> !ismissing(v) && cmp(v, ht), x, peaks[i])
+            hi = findnext(v -> !ismissing(v) && cmp(v, ht), x, peaks[i])
+
+            if !strict
+                if !isnothing(lo)
+                    lo1 = findnext(v -> !ismissing(v) && cmp(ht, v), x, lo + 1)
+                    @assert !isnothing(lo1)
+                    lo += (ht - x[lo]) / (x[lo1] - x[lo]) * (lo1 - lo)
+                end
+                if !isnothing(hi)
+                    hi1 = findprev(v -> !ismissing(v) && cmp(ht, v), x, hi - 1)
+                    @assert !isnothing(hi1)
+                    hi -= (ht - x[hi]) / (x[hi1] - x[hi]) * (hi - hi1)
+                end
+            else
+                !isnothing(lo) && (lo += (ht - x[lo]) / (x[lo+1] - x[lo]))
+                !isnothing(hi) && (hi -= (ht - x[hi]) / (x[hi-1] - x[hi]))
+            end
+            redge[i] = something(hi, lst)
+            ledge[i] = something(lo, fst)
+        end
+    end
+
+    return nothing
+end
+
 """
     peakwidths!(indices, x; [strict=true, relheight=0.5, min, max]) -> (indices, widths, ledge, redge)
     peakwidths!(pks::NamedTuple; [strict=true, relheight=0.5, min, max]) -> NamedTuple
@@ -132,8 +166,6 @@ function peakwidths!(
     else
         throw(ArgumentError("The first peak in `indices` is not a local extrema"))
     end
-    cmp = maxima ? (≤) : (≥)
-    op = maxima ? (-) : (+)
 
     V1 = promote_type(T, U)
     _bad = Missing <: V1 ? missing : float(Int)(NaN)
@@ -141,6 +173,7 @@ function peakwidths!(
     V = promote_type(V1, float(Int))
     ledge = similar(proms, V)
     redge = similar(proms, V)
+    widths = similar(proms, V)
 
     if strict
         lst, fst = _bad, _bad
@@ -149,35 +182,13 @@ function peakwidths!(
         fst = firstindex(x)
     end
 
-    for i in eachindex(peaks, ledge, redge)
-        prom = proms[i]
-        if ismissing(prom) || isnan(prom)
-            redge[i] = _bad
-            ledge[i] = _bad
-        else
-            ht = op(x[peaks[i]], relheight * proms[i])
-            lo = findprev(v -> !ismissing(v) && cmp(v, ht), x, peaks[i])
-            hi = findnext(v -> !ismissing(v) && cmp(v, ht), x, peaks[i])
-
-            if !strict
-                if !isnothing(lo)
-                    lo1 = findnext(v -> !ismissing(v) && cmp(ht, v), x, lo + 1)
-                    lo += (ht - x[lo]) / (x[lo1] - x[lo]) * (lo1 - lo)
-                end
-                if !isnothing(hi)
-                    hi1 = findprev(v -> !ismissing(v) && cmp(ht, v), x, hi - 1)
-                    hi -= (ht - x[hi]) / (x[hi1] - x[hi]) * (hi - hi1)
-                end
-            else
-                !isnothing(lo) && (lo += (ht - x[lo]) / (x[lo+1] - x[lo]))
-                !isnothing(hi) && (hi -= (ht - x[hi]) / (x[hi-1] - x[hi]))
-            end
-            redge[i] = something(hi, lst)
-            ledge[i] = something(lo, fst)
-        end
+    if maxima
+        _inner_widthscalcloop!(-, ≤, x, peaks, proms, ledge, redge, relheight, _bad, fst, lst, strict)
+    else
+        _inner_widthscalcloop!(+, ≥, x, peaks, proms, ledge, redge, relheight, _bad, fst, lst, strict)
     end
 
-    widths::Vector{V} = redge - ledge
+    widths .= redge .- ledge
 
     if !isnothing(min) || !isnothing(max)
         lo = something(min, zero(eltype(widths)))
@@ -193,14 +204,13 @@ function peakwidths!(
 end
 
 function peakwidths!(pks::NamedTuple; strict=true, relheight=0.5, min=nothing, max=nothing)
-    !haskey(pks, :proms) && throw(ArgumentError(
+    !hasproperty(pks, :proms) && throw(ArgumentError(
         "Argument `pks` is expected to have prominences (`:proms`) already calculated"))
     if xor(hasproperty(pks, :widths), hasproperty(pks, :edges))
         throw(ArgumentError("Argument `pks` is expected have neither or both of the fields `:widths` and `:edges`."))
     end
     if !hasproperty(pks, :widths)
-        # Avoid filtering by min/max/strict here, so that it always happens outside if-statement.
-        # Pro: one less edge case. Con: More internal allocations
+        # Wait to filter until after merging `pks`
         _, widths, leftedges, rightedges = peakwidths(pks.indices, pks.data, pks.proms; relheight, strict)
         pks = merge(pks, (; widths, edges=collect(zip(leftedges, rightedges))))
     end

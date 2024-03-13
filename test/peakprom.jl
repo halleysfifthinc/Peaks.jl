@@ -47,6 +47,11 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test last(peakproms(argmaxima(p4[2:end-1]), p4[2:end-1])) == [1]
         @test last(peakproms(argmaxima(p4[2:end-1]; strict=false), p4[2:end-1]; strict=false)) == [2,1,1]
 
+        # Plateaus have the same prominence
+        p4_plat = [0,4,2,4,4,3,4,0]
+        @test last(peakproms(argmaxima(p4_plat), p4_plat)) == [2,1,1]
+        @test last(peakproms(argmaxima(p4_plat), p4_plat; strict=false)) == [2,1,1]
+
         # The presence of a missing/NaN in either bounding interval poisons the prominence
         m4 = [missing; p4; missing]
         n4 = [NaN; p4; NaN]
