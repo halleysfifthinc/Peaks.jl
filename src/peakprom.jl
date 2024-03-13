@@ -190,13 +190,11 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
 
             # Find left and right bounding peaks
             if maxima # cmp = ≥, manual union-splitting
-                _lb = findprev(y -> ≥(x[y], x[peaks[i]]) === true, peaks′, first(j) - 1)
-                peaks′[j] === peaks[i] && (j += 1)
-                _rb = findnext(y -> ≥(x[y], x[peaks[i]]) === true, peaks′, last(j) + 1)
+                _lb = findprev(y -> ≥(x[y], x[peaks[i]]) === true, peaks′, j - 1)
+                _rb = findnext(y -> ≥(x[y], x[peaks[i]]) === true, peaks′, j + 1)
             else # cmp = ≤
-                _lb = findprev(y -> ≤(x[y], x[peaks[i]]) === true, peaks′, first(j) - 1)
-                peaks′[j] === peaks[i] && (j += 1)
-                _rb = findnext(y -> ≤(x[y], x[peaks[i]]) === true, peaks′, last(j) + 1)
+                _lb = findprev(y -> ≤(x[y], x[peaks[i]]) === true, peaks′, j - 1)
+                _rb = findnext(y -> ≤(x[y], x[peaks[i]]) === true, peaks′, j + 1)
             end
 
             # Find left and right reverse peaks just inside the bounding peaks
