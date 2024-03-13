@@ -204,14 +204,13 @@ function peakwidths!(
 end
 
 function peakwidths!(pks::NamedTuple; strict=true, relheight=0.5, min=nothing, max=nothing)
-    !haskey(pks, :proms) && throw(ArgumentError(
+    !hasproperty(pks, :proms) && throw(ArgumentError(
         "Argument `pks` is expected to have prominences (`:proms`) already calculated"))
     if xor(hasproperty(pks, :widths), hasproperty(pks, :edges))
         throw(ArgumentError("Argument `pks` is expected have neither or both of the fields `:widths` and `:edges`."))
     end
     if !hasproperty(pks, :widths)
-        # Avoid filtering by min/max/strict here, so that it always happens outside if-statement.
-        # Pro: one less edge case. Con: More internal allocations
+        # Wait to filter until after merging `pks`
         _, widths, leftedges, rightedges = peakwidths(pks.indices, pks.data, pks.proms; relheight, strict)
         pks = merge(pks, (; widths, edges=collect(zip(leftedges, rightedges))))
     end
