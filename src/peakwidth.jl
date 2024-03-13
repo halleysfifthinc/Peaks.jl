@@ -79,7 +79,7 @@ peakwidths(; kwargs...) = function _curried_peakwidths(pks)
     return peakwidths(pks; kwargs...)
 end
 
-function _inner_widthscalcloop!(op::O, cmp::C, x::AbstractVector{T}, peaks::AbstractVector{Int}, proms::AbstractVector{Union{Missing,T}}, ledge::AbstractVector{V}, redge::AbstractVector{V}, relheight::U, _bad, fst, lst, strict::Bool) where {O,C,T,V,U}
+function _inner_widthscalcloop!(op::O, cmp::C, x::AbstractVector{T}, peaks::AbstractVector{Int}, proms::AbstractVector{P}, ledge::AbstractVector{V}, redge::AbstractVector{V}, relheight::U, _bad, fst, lst, strict::Bool) where {O,C,T,P,V,U}
     for i in eachindex(peaks, ledge, redge)
         prom = proms[i]
         if ismissing(prom) || isnan(prom)

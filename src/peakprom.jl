@@ -93,15 +93,7 @@ function _strict_inner_promscalcloop!(cmp::C, extremum::M, extrema::A, _ref::MT,
                 rref = extremum(view(x, (peaks[i]+1):rb))
             end
 
-            exa_ref = if ismissing(lref)
-                rref
-            elseif ismissing(rref)
-                lref
-            else
-                extrema(lref, rref)
-            end
-
-            proms[i] = abs(x[peaks[i]] - exa_ref)
+            proms[i] = abs(x[peaks[i]] - extrema(lref, rref))
         end
 
         return nothing
