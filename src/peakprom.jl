@@ -253,12 +253,11 @@ function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
     return peaks, proms
 end
 
-function peakproms!(pks::NamedTuple; strict=true, min=nothing, max=nothing)
+function peakproms!(pks::NamedTuple{names,Ts}; strict=true, min=nothing, max=nothing) where {names,Ts}
     if !hasproperty(pks, :proms)
-        # Avoid filtering by min/max/strict here, so that it always happens outside if-statement.
-        # Pro: one less edge case. Con: More internal allocations
+        # Wait to filter until after merging `pks`
         _, proms = peakproms(pks.indices, pks.data; strict)
-        pks = merge(pks, (; proms))
+        pks = NamedTuple{(names..., :proms)}((values(pks)..., proms))
     end
     filterpeaks!(pks, :proms; min, max)
     return pks
