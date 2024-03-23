@@ -178,6 +178,73 @@ function argmaxima(
 end
 
 """
+    simplemaxima(x) -> Vector{Int}
+
+Find the indices of local maxima in `x`, where each maxima `i` is greater than both adjacent
+elements or is the first index of a plateau.
+
+A plateau is defined as a maxima with consecutive equal (`===`/egal) maximal values which
+are bounded by lesser values immediately before and after the plateau.
+
+This function is semantically equivalent to `argmaxima(x, w=1; strict=true)`, but is
+faster because of its simplified set of features. (The difference in speed scales with
+`length(x)`, up to ~2-3x faster.)
+
+Vectors with `missing`s are not supported by `simplemaxima`, use `argmaxima` if this is
+needed.
+
+See also: [`argmaxima`](@ref)
+
+# Examples
+```julia-repl
+julia> simplemaxima([0,2,0,1,1,0])
+2-element Vector{Int64}:
+ 2
+ 4
+
+julia> argmaxima([0,2,0,1,1,0])
+2-element Vector{Int64}:
+ 2
+ 4
+
+julia> simplemaxima([2,0,1,1])
+Int64[]
+
+julia> @btime simplemaxima(x) setup=(x = repeat([0,1]; outer=100));
+  620.759 ns (4 allocations: 1.92 KiB)
+
+julia> @btime argmaxima(x) setup=(x = repeat([0,1]; outer=100));
+  1.079 μs (4 allocations: 1.92 KiB)
+```
+"""
+function simplemaxima(x::AbstractVector{T}) where {T}
+    T >: Missing && throw(MethodError(simplemaxima, Tuple{typeof(x)}))
+
+    pks = Int[]
+    i = firstindex(x) + 1
+    @inbounds while i < lastindex(x)
+        xi = x[i]
+        pre = x[i-1] < xi
+        post = x[i+1] < xi
+        plat = x[i+1] === xi
+
+        if plat
+            j = something(findnext(Base.Fix2(!==, xi), x, i+2), lastindex(x)+1)
+            post = j > lastindex(x) ? false : x[j] < xi
+        end
+
+        if pre && post
+            push!(pks, i)
+            i = plat ? j+1 : i+2
+        else
+            i += 1
+        end
+    end
+
+    return pks
+end
+
+"""
     maxima(x[, w=1; strict=true]) -> Vector{eltype(x)}
 
 Find the values of local maxima in `x`, where each maxima `i` is either the maximum of
@@ -311,6 +378,73 @@ function argminima(
     while i ≤ lastindex(x)
         push!(pks, i)
         i = findnextminima(x, i+w+1, w; strict=strict)
+    end
+
+    return pks
+end
+
+"""
+    simpleminima(x) -> Vector{Int}
+
+Find the indices of local minima in `x`, where each minima `i` is less than both adjacent
+elements or is the first index of a plateau.
+
+A plateau is defined as a minima with consecutive equal (`===`/egal) minimal values which
+are bounded by greater values immediately before and after the plateau.
+
+This function is semantically equivalent to `argminima(x, w=1; strict=true)`, but is faster
+because of its simplified set of features. (The difference in speed scales with `length(x)`,
+up to ~2-3x faster.)
+
+Vectors with `missing`s are not supported by `simpleminima`, use `argminima` if this is
+needed.
+
+See also: [`argminima`](@ref)
+
+# Examples
+```julia-repl
+julia> simpleminima([3,2,3,1,1,3])
+2-element Vector{Int64}:
+ 2
+ 4
+
+julia> argminima([3,2,3,1,1,3])
+2-element Vector{Int64}:
+ 2
+ 4
+
+julia> simpleminima([2,3,1,1])
+Int64[]
+
+julia> @btime simpleminima(x) setup=(x = repeat([0,1]; outer=100));
+  671.388 ns (4 allocations: 1.92 KiB)
+
+julia> @btime argminima(x) setup=(x = repeat([0,1]; outer=100));
+  1.175 μs (4 allocations: 1.92 KiB)
+```
+"""
+function simpleminima(x::AbstractVector{T}) where {T}
+    T >: Missing && throw(MethodError(simpleminima, Tuple{typeof(x)}))
+
+    pks = Int[]
+    i = firstindex(x) + 1
+    @inbounds while i < lastindex(x)
+        xi = x[i]
+        pre = x[i-1] > xi
+        post = x[i+1] > xi
+        plat = x[i+1] === xi
+
+        if plat
+            j = something(findnext(Base.Fix2(!==, xi), x, i+2), lastindex(x)+1)
+            post = j > lastindex(x) ? false : x[j] > xi
+        end
+
+        if pre && post
+            push!(pks, i)
+            i = plat ? j+1 : i+2
+        else
+            i += 1
+        end
     end
 
     return pks
