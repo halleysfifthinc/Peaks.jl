@@ -208,8 +208,8 @@ function peakwidths!(pks::NamedTuple; strict=true, relheight=0.5, min=nothing, m
         "Argument `pks` is expected to have prominences (`:proms`) already calculated. \nExample fix: `peakwidths!(peakproms!(pks))`"))
     if xor(hasproperty(pks, :widths), hasproperty(pks, :edges))
         hasproperty(pks, :widths) ? 
-            throw(ArgumentError("Argument `pks` is has property `:widths`, but not field `:edges`. As functions from Peaks.jl only ever add both, this implies unexpected tampering with the peaks provided. To avoid unexpected behaviour, this is an error." )) :
-            throw(ArgumentError("Argument `pks` is has property `:edges`, but not field `:widths`. As functions from Peaks.jl only ever add both, this implies unexpected tampering with the peaks provided. To avoid unexpected behaviour, this is an error." ))
+            throw(ArgumentError("Argument `pks` has property `:widths`, but not field `:edges`. As functions from Peaks.jl only ever add both, this implies unexpected tampering with the peaks provided. To avoid unexpected behaviour, this is an error." )) :
+            throw(ArgumentError("Argument `pks` has property `:edges`, but not field `:widths`. As functions from Peaks.jl only ever add both, this implies unexpected tampering with the peaks provided. To avoid unexpected behaviour, this is an error." ))
     end
     if !hasproperty(pks, :widths)
         # Wait to filter until after merging `pks`
