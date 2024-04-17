@@ -7,11 +7,19 @@ makedocs(
     modules = [Peaks],
     checkdocs = :exports,
     format = Documenter.HTML(;
-        prettyurls=get(ENV, "CI", "false") == "true",
+        prettyurls=true,
         canonical="https://halleysfifthinc.github.io/Peaks.jl",
     ),
     authors="Allen Hill <allenofthehills@gmail.com> and contributors",
-    repo=Remotes.GitHub("halleysfifthinc", "Peaks.jl")
+    repo=Remotes.GitHub("halleysfifthinc", "Peaks.jl"),
+    pages=[
+        "Home" => "index.md",
+        "How-to" => "how-to.md",
+        "Reference" => [
+            "Glossary" => "glossary.md",
+            "API" => "reference.md",
+            ],
+    ],
 )
 
 # Documenter can also automatically deploy documentation to gh-pages.
