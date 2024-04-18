@@ -413,7 +413,7 @@ considered the peak location. Uncommon for floating-point data.
     p # hide
     ```
 
-##### Peak prominence
+##### [Peak prominence](@id prominence)
 
 For maxima, peak prominence is the absolute difference in height between a maxima and the
 larger of the two minimums in the adjacent reference ranges. Reference ranges are the range
@@ -426,7 +426,7 @@ extrema/extremum (e.g. minima for maxima, and maximum for minimum, etc.).
     p # hide
     ```
 
-##### Peak width
+##### [Peak width](@id width)
 
 Peak width is measured as the distance (in units of indices) between the intersection of a
 horizontal reference line with the signal on either side of a peak, where the height of the
@@ -438,7 +438,7 @@ reference line is offset from the peak height by a proportion of the peak promin
     p # hide
     ```
 
-##### "Strict"-ness
+##### ["Strict"-ness](@id strict)
 
 The default behavior of peak finding and related functions (e.g. `peakproms`, etc.) is to
 only return results that are exactly correct, and to return nothing (i.e. ignore a potential
