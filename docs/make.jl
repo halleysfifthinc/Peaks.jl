@@ -1,6 +1,8 @@
 using Documenter
 using Peaks
 
+ENV["GKSwstype"] = "100"
+
 DocMeta.setdocmeta!(Peaks, :DocTestSetup, :(using Peaks); recursive=true)
 makedocs(
     sitename = "Peaks",
