@@ -389,7 +389,7 @@ p = Plot([
 
 # Common terminology
 
-##### Peak (a.k.a. [local] extrema, maxima, minima, etc.)
+##### [Peak (a.k.a. [local] extrema, maxima, minima, etc.)](@id peak)
 
 An element `x[i]` which is more extreme than its adjacent elements, or more extreme than all
 elements in the window `x[i-w:i+w]` where `w` is a positive integer
