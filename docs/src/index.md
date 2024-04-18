@@ -25,13 +25,12 @@ print(out); # hide
 
 ```@setup tutorial
 using Peaks, Plots; gr()
-Plots.reset_defaults()
 
 a = 3
 b = 2
 c = 1
 
-fs = 100
+fs = 25
 T = 1/fs
 f1 = .05
 f2 = .10
