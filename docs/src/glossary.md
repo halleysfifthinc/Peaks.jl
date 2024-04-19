@@ -91,9 +91,9 @@ characteristics are altered) is undesired[^1] and an
 [issue](https://github.com/halleysfifthinc/Peaks.jl/issues/new/choose) should be opened.**
 
 [^1]: We try to ensure that non-`strict` peak characteristics will be
-unaffected during `strict == false` mode. Any issues with examples of altered
-characteristics are appreciated, and fixes will be attempted, but we do **not** guarantee
-that altered peak characteristics can be prevented.
+    unaffected during `strict == false` mode. Any issues with examples of altered
+    characteristics are appreciated, and fixes will be attempted, but we do **not** guarantee
+    that altered peak characteristics can be prevented.
 
 !!! warning "List of Peaks.jl function behavior/assumptions for `strict == false`"
     - `maxima`/`minima` finding functions (e.g. `findmaxima`, etc.) assume that any missing
