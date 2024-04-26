@@ -9,14 +9,16 @@ Peaks.jl can be installed from the Julia REPL by running
 ```
 
 ```@example
-_, io_err = mktemp(); # hide
-pkgout = redirect_stdio(stdout=devnull, stderr=io_err) do; # hide
-    run(`julia --color=yes -E 'using Pkg; Pkg.activate(;temp=true); Pkg.add("Peaks");'`) # hide
+mktempdir() do tmpdir # hide
+    out = read(`julia --color=yes -e " # hide
+        using Pkg; # hide
+        redirect_stderr(devnull) # hide
+        Pkg.activate(\"$tmpdir\"); # hide
+        redirect_stderr(stdout) # hide
+        Pkg.add(\"Peaks\");"`, String); # hide
+    out = replace(out, tmpdir => "~/.julia/environments/v$(VERSION.major).$(VERSION.minor)") # hide
+    print(out); # hide
 end; # hide
-seekstart(io_err); # hide
-out = read(IOContext(io_err, :color => true), String); # hide
-close(io_err); # hide
-print(out); # hide
 ```
 
 ## Getting started
