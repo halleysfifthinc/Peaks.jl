@@ -1,5 +1,8 @@
 # Peaks.jl
 
+Peaks is a library to find peaks (i.e. local maxima and minima) and peak characteristics
+(e.g. how tall or wide are peaks, etc) in vector (1D) data.
+
 ## Installation
 
 Peaks.jl can be installed from the Julia REPL by running
