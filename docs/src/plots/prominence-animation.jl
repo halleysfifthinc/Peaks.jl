@@ -9,18 +9,12 @@ Base.show(io, ::MIME"text/html", p::PlotForceHTML) = PlotlyJS.PlotlyBase.to_html
     autoplay=false, include_plotlyjs="require-loaded", include_mathjax=missing,
     full_html=false);
 
-a = 3
-b = 2
-c = 1
-
 T = .1
-f1 = .05
-f2 = .10
-f3 = .30
 
-sinf(t) = a*sin(2*pi*f1*t) + b*sin(2*pi*f2*t) + c*sin(2*pi*f3*t)
-t = 10:T:23.5
-y = sinf.(t)
+sinf(t) = 3sinpi(0.1t) + 2sinpi(0.2t) + sinpi(0.6t)
+t = round.(10:T:23.5; digits=1)
+y = round.(sinf.(t); sigdigits=3)
+
 pks, = findmaxima(y)
 currpk = pks[2]
 prevpk = pks[1]

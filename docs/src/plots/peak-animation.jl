@@ -8,25 +8,20 @@ Base.show(io, ::MIME"text/html", p::PlotForceHTML) = PlotlyJS.PlotlyBase.to_html
     autoplay=false, include_plotlyjs="require", include_mathjax=missing,
     full_html=false);
 
-a = 3
-b = 2
-c = 1
 
 T = .1
-f1 = .05
-f2 = .10
-f3 = .30
-w = 16
-frame_len = 600*T
-
-t = 0.:T:23
+t = round.(0.:T:23; digits=1)
 ax = axes(t, 1)
+
+sinf(t) = 3sinpi(0.1t) + 2sinpi(0.2t) + sinpi(0.6t)
+y = round.(sinf.(t); sigdigits=3)
+
+frame_len = 600*T
 clamp_window(i) = clamp(i-w,ax):clamp(i+w,ax)
 
-sinf(t) = a*sin(2*pi*f1*t) + b*sin(2*pi*f2*t) + c*sin(2*pi*f3*t)
-
-y = sinf.(t);
+w = 16
 pks = findmaxima(y, w)
+
 pks_trace = scatter(;x=t[pks.indices], y=pks.heights, mode="markers", zorder=10,
     name="Maxima", legendrank=2, marker=attr(;color="#d62728", opacity=zeros(ax)))
 maximum_trace = scatter(;x=[t[argmax(y[clamp_window(1)])]], y=[maximum(y[clamp_window(1)])],

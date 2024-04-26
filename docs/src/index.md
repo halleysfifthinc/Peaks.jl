@@ -26,31 +26,22 @@ print(out); # hide
 ```@setup tutorial
 using Peaks, Plots; gr()
 
-a = 3
-b = 2
-c = 1
+T = 1/25
+t = 0:T:23
 
-fs = 25
-T = 1/fs
-f1 = .05
-f2 = .10
-f3 = .30
+f(t) = 3sinpi(0.1t) + 2sinpi(0.2t) + sinpi(0.6t)
 
-t = T:T:23
-
-sinf(t) = a*sin(2*pi*f1*t) + b*sin(2*pi*f2*t) + c*sin(2*pi*f3*t)
-
-x = sinf.(t);
+y = f.(t);
 ```
 
 ```@example tutorial
-p = plot(t, x; label="signal") # hide
+p = plot(t, y; label="signal") # hide
 ```
 
 To find the peaks in your data you can use the `findmaxima` function:
 
 ```@repl tutorial
-indices, heights = findmaxima(x)
+indices, heights = findmaxima(y)
 ```
 
 When the peaks are plotted over the data, we see that all the local maxima have been identified.
@@ -64,9 +55,9 @@ plot!(p, t[indices], heights; seriestype=:scatter, label="maxima") # hide
 Two commonly desired peak characteristics can be determined using the `peakproms` and `peakwidths` functions:
 
 ```@repl tutorial
-indices, proms = peakproms(indices, x)
+indices, proms = peakproms(indices, y)
 
-indices, widths, edges... = peakwidths(indices, x, proms)
+indices, widths, edges... = peakwidths(indices, y, proms)
 ```
 
 Mutating bang (`'!'`) functions are available for `peakproms` (e.g. `peakproms!`),
@@ -77,7 +68,7 @@ Mutating bang (`'!'`) functions are available for `peakproms` (e.g. `peakproms!`
 There are Peaks.jl functions that bundle the peaks, peak characteristics, and signal into a convenient `NamedTuple`:
 
 ```@repl tutorial
-pks = findmaxima(x);
+pks = findmaxima(y);
 pks = peakproms(pks);
 pks = peakwidths(pks)
 ```
@@ -86,7 +77,7 @@ Mutating functions are also available for the `NamedTuple` functions; the vector
 `NamedTuple` are mutated and re-used in the returned tuple. The `NamedTuple` functions can also be piped:
 
 ```@repl tutorial
-pks = findmaxima(x) |> peakproms!(;strict=false) |> peakwidths!(; max=100)
+pks = findmaxima(y) |> peakproms!(;strict=false) |> peakwidths!(; max=100)
 ```
 
 !!! warning "Performance tip"
@@ -101,6 +92,6 @@ recipe `plotpeaks`:
 
 ```@example tutorial
 using Plots
-plotpeaks(t, x; peaks=indices, prominences=true, widths=true)
+plotpeaks(t, y; peaks=indices, prominences=true, widths=true)
 ```
 
