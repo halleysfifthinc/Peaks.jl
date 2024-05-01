@@ -16,7 +16,7 @@ w = 16
 pks = findmaxima(y, w)
 
 pks_trace = scatter(;x=t[pks.indices], y=pks.heights, mode="markers", zorder=10,
-    name="Maxima", legendrank=2, marker=attr(;color="#d62728", opacity=zeros(ax)))
+name="Maxima", legendrank=2, marker=attr(;color="#d62728", opacity=zeros(Int, size(pks.indices))))
 maximum_trace = scatter(;x=[t[argmax(y[clamp_window(1)])]], y=[maximum(y[clamp_window(1)])],
     mode="markers", marker_color="blueviolet", legendrank=3, zorder=5, name="Window maximum")
 windowshade = scatter(;x=[0], y=[0], visible="legendonly", opacity=.65,
@@ -133,9 +133,7 @@ p = Plot([
             traces = [1,2],
             layout = attr(;
                 shapes = [
-                    rect(t[clamp(i-w, ax)], t[clamp(i+w,ax)], 0, 1;
-                               yref="y domain", fillcolor=:black, opacity=0.25, layer="below",
-                               line_width=0),
+                    rect(t[clamp(i-w, ax)], t[clamp(i+w,ax)], 0, 1)
                     vline(t[clamp(i, ax)])
                 ]))
         for i in ax
