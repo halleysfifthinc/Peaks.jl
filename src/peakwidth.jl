@@ -17,8 +17,8 @@ from `pks`. `pks` must have `:indices`, `:heights`, and `:proms` fields. If `pks
 remaining fields will be copied unmodified.
 
 If `strict == true`, the width for a peak with a gap in the signal (e.g. `NaN`, `missing`)
-at the reference level will match the value/type of the signal gap. Otherwise, the signal
-crossing will be linearly interpolated between the edges of the gap.
+at the reference level will match the gap (e.g. `NaN` for `NaN`, etc.). Otherwise, the
+signal crossing will be linearly interpolated between the edges of the gap.
 
 See also: [`peakwidths!`](@ref), [`peakproms`](@ref), [`findmaxima`](@ref)
 
@@ -207,7 +207,7 @@ function peakwidths!(pks::NamedTuple; strict=true, relheight=0.5, min=nothing, m
     !hasproperty(pks, :proms) && throw(ArgumentError(
         "Argument `pks` is expected to have prominences (`:proms`) already calculated. \nExample fix: `peakwidths!(peakproms!(pks))`"))
     if xor(hasproperty(pks, :widths), hasproperty(pks, :edges))
-        hasproperty(pks, :widths) ? 
+        hasproperty(pks, :widths) ?
             throw(ArgumentError("Argument `pks` has property `:widths`, but not field `:edges`. As functions from Peaks.jl only ever add both, this implies unexpected tampering with the peaks provided. To avoid unexpected behaviour, this is an error." )) :
             throw(ArgumentError("Argument `pks` has property `:edges`, but not field `:widths`. As functions from Peaks.jl only ever add both, this implies unexpected tampering with the peaks provided. To avoid unexpected behaviour, this is an error." ))
     end
