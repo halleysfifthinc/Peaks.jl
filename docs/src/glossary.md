@@ -53,6 +53,7 @@ line), a peak is identified (red dot). Use the scroll bar at the bottom to under
 some "peaks" aren't found. (Hint: pay attention the window size and the window maximum.)
 
 ```@example peak-animation
+INCLUDE_PLOTLYJS[] = "require" # hide
 PlotForceHTML(p) # hide
 ```
 

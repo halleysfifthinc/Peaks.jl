@@ -1,12 +1,6 @@
 using Peaks, PlotlyJS
 
-struct PlotForceHTML
-    p::Plot
-end
-
-Base.show(io, ::MIME"text/html", p::PlotForceHTML) = PlotlyJS.PlotlyBase.to_html(io, p.p;
-    autoplay=false, include_plotlyjs="require", include_mathjax=missing,
-    full_html=false);
+include(joinpath(@__DIR__, "standards.jl"))
 
 T = .1
 w = 16
