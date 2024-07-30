@@ -1,7 +1,7 @@
 using Peaks, PlotlyJS
 
-t = -1.2:.001:1.2
-y = cospi.(t) .+ (t./-10)
+t = round.(-1.2:.01:1.2; digits=2)
+y = round.(cospi.(t) .+ (t./-10); digits=3)
 pks = findmaxima(y)
 pks = peakproms!(pks)
 relheight = 0.7
@@ -9,7 +9,7 @@ pks = peakwidths!(pks; relheight)
 
 xneg1 = findfirst(x -> x ≈ -1, t)
 
-p = plot(scatter(;y), Layout(;
+p = Plot(scatter(;y), Layout(;
     margin=attr(b=10, l=10, r=10, t=10),
     xlabel="Indices",
     showlegend=false,
@@ -18,7 +18,7 @@ p = plot(scatter(;y), Layout(;
 add_hline!(p, pks.heights[1] - pks.proms[1]; line_dash="dash", line_width=2, line_color="rgba(89,105,112,0.40)")
 add_hline!(p, pks.heights[1]; line_dash="dash", line_width=2, line_color="rgba(89,105,112,0.40)")
 
-add_trace!(p, scatter(;x=pks.indices, y=pks.heights, mode=:markers))
+add_trace!(p, scatter(;x=pks.indices.-1, y=pks.heights, mode=:markers))
 
 codefont = attr(;
         font_family="JuliaMono,SFMono-Regular,Menlo,Consolas,Liberation Mono,DejaVu Sans Mono,monospace",
@@ -27,7 +27,7 @@ codefont = attr(;
     )
 relayout!(p, font_size=13, annotations=[
     attr(;
-        x=pks.edges[1][1], ax=pks.edges[1][2],
+        x=pks.edges[1][1]-1, ax=pks.edges[1][2]-1,
         y=pks.heights[1] - pks.proms[1]*relheight,
         ay=pks.heights[1] - pks.proms[1]*relheight,
         xanchor="left",
@@ -64,7 +64,7 @@ relayout!(p, font_size=13, annotations=[
         showarrow=false,
     ),
     attr(codefont;
-        x=pks.edges[1][2],
+        x=pks.edges[1][2]-1,
         xshift=-20,
         xanchor="right",
         y=pks.heights[1] - pks.proms[1]*relheight,
