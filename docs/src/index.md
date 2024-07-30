@@ -1,7 +1,7 @@
 # Peaks.jl
 
-Peaks is a library to find peaks (i.e. local maxima and minima) and peak characteristics
-(e.g. how tall or wide are peaks, etc) in vector (1D) data.
+Peaks is a library for finding peaks (i.e. local maxima and minima) and peak characteristics
+(e.g. how tall or wide are peaks, etc) in vector (1D) data signals.
 
 ## Installation
 
@@ -43,7 +43,7 @@ y = f.(t);
 p = plot(t, y; label="signal") # hide
 ```
 
-To find the peaks in your data you can use the `findmaxima` function:
+To find the peaks in your data you can use the [`findmaxima`](@ref) function:
 
 ```@repl tutorial
 indices, heights = findmaxima(y)
@@ -57,7 +57,8 @@ plot!(p, t[indices], heights; seriestype=:scatter, label="maxima") # hide
 
 ### Peak characteristics
 
-Two commonly desired peak characteristics can be determined using the `peakproms` and `peakwidths` functions:
+Two commonly desired peak characteristics can be determined using the [`peakproms`](@ref)
+and [`peakwidths`](@ref) functions:
 
 ```@repl tutorial
 indices, proms = peakproms(indices, y)
@@ -65,7 +66,7 @@ indices, proms = peakproms(indices, y)
 indices, widths, edges... = peakwidths(indices, y, proms)
 ```
 
-Mutating bang (`'!'`) functions are available for `peakproms` (e.g. `peakproms!`),
+Mutating bang (`'!'`) functions are available for `peakproms` (e.g. [`peakproms!`](@ref)),
 `peakwidths`, and `peakheights`.
 
 ### Peaks `NamedTuple` & pipable API
@@ -88,7 +89,7 @@ pks = findmaxima(y) |> peakproms!(;strict=false) |> peakwidths!(; max=100)
 !!! warning "Performance tip"
     Be aware that the `NamedTuple` functions allocate more memory than the functions with
     direct/explicit arguments. If maximum performance is needed, mutating functions (e.g.
-    [`peakproms!`](@ref), etc) and/or the direct/non-`NamedTuple` functions are a better choice.
+    [`peakproms!`](@ref), etc) and/or the direct, non-`NamedTuple` methods are a better choice.
 
 ### Plotting
 
