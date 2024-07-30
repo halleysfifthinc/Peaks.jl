@@ -1,7 +1,8 @@
 # Peaks.jl
 
-Peaks is a library for finding peaks (i.e. local maxima and minima) and peak characteristics
-(e.g. how tall or wide are peaks, etc) in vector (1D) data signals.
+Peaks.jl is a library for finding [peaks](glossary.md#peak) (i.e. local maxima and minima)
+and peak characteristics (e.g. how prominent or wide are peaks, etc) in vector (1D) data
+signals.
 
 ## Installation
 
@@ -43,13 +44,16 @@ y = f.(t);
 p = plot(t, y; label="signal") # hide
 ```
 
-To find the peaks in your data you can use the [`findmaxima`](@ref) function:
+To find the peaks in your data you can use the [`findmaxima`](@ref) function, which returns
+a [`NamedTuple`](@extref Base Core.NamedTuple) with fields for each calculated peak
+characteristic (indices, heights) and a reference to the data.
 
 ```@repl tutorial
 indices, heights = findmaxima(y)
 ```
 
-When the peaks are plotted over the data, we see that all the local maxima have been identified.
+When the peaks are plotted over the data, we see that all the local maxima have been
+identified.
 
 ```@example tutorial
 plot!(p, t[indices], heights; seriestype=:scatter, label="maxima") # hide
@@ -57,8 +61,10 @@ plot!(p, t[indices], heights; seriestype=:scatter, label="maxima") # hide
 
 ### Peak characteristics
 
-Two commonly desired peak characteristics can be determined using the [`peakproms`](@ref)
-and [`peakwidths`](@ref) functions:
+Peaks have various characteristics, including [height](glossary.md#height),
+[prominence](glossary.md#prominence), and [width](glossary.md#width). Peaks.jl exports
+functions for finding each characteristic: [`peakheights`](@ref), [`peakproms`](@ref),
+[`peakwidths`](@ref):
 
 ```@repl tutorial
 indices, proms = peakproms(indices, y)
@@ -66,8 +72,8 @@ indices, proms = peakproms(indices, y)
 indices, widths, edges... = peakwidths(indices, y, proms)
 ```
 
-Mutating bang (`'!'`) functions are available for `peakproms` (e.g. [`peakproms!`](@ref)),
-`peakwidths`, and `peakheights`.
+Mutating bang (`'!'`) functions are available (i.e. [`peakproms!`](@ref), etc.) when
+allocations are a concern.
 
 ### Peaks `NamedTuple` & pipable API
 
@@ -80,7 +86,7 @@ pks = peakwidths(pks)
 ```
 
 Mutating functions are also available for the `NamedTuple` functions; the vectors within the
-`NamedTuple` are mutated and re-used in the returned tuple. The `NamedTuple` functions can also be piped:
+`NamedTuple` are mutated and re-used in the returned tuple. The `NamedTuple` functions can also be [chained/piped](@extref Base.:|>):
 
 ```@repl tutorial
 pks = findmaxima(y) |> peakproms!(;strict=false) |> peakwidths!(; max=100)
@@ -93,7 +99,7 @@ pks = findmaxima(y) |> peakproms!(;strict=false) |> peakwidths!(; max=100)
 
 ### Plotting
 
-The peaks, prominences, and widths can be visualized all together using the `Plots.jl`
+The peaks, prominences, and widths can be visualized all together using a `Plots.jl`
 recipe `plotpeaks`:
 
 ```@example tutorial
