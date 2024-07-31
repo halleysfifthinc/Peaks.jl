@@ -1,7 +1,5 @@
 module Peaks
 
-using Compat
-
 export argmaxima, simplemaxima, argminima, simpleminima, maxima, minima, findmaxima,
     findminima, findnextmaxima, findnextminima, peakproms, peakproms!, peakwidths,
     peakwidths!, peakheights, peakheights!, ismaxima, isminima, isplateau, filterpeaks!
@@ -15,7 +13,7 @@ include("plot.jl")
 
 function __init__()
     Base.Experimental.register_error_hint(MethodError) do io, exc, argtypes, kwargs
-        if exc.f == simplemaxima || exc.f == simpleminima
+        if (exc.f == simplemaxima || exc.f == simpleminima) && eltype(argtypes[1]) <: Missing
             if exc.f == simplemaxima
                 cmp = "max"
             else
