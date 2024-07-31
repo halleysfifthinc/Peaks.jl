@@ -1,7 +1,5 @@
 module Peaks
 
-using Compat
-
 export argmaxima, argminima, maxima, minima, findmaxima, findminima, findnextmaxima,
     findnextminima, peakproms, peakproms!, peakwidths, peakwidths!, peakheights,
     peakheights!, ismaxima, isminima, filterpeaks!
