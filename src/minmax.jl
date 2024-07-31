@@ -8,11 +8,15 @@ function findnextextrema(cmp, x::AbstractVector, i::Int, w::Int, strict::Bool)
     while i ≤ maxlast
         peak = true
         xi = x[i]
+        # @show i, xi
         if ismissing(xi) || isnan(xi)
             i = something(findnext(p -> !isnan(p) & !ismissing(p), x, i+1), lastindex(x)+1)
         else
-            for j in max(firstindex(x),i-w):min(i+w,lastindex(x))
+            hi = min(i+w,lastindex(x))
+            lo = max(firstindex(x),i-w)
+            for j in lo:hi
                 j === i && continue
+                # @show lo, j, hi
                 xj = x[j]
                 if coalesce(cmp(xi, xj), strict) || (strict && isnan(xj))
                     peak &= false
@@ -20,21 +24,27 @@ function findnextextrema(cmp, x::AbstractVector, i::Int, w::Int, strict::Bool)
                     break # No reason to continue checking if the rest of the elements qualify
                 elseif xi === xj # potential plateau
                     k = findnext(p -> xi !== p, x, j+1)
-                    # @show k i j
+                    # @show i, j, k
                     if strict
+                        # @show !isnothing(k) && i-1 ≥ firstindex(x)
                         if !isnothing(k) && i-1 ≥ firstindex(x)
                             xi1 = x[i-1]
                             xk = x[k]
-                            # @show xi1 xi xk i j k
+                            # @show xi1, xk
+                            # @show k < i
+                            # @show k ≥ hi, !ismissing(xi1), !isnan(xi1), cmp(xi1, xi), !ismissing(xk), !isnan(xk), cmp(xk, xi)
                             if k < i
                                 # elements of equal value are allowed within x[i-w:i+w] when
                                 # `strict == true` (as long as the immediately previous
                                 # element is less than `x[i]`, etc as tested on the next
                                 # line)
                                 continue
-                            elseif !ismissing(xi1) && !isnan(xi1) && cmp(xi1, xi) &&
+                            elseif k ≥ hi && !ismissing(xi1) && !isnan(xi1) && cmp(xi1, xi) &&
                                 !ismissing(xk) && !isnan(xk) && cmp(xk, xi)
-                                # plateau begins and ends with elements less than the current
+                                # plateau is confirmed:
+                                #   - longer than window (not necessary by definition, but
+                                #     necessary for fastpath)
+                                #   - begins and ends with elements less than the current
                                 return i
                             else
                                 peak &= false
@@ -50,7 +60,7 @@ function findnextextrema(cmp, x::AbstractVector, i::Int, w::Int, strict::Bool)
                     else
                         xk = isnothing(k) ? NaN : x[k]
                         xi1 = i-1 ≥ firstindex(x) ? x[i-1] : NaN
-                        if i+w ≤ something(k, lastindex(x)+1) &&
+                        if something(k, lastindex(x)+1) ≥ hi &&
                             (ismissing(xi1) || isnan(xi1) || cmp(xi1, xi)) &&
                             (ismissing(xk) || isnan(xk) || cmp(xk, xi))
                             return i
