@@ -85,6 +85,34 @@ function findnextextrema(cmp, x::AbstractVector, i::Int, w::Int, strict::Bool)
     return lastindex(x) + 1
 end
 
+function _simpleextrema(f, cmp::F, x::AbstractVector{T}) where {F,T}
+    T >: Missing && throw(MethodError(simplemaxima, Tuple{typeof(x)}))
+
+    pks = Int[]
+    i = firstindex(x) + 1
+    @inbounds while i < lastindex(x)
+        xi = x[i]
+        pre = cmp(x[i-1], xi)
+        post = cmp(x[i+1], xi)
+        plat = x[i+1] === xi
+
+        if plat
+            j = something(findnext(Base.Fix2(!==, xi), x, i+2), lastindex(x)+1)
+            post = j > lastindex(x) ? false : cmp(x[j], xi)
+        end
+
+        if pre && post
+            push!(pks, i)
+            i = plat ? j+1 : i+2
+        else
+            i += 1
+        end
+    end
+
+    return pks
+end
+
+
 """
     findnextmaxima(x, i[, w=1; strict=true]) -> Int
 
@@ -217,32 +245,7 @@ julia> @btime argmaxima(x) setup=(x = repeat([0,1]; outer=100));
   1.079 μs (4 allocations: 1.92 KiB)
 ```
 """
-function simplemaxima(x::AbstractVector{T}) where {T}
-    T >: Missing && throw(MethodError(simplemaxima, Tuple{typeof(x)}))
-
-    pks = Int[]
-    i = firstindex(x) + 1
-    @inbounds while i < lastindex(x)
-        xi = x[i]
-        pre = x[i-1] < xi
-        post = x[i+1] < xi
-        plat = x[i+1] === xi
-
-        if plat
-            j = something(findnext(Base.Fix2(!==, xi), x, i+2), lastindex(x)+1)
-            post = j > lastindex(x) ? false : x[j] < xi
-        end
-
-        if pre && post
-            push!(pks, i)
-            i = plat ? j+1 : i+2
-        else
-            i += 1
-        end
-    end
-
-    return pks
-end
+simplemaxima(x::AbstractVector) = _simpleextrema(simplemaxima, <, x)
 
 """
     maxima(x[, w=1; strict=true]) -> Vector{eltype(x)}
@@ -423,32 +426,7 @@ julia> @btime argminima(x) setup=(x = repeat([0,1]; outer=100));
   1.175 μs (4 allocations: 1.92 KiB)
 ```
 """
-function simpleminima(x::AbstractVector{T}) where {T}
-    T >: Missing && throw(MethodError(simpleminima, Tuple{typeof(x)}))
-
-    pks = Int[]
-    i = firstindex(x) + 1
-    @inbounds while i < lastindex(x)
-        xi = x[i]
-        pre = x[i-1] > xi
-        post = x[i+1] > xi
-        plat = x[i+1] === xi
-
-        if plat
-            j = something(findnext(Base.Fix2(!==, xi), x, i+2), lastindex(x)+1)
-            post = j > lastindex(x) ? false : x[j] > xi
-        end
-
-        if pre && post
-            push!(pks, i)
-            i = plat ? j+1 : i+2
-        else
-            i += 1
-        end
-    end
-
-    return pks
-end
+simpleminima(x::AbstractVector) = _simpleextrema(simpleminima, >, x)
 
 """
     minima(x[, w=1; strict=true]) -> Vector{eltype(x)}
