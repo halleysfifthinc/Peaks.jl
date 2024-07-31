@@ -2,7 +2,7 @@ module Peaks
 
 export argmaxima, argminima, maxima, minima, findmaxima, findminima, findnextmaxima,
     findnextminima, peakproms, peakproms!, peakwidths, peakwidths!, peakheights,
-    peakheights!, ismaxima, isminima, filterpeaks!
+    peakheights!, ismaxima, isminima, isplateau, filterpeaks!
 
 include("minmax.jl")
 include("utils.jl")

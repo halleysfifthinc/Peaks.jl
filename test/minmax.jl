@@ -151,7 +151,7 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test isempty(argminima(reverse(mn)))
     end
 
-    @testset "is(minima|maxima)" begin
+    @testset "is(minima|maxima|plateau)" begin
         isx =  [0,0,3,1,2,0,4,4,0,5]
         ispk = [0,0,1,0,1,0,1,0,0,1] # Not strict
 
@@ -164,6 +164,13 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test isminima(10, -isx; strict=true) == false
         @test isminima(10, -isx; strict=false) == true
         @test isminima.(eachindex(isx), Ref(-isx); strict=false) == ispk
+
+        @test isplateau(7, isx) == true
+        @test isplateau(8, isx) == false
+        @test isplateau(3, isx) == false
+
+        @test isplateau(10, isx; strict=true) == false
+        @test isplateau(10, isx; strict=false) == false
     end
 
     pks, vals = @test_nowarn findmaxima(x1)

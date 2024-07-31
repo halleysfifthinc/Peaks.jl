@@ -28,5 +28,6 @@ findnextmaxima
 findnextminima
 ismaxima
 isminima
+isplateau
 ```
 
