@@ -12,7 +12,7 @@ t = T:T:fs
 
 x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
 
-@testset "argminima/argmaxima" begin
+@testset "maxima/minima" begin
     @test_throws DomainError Peaks.findnextextrema(<, x1, 1, 0, false)
     @test length(argmaxima(x1)) == 30
     @test length(argminima(x1)) == 30
@@ -29,6 +29,9 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
     @test argmaxima([0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], 2) == [4,8,12]
     @test argmaxima([0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], 2; strict=false) == [2,6,10,14]
 
+    @test simplemaxima(x1) == argmaxima(x1)
+    @test simpleminima(x1) == argminima(x1)
+
     # OffsetArrays
     x1_off = OffsetArray(x1, -200:length(x1)-201)
     @test length(argmaxima(x1_off)) == 30
@@ -39,6 +42,8 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
     @test length(argminima(x1_off, 1; strict=false)) == 31
     @test argmaxima(x1_off, 1; strict=false) == argmaxima(x1, 1; strict=false) .- 201
     @test argminima(x1_off, 1; strict=false) == argminima(x1, 1; strict=false) .- 201
+    @test simplemaxima(x1_off) == argmaxima(x1_off)
+    @test simpleminima(x1_off) == argminima(x1_off)
 
     @testset "Plateaus" begin
         p1 = [0,1,1,1,1,1]
@@ -59,6 +64,9 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test isempty(argmaxima( p3))
         @test isempty(argminima(-p3))
 
+        @test isempty(simplemaxima( p1))
+        @test isempty(simpleminima(-p1))
+
         @test argmaxima(reverse( p1), 2; strict=false) == [1]
         @test argminima(reverse(-p1), 2; strict=false) == [1]
         @test argmaxima(reverse( p2), 2; strict=false) == [1]
@@ -73,12 +81,20 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test isempty(argmaxima(reverse( p3)))
         @test isempty(argminima(reverse(-p3)))
 
+        @test isempty(simplemaxima(reverse( p1)))
+        @test isempty(simpleminima(reverse(-p1)))
+
         @test argmaxima( [0,1,1,1,1,0]) == [2]
         @test argminima(-[0,1,1,1,1,0]) == [2]
         @test argmaxima( [0,1,1,1,2,0]) == [5]
         @test argminima(-[0,1,1,1,2,0]) == [5]
         @test argmaxima( [0,1,1,0,2,1], 3; strict=false) == [5]
         @test argminima(-[0,1,1,0,2,1], 3; strict=false) == [5]
+
+        @test simplemaxima( [0,1,1,1,1,0]) == argmaxima( [0,1,1,1,1,0])
+        @test simpleminima(-[0,1,1,1,1,0]) == argminima(-[0,1,1,1,1,0])
+        @test simplemaxima( [0,1,1,1,2,0]) == argmaxima( [0,1,1,1,2,0])
+        @test simpleminima(-[0,1,1,1,2,0]) == argminima(-[0,1,1,1,2,0])
 
         # issue #4
         @test isempty(argmaxima(zeros(10)))
@@ -100,6 +116,7 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
     @testset "Missings and NaNs" begin
         m1 = [0,0,1,1,1,missing,missing,0,0]
         n1 = [0,0,1,1,1,NaN,NaN,0,0]
+
         @test isempty(argmaxima( m1, 1; strict=true))
         @test isempty(argmaxima( n1, 1; strict=true))
         @test isempty(argminima(-m1, 1; strict=true))
@@ -109,6 +126,11 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test argminima(-m1, 1; strict=false) == [3,8]
         @test argminima(-n1, 1; strict=false) == [3,8]
 
+        @test_throws MethodError simplemaxima(m1)
+        @test_throws MethodError simpleminima(m1)
+        @test isempty(simplemaxima( n1))
+        @test isempty(simpleminima(-n1))
+
         @test isempty(argmaxima(reverse( m1), 1; strict=true))
         @test isempty(argmaxima(reverse( n1), 1; strict=true))
         @test isempty(argminima(reverse(-m1), 1; strict=true))
@@ -117,6 +139,9 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test argmaxima(reverse( n1), 1; strict=false) == [1,5]
         @test argminima(reverse(-m1), 1; strict=false) == [1,5]
         @test argminima(reverse(-n1), 1; strict=false) == [1,5]
+
+        @test isempty(simplemaxima(reverse( n1)))
+        @test isempty(simpleminima(reverse(-n1)))
 
         m2 = [0,1,2,1,missing,missing,missing]
         n2 = [0,1,2,1,NaN,NaN,NaN]
@@ -137,12 +162,20 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test isempty(argminima(reverse(-m2), 2))
         @test isempty(argminima(reverse(-n2), 2))
 
+        @test simplemaxima(n2) == argmaxima(n2, 1)
+        @test simpleminima(-n2) == argminima(-n2, 1)
+        @test simplemaxima(reverse(n2)) == argmaxima(reverse(n2), 1)
+        @test simpleminima(reverse(-n2)) == argminima(reverse(-n2), 1)
+
         m3 = [0,1,0,1,missing,1,0,1,0]
         n3 = [0,1,0,1,NaN,1,0,1,0]
         @test argmaxima(m3) == [2,8]
         @test argminima(-m3) == [2,8]
         @test argmaxima(n3) == [2,8]
         @test argminima(-n3) == [2,8]
+
+        @test simpleminima(n3) == argminima(n3)
+        @test simpleminima(-n3) == argminima(-n3)
 
         mn = [1,NaN,missing,1]
         @test isempty(argmaxima(mn))

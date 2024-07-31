@@ -7,6 +7,8 @@ maxima
 minima
 findmaxima
 findminima
+simplemaxima
+simpleminima
 ```
 
 ## Peak characteristics & filtering
