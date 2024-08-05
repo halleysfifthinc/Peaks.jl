@@ -66,6 +66,10 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
 
         @test isempty(simplemaxima( p1))
         @test isempty(simpleminima(-p1))
+        @test isempty(simplemaxima( p2))
+        @test isempty(simpleminima(-p2))
+        @test isempty(simplemaxima( p3))
+        @test isempty(simpleminima(-p3))
 
         @test argmaxima(reverse( p1), 2; strict=false) == [1]
         @test argminima(reverse(-p1), 2; strict=false) == [1]
@@ -83,6 +87,10 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
 
         @test isempty(simplemaxima(reverse( p1)))
         @test isempty(simpleminima(reverse(-p1)))
+        @test isempty(simplemaxima(reverse( p2)))
+        @test isempty(simpleminima(reverse(-p2)))
+        @test isempty(simplemaxima(reverse( p3)))
+        @test isempty(simpleminima(reverse(-p3)))
 
         @test argmaxima( [0,1,1,1,1,0]) == [2]
         @test argminima(-[0,1,1,1,1,0]) == [2]
