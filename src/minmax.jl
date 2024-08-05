@@ -92,18 +92,22 @@ function _simpleextrema(f, cmp::F, x::AbstractVector{T}) where {F,T}
     i = firstindex(x) + 1
     @inbounds while i < lastindex(x)
         xi = x[i]
-        pre = cmp(x[i-1], xi)
-        post = cmp(x[i+1], xi)
-        plat = x[i+1] === xi
 
-        if plat
-            j = something(findnext(Base.Fix2(!==, xi), x, i+2), lastindex(x)+1)
-            post = j > lastindex(x) ? false : cmp(x[j], xi)
-        end
-
-        if pre && post
-            push!(pks, i)
-            i = plat ? j+1 : i+2
+        if cmp(x[i-1], xi) # pre
+            if x[i+1] === xi # plateau
+                j = something(findnext(Base.Fix2(!==, xi), x, i+2), lastindex(x)+1)
+                if j ≤ lastindex(x) && cmp(x[j], xi) # post
+                    push!(pks, i)
+                    i = j+1
+                else
+                    i += 1
+                end
+            elseif cmp(x[i+1], xi) # post
+                push!(pks, i)
+                i += 2
+            else
+                i += 1
+            end
         else
             i += 1
         end
