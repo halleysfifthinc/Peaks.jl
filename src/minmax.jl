@@ -86,7 +86,7 @@ function findnextextrema(cmp, x::AbstractVector, i::Int, w::Int, strict::Bool)
 end
 
 function _simpleextrema(f, cmp::F, x::AbstractVector{T}) where {F,T}
-    T >: Missing && throw(MethodError(simplemaxima, Tuple{typeof(x)}))
+    T >: Missing && throw(MethodError(f, Tuple{typeof(x)}))
 
     pks = Int[]
     i = firstindex(x) + 1
