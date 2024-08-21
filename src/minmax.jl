@@ -85,38 +85,6 @@ function findnextextrema(cmp, x::AbstractVector, i::Int, w::Int, strict::Bool)
     return lastindex(x) + 1
 end
 
-function _simpleextrema(f, cmp::F, x::AbstractVector{T}) where {F,T}
-    T >: Missing && throw(MethodError(f, Tuple{typeof(x)}))
-
-    pks = Int[]
-    i = firstindex(x) + 1
-    @inbounds while i < lastindex(x)
-        xi = x[i]
-
-        if cmp(x[i-1], xi) # pre
-            if x[i+1] === xi # plateau
-                j = something(findnext(Base.Fix2(!==, xi), x, i+2), lastindex(x)+1)
-                if j ≤ lastindex(x) && cmp(x[j], xi) # post
-                    push!(pks, i)
-                    i = j+1
-                else
-                    i += 1
-                end
-            elseif cmp(x[i+1], xi) # post
-                push!(pks, i)
-                i += 2
-            else
-                i += 1
-            end
-        else
-            i += 1
-        end
-    end
-
-    return pks
-end
-
-
 """
     findnextmaxima(x, i[, w=1; strict=true]) -> Int
 

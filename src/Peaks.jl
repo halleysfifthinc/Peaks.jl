@@ -1,9 +1,12 @@
 module Peaks
 
+using SIMD
+
 export argmaxima, simplemaxima, argminima, simpleminima, maxima, minima, findmaxima,
     findminima, findnextmaxima, findnextminima, peakproms, peakproms!, peakwidths,
     peakwidths!, peakheights, peakheights!, ismaxima, isminima, isplateau, filterpeaks!
 
+include("simple.jl")
 include("minmax.jl")
 include("utils.jl")
 include("peakprom.jl")
