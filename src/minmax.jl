@@ -165,16 +165,30 @@ function argmaxima(
     x::AbstractVector{T}, w::Int=1; strict::Bool=true
 ) where T
     w > 0 || _smallwerr(w)
-    pks = Int[]
 
     i = strict ? w + firstindex(x) : firstindex(x)
     i = findnextmaxima(x, i, w; strict=strict)
-    while i ≤ lastindex(x)
-        push!(pks, i)
-        i = findnextmaxima(x, i+w+1, w; strict=strict)
-    end
 
-    return pks
+    if typeof(axes(x,1)) <: AbstractUnitRange && length(x) > 48
+        ppks = BitVector(undef, length(x))
+        fill!(ppks, false)
+        ioffs = firstindex(x)-1
+
+        while i ≤ lastindex(x)
+            ppks[i-ioffs] = true
+            i = findnextmaxima(x, i+w+1, w; strict=strict)
+        end
+
+        return findall_offset(ppks, -ioffs)
+    else
+        pks = Int[]
+        while i ≤ lastindex(x)
+            push!(pks, i)
+            i = findnextmaxima(x, i+w+1, w; strict=strict)
+        end
+
+        return pks
+    end
 end
 
 """
@@ -346,16 +360,30 @@ function argminima(
     x::AbstractVector{T}, w::Int=1; strict::Bool=true
 ) where T
     w > 0 || _smallwerr(w)
-    pks = Int[]
 
     i = strict ? w + firstindex(x) : firstindex(x)
     i = findnextminima(x, i, w; strict=strict)
-    while i ≤ lastindex(x)
-        push!(pks, i)
-        i = findnextminima(x, i+w+1, w; strict=strict)
-    end
 
-    return pks
+    if typeof(axes(x,1)) <: AbstractUnitRange && length(x) > 48
+        ppks = BitVector(undef, length(x))
+        fill!(ppks, false)
+        ioffs = firstindex(x)-1
+
+        while i ≤ lastindex(x)
+            ppks[i-ioffs] = true
+            i = findnextminima(x, i+w+1, w; strict=strict)
+        end
+
+        return findall_offset(ppks, -ioffs)
+    else
+        pks = Int[]
+        while i ≤ lastindex(x)
+            push!(pks, i)
+            i = findnextminima(x, i+w+1, w; strict=strict)
+        end
+
+        return pks
+    end
 end
 
 """
