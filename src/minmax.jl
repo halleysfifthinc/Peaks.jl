@@ -1,6 +1,6 @@
 _smallwerr(w) = throw(DomainError(w,"window size `w` must be greater than zero"))
 
-function findnextextrema(cmp, x::AbstractVector, i::Int, w::Int, strict::Bool)
+function findnextextrema(cmp::F, x::AbstractVector{T}, i::Int, w::Int, strict::Bool) where {F,T}
     w > 0 || _smallwerr(w)
     strict && i - w < firstindex(x) && (i = w + 1) # First peak can't be closer than w
     maxlast = strict ? lastindex(x) - w : lastindex(x)
