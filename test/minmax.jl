@@ -118,6 +118,19 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test findnextmaxima(y44, 64, 50; strict=false) == 101
         @test findnextmaxima([0,0,1,1,0], 3, 2) == findnextmaxima([0,0,1,0,0], 3, 2)
 
+        # issue #50
+        # use of partial ordering :(<)/:(>) is (logically) incompatible with use of === for
+        # plateaus `!(-0. < 0.) && !(-0. > 0.)`, but `-0. !== 0.`. Arguably the following
+        # examples should be considered plateaus
+        @test argmaxima([-1., -0., 0., -1.]) == [2]
+        @test argmaxima([-1., 0., -0., -1.]) == [2]
+        @test argminima([1., -0., 0., 1.]) == [2]
+        @test argminima([1., 0., -0., 1.]) == [2]
+        @test simplemaxima([-1., -0., 0., -1.]) == [2]
+        @test simplemaxima([-1., 0., -0., -1.]) == [2]
+        @test simpleminima([1., -0., 0., 1.]) == [2]
+        @test simpleminima([1., 0., -0., 1.]) == [2]
+        @test isplateau(2, [-1., -0., 0., -1.])
     end
 
     # A missing or NaN should not occur within the `w` of the peak

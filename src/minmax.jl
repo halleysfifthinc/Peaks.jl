@@ -22,8 +22,8 @@ function findnextextrema(cmp, x::AbstractVector, i::Int, w::Int, strict::Bool)
                     peak &= false
                     i = j > i ? j : i + 1
                     break # No reason to continue checking if the rest of the elements qualify
-                elseif xi === xj # potential plateau
-                    k = findnext(p -> xi !== p, x, j+1)
+                elseif !ismissing(xj) && xi == xj # potential plateau
+                    k = findnext(p -> ismissing(p) || xi != p, x, j+1)
                     # @show i, j, k
                     if strict
                         # @show !isnothing(k) && i-1 ≥ firstindex(x)
@@ -124,7 +124,7 @@ Find the index of the next maxima in `x` after or including `i`, where the maxim
 either the maximum of `x[i-w:i+w]` or the first index of a plateau. Returns `lastindex(x) +
 1` if no maxima occur after `i`.
 
-A plateau is defined as a maxima with consecutive equal (`===`/egal) maximal values which
+A plateau is defined as a maxima with consecutive equal (`==`) maximal values which
 are bounded by lesser values immediately before and after the consecutive maximal values.
 
 When `strict == true`, no elements in `x[i-w:i+w]` may be `missing` or `NaN`, and the bounds
@@ -153,7 +153,7 @@ findnextmaxima(x, i, w=1; strict=true) = findnextextrema(<, x, i, w, strict)
 Test if `i` is a maxima in `x`, where the maxima `i` is either the maximum of `x[i-w:i+w]`
 or the first index of a plateau.
 
-A plateau is defined as a maxima with consecutive equal (`===`/egal) maximal values which
+A plateau is defined as a maxima with consecutive equal (`==`) maximal values which
 are bounded by lesser values immediately before and after the consecutive maximal values.
 
 See also: [`findnextmaxima`](@ref)
@@ -166,7 +166,7 @@ ismaxima(i, x, w=1; strict=true)::Bool = findnextextrema(<, x, i, w, strict) ===
 Find the indices of local maxima in `x`, where each maxima `i` is either the maximum of
 `x[i-w:i+w]` or the first index of a plateau.
 
-A plateau is defined as a maxima with consecutive equal (`===`/egal) maximal values which
+A plateau is defined as a maxima with consecutive equal (`==`) maximal values which
 are bounded by lesser values immediately before and after the consecutive maximal values.
 
 When `strict == true`, no elements in `x[i-w:i+w]` may be `missing` or `NaN`, and the bounds
@@ -215,7 +215,7 @@ end
 Find the indices of local maxima in `x`, where each maxima `i` is greater than both adjacent
 elements or is the first index of a plateau.
 
-A plateau is defined as a maxima with consecutive equal (`===`/egal) maximal values which
+A plateau is defined as a maxima with consecutive equal (`==`) maximal values which
 are bounded by lesser values immediately before and after the plateau.
 
 This function is semantically equivalent to `argmaxima(x, w=1; strict=true)`, but is
@@ -257,7 +257,7 @@ simplemaxima(x::AbstractVector) = _simpleextrema(simplemaxima, <, x)
 Find the values of local maxima in `x`, where each maxima `i` is either the maximum of
 `x[i-w:i+w]` or the first index of a plateau.
 
-A plateau is defined as a maxima with consecutive equal (`===`/egal) maximal values which
+A plateau is defined as a maxima with consecutive equal (`==`) maximal values which
 are bounded by lesser values immediately before and after the consecutive maximal values.
 
 See also: [`argmaxima`](@ref), [`findnextmaxima`](@ref), [`minima`](@ref)
@@ -279,7 +279,7 @@ Returns a `NamedTuple` contains the fields `indices`, `heights`, `data`, which a
 equivalent to `heights = data[indices]`. The `data` field is a reference (not a copy) to
 the argument `x`.
 
-A plateau is defined as a maxima with consecutive equal (`===`/egal) maximal values which
+A plateau is defined as a maxima with consecutive equal (`==`) maximal values which
 are bounded by lesser values immediately before and after the consecutive maximal values.
 
 See also: [`argmaxima`](@ref), [`findnextmaxima`](@ref), [`findminima`](@ref)
@@ -304,7 +304,7 @@ Find the index of the next minima in `x`, after or including `i`, where the mini
 either the minimum of `x[i-w:i+w]` or the first index of a plateau. Returns `lastindex(x) +
 1` if no minima occur after `i`.
 
-A plateau is defined as a minima with consecutive equal (`===`/egal) minimal values which
+A plateau is defined as a minima with consecutive equal (`==`) minimal values which
 are bounded by greater values immediately before and after the consecutive minimal values.
 
 When `strict == true`, no elements in `x[i-w:i+w]` may be `missing` or `NaN`, and the bounds
@@ -333,7 +333,7 @@ findnextminima(x, i, w=1; strict=true) = findnextextrema(>, x, i, w, strict)
 Test if `i` is a minima in `x`, where the minima `i` is either the minimum of `x[i-w:i+w]`
 or the first index of a plateau.
 
-A plateau is defined as a minima with consecutive equal (`===`/egal) minimal values which
+A plateau is defined as a minima with consecutive equal (`==`) minimal values which
 are bounded by greater values immediately before and after the consecutive minimal values.
 
 See also: [`findnextminima`](@ref)
@@ -347,7 +347,7 @@ isminima(i, x, w=1; strict=true)::Bool = findnextextrema(>, x, i, w, strict) ===
 Find the indices of local minima in `x`, where each minima `i` is either the minimum of
 `x[i-w:i+w]` or the first index of a plateau.
 
-A plateau is defined as a minima with consecutive equal (`===`/egal) minimal values which
+A plateau is defined as a minima with consecutive equal (`==`) minimal values which
 are bounded by greater values immediately before and after the consecutive minimal values.
 
 When `strict == true`, no elements in `x[i-w:i+w]` may be `missing` or `NaN`, and the bounds
@@ -396,7 +396,7 @@ end
 Find the indices of local minima in `x`, where each minima `i` is less than both adjacent
 elements or is the first index of a plateau.
 
-A plateau is defined as a minima with consecutive equal (`===`/egal) minimal values which
+A plateau is defined as a minima with consecutive equal (`==`) minimal values which
 are bounded by greater values immediately before and after the plateau.
 
 This function is semantically equivalent to `argminima(x, w=1; strict=true)`, but is faster
@@ -438,7 +438,7 @@ simpleminima(x::AbstractVector) = _simpleextrema(simpleminima, >, x)
 Find the values of local minima in `x`, where each minima `i` is either the minimum of
 `x[i-w:i+w]` or the first index of a plateau.
 
-A plateau is defined as a minima with consecutive equal (`===`/egal) minimal values which
+A plateau is defined as a minima with consecutive equal (`==`) minimal values which
 are bounded by greater values immediately before and after the consecutive minimal values.
 
 See also: [`argminima`](@ref), [`findnextminima`](@ref)
@@ -460,7 +460,7 @@ Returns a `NamedTuple` contains the fields `indices`, `heights`, `data`, which a
 equivalent to `heights = data[indices]`. The `data` field is a reference (not a copy) to
 the argument `x`.
 
-A plateau is defined as a minima with consecutive equal (`===`/egal) minimal values which
+A plateau is defined as a minima with consecutive equal (`==`) minimal values which
 are bounded by greater values immediately before and after the consecutive minimal values.
 
 See also: [`argminima`](@ref), [`findnextminima`](@ref)
@@ -482,7 +482,7 @@ end
     isplateau(i, x[, w=1; strict=true]) -> Union{Missing,Bool}
 
 Test if `i` is a plateau in `x`, where a plateau is defined as a maxima or minima with
-consecutive equal (`===`/egal) extreme values which are bounded by lesser values immediately
+consecutive equal (`==`) extreme values which are bounded by lesser values immediately
 before and after the consecutive values. Returns `false` if `i` is the last index in `x`.
 
 See also: [`ismaxima`](@ref), [`isminima`](@ref)
@@ -494,7 +494,7 @@ function isplateau(i, x, w=1; strict=true)
             # should not assume first/last element is (also) a plateau (too much assuming)
             return false
         else
-            return x[i] === x[i+1]
+            return x[i] == x[i+1]
         end
     else
         return false
