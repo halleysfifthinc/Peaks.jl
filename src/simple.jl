@@ -198,7 +198,7 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
             # in 64 elements blocks, create bitmasks for `x[i-1] < x[i]` (aka `pre`),
             # `x[i+1] < x[i]` (aka `post`) and `x[i+1] == x[i]` (aka `plat`)
             for _ in 1:8
-                @debug "" i, j, shift
+                # @debug "" i, j, shift
                 xpre = vload(Vec{8,T}, x, i+1)
                 xcurr = vload(Vec{8,T}, x, i+2)
                 xpost = vload(Vec{8,T}, x, i+3)
@@ -212,7 +212,14 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
                 pk |= _c << shift
                 plat |= _plat << shift
                 pre |= _pre << shift
+
+                # `post` is only kept around for verifying plateau ends, where the *next*
+                # comparison after the last plateau element must be true. So although the -1
+                # shift is now incorrect/mismatched to compare against `pre`, it is correct
+                # to compare against `plat`, which is the only remaining use for it. (Since
+                # we already compared `_pre` & `_post`)
                 post |= _post << (shift-1)
+
                 j += 8
                 i += 8
                 shift += 8
@@ -220,7 +227,7 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
             end
             pks_j, r = divrem(j, 64)
             pks_j += r > 0
-            @debug "" plat, post, pre, _post, _plat
+            # @debug "" plat, post, pre, _post, _plat
 
             # (come back to the comments on this section after reading the next commented
             # sections)
@@ -241,7 +248,7 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
                         # Remove the plateau from consideration in the forthcoming ops to
                         # create this chunk's `pk` (by unsetting the relevent `post` bit)
                         post ⊻= plat_end_mask
-                        @debug "(confirmed) Plateau ends at $(plat_begin+t1s)"
+                        # @debug "(confirmed) Plateau ends at $(plat_begin+t1s)"
                     end
 
                     # else this isn't a plateau; either way, reset `continuing_plat`
@@ -262,12 +269,12 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
             # shifting is always +1 of a byte range, so the top bit of `_c` is always
             # shifted beyond `pk` (i.e. non-existent bit 65).
             pks.chunks[pks_j] |= pk
-            @debug "" r, _c
+            # @debug "" r, _c
             if r == 0 && top_bit_set(UInt8, _c)
                 pks.chunks[pks_j+1] |= 1
             end
 
-            @debug "" !continuing_plat, top_bit_set(UInt8, _plat), !top_bit_set(post)
+            # @debug "" !continuing_plat, top_bit_set(UInt8, _plat), !top_bit_set(post)
 
             # A plateau might begin in one chunk and not end until later. We only begin a
             # `continuing_plat` if we're not already in the middle of one. The last element
@@ -277,7 +284,7 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
             # bit of `_post` isn't shifted beyond `post`, unlike the other bitmasks)
             if !continuing_plat && top_bit_set(UInt8, _plat) && !top_bit_set(post)
                 l1s = leading_ones(plat)
-                @debug "" _plat, _pre l1s > 0, top_bit_set(UInt8, _plat & _pre)
+                # @debug "" _plat, _pre l1s > 0, top_bit_set(UInt8, _plat & _pre)
 
                 # `plat` has leading ones, or the top-bit of `_plat` (aka bit 65 of `plat)
                 # is set. We store the index of the beginning of the plateau to set (or not)
@@ -285,7 +292,7 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
                 if l1s > 0 || top_bit_set(UInt8, _plat & _pre)
                     continuing_plat = true
                     plat_begin = j-leading_ones(plat)+1
-                    @debug "Plateau begins @" plat_begin
+                    # @debug "Plateau begins @" plat_begin
 
                 # This was an incomplete chunk; we calculate the index of the beginning of
                 # the plateau by counting the leading zeros after zero'ing the upper bits of
@@ -307,10 +314,10 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
             pre = _pre >> 7
         end
 
-        @debug "Ending plateau status" continuing_plat, plat_begin
+        # @debug "Ending plateau status" continuing_plat, plat_begin
         j = ifelse(continuing_plat,plat_begin,j-8)
         i = ifelse(continuing_plat,plat_begin-(firstindex(x)-1),i-8)
-        @debug j, i
+        # @debug j, i
     else
         j = 2
         i = firstindex(x)+1
@@ -330,7 +337,7 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
                 continue # skip i += 1 at the end of the loop
             elseif xip1 == xi # plateau
                 k = @something findnext(Base.Fix2(!=, xi), x, i+2) lasti+1
-                @debug "" i,j,k k ≤ lasti, cmp(x[k], xi)
+                # @debug "" i,j,k k ≤ lasti, cmp(x[k], xi)
                 if k ≤ lasti && cmp(x[k], xi) # post
                     pks[j] = true
                     j = j+(k-i)+1
