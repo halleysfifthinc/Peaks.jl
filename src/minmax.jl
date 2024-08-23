@@ -29,17 +29,17 @@ function findnextextrema(cmp::F, x::AbstractVector{T}, i::Int, w::Int, strict::B
                         # @show !isnothing(k) && i-1 ≥ firstindex(x)
                         if !isnothing(k) && i-1 ≥ firstindex(x)
                             xi1 = x[i-1]
-                            xk = x[k]
+                            xk = x[k::Int]
                             # @show xi1, xk
                             # @show k < i
                             # @show k ≥ hi, !ismissing(xi1), !isnan(xi1), cmp(xi1, xi), !ismissing(xk), !isnan(xk), cmp(xk, xi)
-                            if k < i
+                            if k::Int < i
                                 # elements of equal value are allowed within x[i-w:i+w] when
                                 # `strict == true` (as long as the immediately previous
                                 # element is less than `x[i]`, etc as tested on the next
                                 # line)
                                 continue
-                            elseif k ≥ hi && !ismissing(xi1) && !isnan(xi1) && cmp(xi1, xi) &&
+                            elseif k::Int ≥ hi && !ismissing(xi1) && !isnan(xi1) && cmp(xi1, xi) &&
                                 !ismissing(xk) && !isnan(xk) && cmp(xk, xi)
                                 # plateau is confirmed:
                                 #   - longer than window (not necessary by definition, but
@@ -48,7 +48,7 @@ function findnextextrema(cmp::F, x::AbstractVector{T}, i::Int, w::Int, strict::B
                                 return i
                             else
                                 peak &= false
-                                i = k > i ? k : i+1
+                                i = k::Int > i ? k::Int : i+1
                                 break
                             end
                         else
@@ -58,16 +58,16 @@ function findnextextrema(cmp::F, x::AbstractVector{T}, i::Int, w::Int, strict::B
                             break
                         end
                     else
-                        xk = isnothing(k) ? NaN : x[k]
+                        xk = isnothing(k) ? NaN : x[k::Int]
                         xi1 = i-1 ≥ firstindex(x) ? x[i-1] : NaN
                         if something(k, lastindex(x)+1) ≥ hi &&
                             (ismissing(xi1) || isnan(xi1) || cmp(xi1, xi)) &&
                             (ismissing(xk) || isnan(xk) || cmp(xk, xi))
                             return i
                         elseif !isnothing(k)
-                            if k > i
+                            if k::Int > i
                                 peak &= false
-                                i = k
+                                i = k::Int
                                 break
                             end
                         else
