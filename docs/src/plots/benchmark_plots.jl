@@ -1,4 +1,4 @@
-using BenchmarkTools, PlotlyJS, DataFrames, DataFramesMeta, Statistics
+using BenchmarkTools, PlotlyJS, DataFrames, DataFramesMeta
 
 include(joinpath(@__DIR__, "standards.jl"))
 # include(joinpath(@__DIR__, "../../../benchmark/benchmarks.jl"))
