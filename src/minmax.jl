@@ -202,7 +202,7 @@ are bounded by lesser values immediately before and after the plateau.
 
 This function is semantically equivalent to `argmaxima(x, w=1; strict=true)`, but is
 faster because of its simplified set of features. (The difference in speed scales with
-`length(x)`, up to ~2-3x faster.)
+`length(x)`; for input arrays longer than 5k elements, `argmaxima` is roughly 7x slower.)
 
 Vectors with `missing`s are not supported by `simplemaxima`, use `argmaxima` if this is
 needed.
@@ -225,10 +225,10 @@ julia> simplemaxima([2,0,1,1])
 Int64[]
 
 julia> @btime simplemaxima(x) setup=(x = repeat([0,1]; outer=100));
-  620.759 ns (4 allocations: 1.92 KiB)
+  269.865 ns (3 allocations: 1.00 KiB)
 
 julia> @btime argmaxima(x) setup=(x = repeat([0,1]; outer=100));
-  1.079 μs (4 allocations: 1.92 KiB)
+  748.780 ns (3 allocations: 1.00 KiB)
 ```
 """
 simplemaxima(x::AbstractVector) = _simpleextrema(simplemaxima, <, x)
@@ -396,8 +396,8 @@ A plateau is defined as a minima with consecutive equal (`==`) minimal values wh
 are bounded by greater values immediately before and after the plateau.
 
 This function is semantically equivalent to `argminima(x, w=1; strict=true)`, but is faster
-because of its simplified set of features. (The difference in speed scales with `length(x)`,
-up to ~2-3x faster.)
+because of its simplified set of features. (The difference in speed scales with `length(x)`;
+for input arrays longer than 5k elements, `argmaxima` is roughly 7x slower.)
 
 Vectors with `missing`s are not supported by `simpleminima`, use `argminima` if this is
 needed.
@@ -420,10 +420,10 @@ julia> simpleminima([2,3,1,1])
 Int64[]
 
 julia> @btime simpleminima(x) setup=(x = repeat([0,1]; outer=100));
-  671.388 ns (4 allocations: 1.92 KiB)
+  280.362 ns (3 allocations: 1.00 KiB)
 
 julia> @btime argminima(x) setup=(x = repeat([0,1]; outer=100));
-  1.175 μs (4 allocations: 1.92 KiB)
+  823.634 ns (3 allocations: 1.00 KiB)
 ```
 """
 simpleminima(x::AbstractVector) = _simpleextrema(simpleminima, >, x)
