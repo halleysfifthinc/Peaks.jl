@@ -70,7 +70,7 @@ function _simpleextrema_base(cmp::F, x::AbstractVector{T}, peaktype::Val) where 
                 i += 2
                 continue # skip i += 1 at the end of the loop
             elseif xip1 == xi # plateau
-                j = @something findnext(Base.Fix2(!=, xi), x, i+2) lasti+1
+                j = something(findnext(Base.Fix2(!=, xi), x, i+2), lasti+1)
                 if j ≤ lasti && cmp(x[j], xi) # post
                     if peaktype === Val(:packed)
                         pks[i-ioffs] = true
@@ -336,7 +336,7 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
                 j += 2
                 continue # skip i += 1 at the end of the loop
             elseif xip1 == xi # plateau
-                k = @something findnext(Base.Fix2(!=, xi), x, i+2) lasti+1
+                k = something(findnext(Base.Fix2(!=, xi), x, i+2), lasti+1)
                 # @debug "" i,j,k k ≤ lasti, cmp(x[k], xi)
                 if k ≤ lasti && cmp(x[k], xi) # post
                     pks[j] = true
