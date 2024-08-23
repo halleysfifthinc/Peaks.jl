@@ -17,6 +17,7 @@ makedocs(
     pages=[
         "Home" => "index.md",
         "How-to" => "how-to.md",
+        "Benchmarks" => "benchmarks.md",
         "Reference" => [
             "Glossary" => "glossary.md",
             "API" => "reference.md",
