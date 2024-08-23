@@ -5,6 +5,7 @@ on:
       - master
       - main
       - 'release*'
+    tags: '*'
   pull_request:
 
 # needed to allow julia-actions/cache to delete old caches that it has created
@@ -33,7 +34,7 @@ jobs:
           - x64
     steps:
       - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v1
+      - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
@@ -49,12 +50,13 @@ jobs:
     name: Documentation
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Required when authenticating with `GITHUB_TOKEN`, not needed when authenticating with SSH deploy keys
+      actions: write  # Required when authenticating with `GITHUB_TOKEN`, not needed when authenticating with SSH deploy keys
+      contents: write
       pull-requests: read  # Required when using `push_preview=true`
       statuses: write  # Optional, used to report documentation build statuses
     steps:
       - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v1
+      - uses: julia-actions/setup-julia@v2
         with:
           version: '1'
       - uses: julia-actions/cache@v1
