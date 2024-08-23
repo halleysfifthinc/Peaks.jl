@@ -59,18 +59,18 @@ jobs:
           version: '1'
       - uses: julia-actions/cache@v1
       - run: |
-          julia --project=docs -e '
+          julia --color=auto --project=docs -e '
             using Pkg
             Pkg.Registry.update()
             Pkg.develop(PackageSpec(path=pwd()))
             Pkg.instantiate()'
       - run: |
-          julia --project=docs -e '
+          julia --color=auto --project=docs -e '
             using Documenter: DocMeta, doctest
             using Peaks
             DocMeta.setdocmeta!(Peaks, :DocTestSetup, :(using Peaks); recursive=true)
             doctest(Peaks)'
-      - run: julia --project=docs docs/make.jl
+      - run: julia --color=auto --project=docs docs/make.jl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}

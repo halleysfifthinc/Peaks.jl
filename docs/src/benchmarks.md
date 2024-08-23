@@ -36,7 +36,8 @@ variably[^2].
     function; more predictable branches will make the function run faster than could be
     expected with more realistic data.
 
-When benchmarking against randomly sampled data, we see roughly the same performance characteristics, now presented relative to the speed of `simplemaxima`:
+When benchmarking against randomly sampled data, we see roughly the same performance
+characteristics, now presented relative to the speed of `simplemaxima` (higher is slower):
 
 ```@example benchmark_plots
 ratio_plot # hide
