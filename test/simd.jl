@@ -161,4 +161,10 @@ end
         end
     end
 
+    for pklen in 3:96
+        arr = repeat([0,1]; outer=cld(pklen,2))
+        @test @views argmaxima(arr[1:pklen]) == simplemaxima(arr[1:pklen])
+        arr = repeat([1,0]; outer=cld(pklen,2))
+        @test @views argmaxima(arr[1:pklen]) == simplemaxima(arr[1:pklen])
+    end
 end
