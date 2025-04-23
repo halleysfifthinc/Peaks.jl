@@ -116,19 +116,6 @@ julia> findnextmaxima([0,2,0,1,1,0], 3)
 findnextmaxima(x, i, w=1; strict=true) = findnextextrema(<, x, i, w, strict)
 
 """
-    ismaxima(i, y[, w=1; strict=true]) -> Bool
-
-Test if `i` is a maxima in `y`, where the maxima `i` is either the maximum of `y[i-w:i+w]`
-or the first index of a plateau.
-
-A plateau is defined as a maxima with consecutive equal (`==`) maximal values which
-are bounded by lesser values immediately before and after the consecutive maximal values.
-
-See also: [`findnextmaxima`](@ref)
-"""
-ismaxima(i, x, w=1; strict=true)::Bool = findnextextrema(<, x, i, w, strict) === i
-
-"""
     argmaxima(y[, w=1; strict=true]) -> Vector{Int}
 
 Find the indices of local maxima in `y`, where each maxima `i` is either the maximum of
@@ -308,19 +295,6 @@ julia> findnextminima([3,2,3,1,1,3], 3)
 findnextminima(x, i, w=1; strict=true) = findnextextrema(>, x, i, w, strict)
 
 """
-    isminima(i, y[, w=1; strict=true]) -> Bool
-
-Test if `i` is a minima in `y`, where the minima `i` is either the minimum of `y[i-w:i+w]`
-or the first index of a plateau.
-
-A plateau is defined as a minima with consecutive equal (`==`) minimal values which
-are bounded by greater values immediately before and after the consecutive minimal values.
-
-See also: [`findnextminima`](@ref)
-"""
-isminima(i, y, w=1; strict=true)::Bool = findnextextrema(>, y, i, w, strict) === i
-
-"""
     argminima(y[, w=1; strict=false]) -> Vector{Int}
 
 
@@ -468,28 +442,5 @@ julia> valleys = findminima([1,5,1,3,2])
 function findminima(x, w::Int=1; strict::Bool=true)
     idxs = argminima(x, w; strict=strict)
     return (;indices=idxs, heights=x[idxs], data=x)
-end
-
-"""
-    isplateau(i, y[, w=1; strict=true]) -> Union{Missing,Bool}
-
-Test if `i` is a plateau in `y`, where a plateau is defined as a maxima or minima with
-consecutive equal (`==`) extreme values which are bounded by lesser values immediately
-before and after the consecutive values. Returns `false` if `i` is the last index in `y`.
-
-See also: [`ismaxima`](@ref), [`isminima`](@ref)
-"""
-function isplateau(i, x, w=1; strict=true)
-    if ismaxima(i, x, w; strict) || isminima(i, x, w; strict)
-        if i === lastindex(x)
-            # default unstrict assumption that first/last element can be peak means that we
-            # should not assume first/last element is (also) a plateau (too much assuming)
-            return false
-        else
-            return x[i] == x[i+1]
-        end
-    else
-        return false
-    end
 end
 

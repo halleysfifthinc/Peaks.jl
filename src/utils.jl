@@ -1,3 +1,52 @@
+"""
+    ismaxima(i, x[, w=1; strict=true]) -> Bool
+
+Test if `i` is a maxima in `x`, where the maxima `i` is either the maximum of `x[i-w:i+w]`
+or the first index of a plateau.
+
+A plateau is defined as a maxima with consecutive equal (`==`) maximal values which
+are bounded by lesser values immediately before and after the consecutive maximal values.
+
+See also: [`findnextmaxima`](@ref)
+"""
+ismaxima(i, x, w=1; strict=true)::Bool = findnextextrema(<, x, i, w, strict) === i
+
+"""
+    isminima(i, x[, w=1; strict=true]) -> Bool
+
+Test if `i` is a minima in `x`, where the minima `i` is either the minimum of `x[i-w:i+w]`
+or the first index of a plateau.
+
+A plateau is defined as a minima with consecutive equal (`==`) minimal values which
+are bounded by greater values immediately before and after the consecutive minimal values.
+
+See also: [`findnextminima`](@ref)
+"""
+isminima(i, x, w=1; strict=true)::Bool = findnextextrema(>, x, i, w, strict) === i
+
+"""
+    isplateau(i, x[, w=1; strict=true]) -> Union{Missing,Bool}
+
+Test if `i` is a plateau in `x`, where a plateau is defined as a maxima or minima with
+consecutive equal (`==`) extreme values which are bounded by lesser values immediately
+before and after the consecutive values. Returns `false` if `i` is the last index in `x`.
+
+See also: [`ismaxima`](@ref), [`isminima`](@ref)
+"""
+function isplateau(i, x, w=1; strict=true)
+    if ismaxima(i, x, w; strict) || isminima(i, x, w; strict)
+        if i === lastindex(x)
+            # default unstrict assumption that first/last element can be peak means that we
+            # should not assume first/last element is (also) a plateau (too much assuming)
+            return false
+        else
+            return x[i] == x[i+1]
+        end
+    else
+        return false
+    end
+end
+
 const known_fields = (:indices, :proms, :heights, :widths, :edges)
 
 function check_known_fields_equal_length(pks::NamedTuple)
