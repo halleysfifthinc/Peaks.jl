@@ -7,7 +7,7 @@ on:
       - 'release*'
     tags: '*'
   pull_request:
-  workflow-dispatch:
+  workflow_dispatch:
 
 concurrency:
   # Skip intermediate builds: always.
