@@ -28,8 +28,10 @@ using Test, OffsetArrays, Plots, Aqua, JET, ExplicitImports
                 )) === nothing
         end
     end
-    @testset "JET inference tests" begin
-        JET.test_package(Peaks; target_modules=(Peaks,))
+    @static if isempty(VERSION.prerelease)
+        @testset "JET inference tests" begin
+            JET.test_package(Peaks; target_modules=(Peaks,))
+        end
     end
 
     include("simd.jl")
