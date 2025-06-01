@@ -11,11 +11,22 @@ using Test, OffsetArrays, Plots, Aqua, JET, ExplicitImports
             )) === nothing
         @test check_no_stale_explicit_imports(Peaks) === nothing
         @test check_all_explicit_imports_via_owners(Peaks) === nothing
-        @test check_all_qualified_accesses_are_public(Peaks; ignore=(
-            :_overflowind, :_blsr, :_toind, # for findall_offset function
-            :Experimental, :register_error_hint, # should be public
-            :VecTypes # from SIMD
-            )) === nothing
+
+
+        @static if VERSION < v"1.11"
+            @test check_all_qualified_accesses_are_public(Peaks; ignore=(
+                :_overflowind, :_blsr, :_toind, # for findall_offset function
+                :Experimental, :register_error_hint, # should be public
+                :VecTypes, # from SIMD
+                :Fix2, :depwarn
+                )) === nothing
+        else
+            @test check_all_qualified_accesses_are_public(Peaks; ignore=(
+                :_overflowind, :_blsr, :_toind, # for findall_offset function
+                :Experimental, :register_error_hint, # should be public
+                :VecTypes, # from SIMD
+                )) === nothing
+        end
     end
     @testset "JET inference tests" begin
         JET.test_package(Peaks; target_modules=(Peaks,))
