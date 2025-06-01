@@ -47,6 +47,10 @@ than all elements in the window `x[i-w:i+w]` where `w` is a positive integer. Th
 and most common case is `w=1`, which results in an element being more extreme than its
 neighbors.
 
+!!! note
+    In this package/documentation, "peak" is often used when referring to the index (i.e.
+    location) of a peak, which is most broadly relevant when speaking of a specific peak
+
 In the animation below, the maximum in the window `x[i-w:i+w]` (grey band) is shown as the
 purple dot. When the maximum lines up with the current "time" (i.e. index, vertical black
 line), a peak is identified (red dot). Use the scroll bar at the bottom to understand why
@@ -56,10 +60,6 @@ some "peaks" aren't found. (Hint: pay attention the window size and the window m
 INCLUDE_PLOTLYJS[] = "require" # hide
 PlotForceHTML(p) # hide
 ```
-
-!!! note
-    In this package/documentation, "peak" is often used when referring to the index (i.e.
-    location) of a peak, which is most broadly relevant when speaking of a specific peak
 
 ##### Plateau
 

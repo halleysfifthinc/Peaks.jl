@@ -33,7 +33,7 @@ p = Plot([
             itemclick=false,
             itemdoubleclick=false,
         ),
-        margin=attr(autoexpand=false, b=10, l=10, r=10, t=10),
+        margin=attr(autoexpand=true, b=10, l=10, r=10, t=10),
         yaxis_fixedrange=true,
         xaxis_fixedrange=true,
         xaxis_range=[first(t),last(t)],
