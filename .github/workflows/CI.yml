@@ -7,20 +7,21 @@ on:
       - 'release*'
     tags: '*'
   pull_request:
-
-# needed to allow julia-actions/cache to delete old caches that it has created
-permissions:
-  actions: write
-  contents: read
+  workflow_dispatch:
 
 concurrency:
+  # Skip intermediate builds: always.
+  # Cancel intermediate builds: only if it is a pull request build.
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ !contains(github.ref, 'release/')}}
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
 
 jobs:
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
+    permissions: # needed to allow julia-actions/cache to delete old caches that it has created
+      actions: write
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -46,33 +47,37 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: lcov.info
-  docs:
+
+  Documenter:
     name: Documentation
     runs-on: ubuntu-latest
+    needs: test
     permissions:
       actions: write  # Required when authenticating with `GITHUB_TOKEN`, not needed when authenticating with SSH deploy keys
       contents: write
       pull-requests: read  # Required when using `push_preview=true`
       statuses: write  # Optional, used to report documentation build statuses
     steps:
-      - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: julia-actions/setup-julia@5c9647d97b78a5debe5164e9eec09d653d29bd71 # v2.6.1
         with:
           version: '1'
-      - uses: julia-actions/cache@v2
-      - run: |
-          julia --color=yes --project=docs -e '
+          show-versioninfo: 'true'
+      - uses: julia-actions/cache@d10a6fd8f31b12404a54613ebad242900567f2b9 # v2.1.0
+      - name: Configure doc environment
+        shell: julia --project=docs --color=yes {0}
+        run: |
             using Pkg
             Pkg.Registry.update()
-            Pkg.develop(PackageSpec(path=pwd()))
-            Pkg.instantiate()'
-      - run: |
-          julia --color=yes --project=docs -e '
+            Pkg.instantiate()
+      - name: Run doctests
+        shell: julia --project=docs --color=yes {0}
+        run: |
             using Documenter: DocMeta, doctest
             using Peaks
             DocMeta.setdocmeta!(Peaks, :DocTestSetup, :(using Peaks); recursive=true)
-            doctest(Peaks)'
-      - run: julia --color=yes --project=docs docs/make.jl
+            doctest(Peaks)
+      - uses: julia-actions/julia-docdeploy@e62cc8fd639797a0c2922a437d5b1b81c4a12787 # v1.3.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}

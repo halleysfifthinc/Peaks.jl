@@ -17,10 +17,11 @@ equivalent minima finding functions.)
 
 One important difference between the Peaks.jl functions (`argmaxima`, `simplemaxima`, etc)
 and `Images.findlocalmaxima` or the example functions is that only Peaks.jl functions
-recognize plateaus. Depending on the type and origins of your data (quantized data, such as
-data sampled from physical measurements using ADC's, has a higher likelihood of plateaus),
-recognizing plateaus may or may not be an important/relevant feature. As a result, Peaks.jl
-functions are doing more work, but are still competitive with other obvious implementations.
+recognize plateaus. Depending on the type and origins of your data recognizing plateaus may
+or may not be an important/relevant feature. (Quantized data, such as data sampled from
+physical measurements using ADC's, has a higher likelihood of plateaus.) As a result,
+Peaks.jl functions are doing more work, but are still competitive with other obvious
+implementations.
 
 ```@example benchmark_plots
 times_plot # hide
