@@ -1,6 +1,7 @@
 module Peaks
 
-using SIMD
+using SIMD: SIMD, Vec, VecTypes, vload
+using RecipesBase: RecipesBase, @recipe, @series, @shorthands
 
 export argmaxima, simplemaxima, argminima, simpleminima, maxima, minima, findmaxima,
     findminima, findnextmaxima, findnextminima, peakproms, peakproms!, peakwidths,

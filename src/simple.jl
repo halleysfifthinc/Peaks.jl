@@ -30,7 +30,7 @@ function _simpleextrema(@nospecialize(f), cmp::F, x::AbstractVector{T}) where {F
     T >: Missing && throw(MethodError(f, Tuple{typeof(x)}))
 
     if typeof(axes(x,1)) <: AbstractUnitRange && length(x) > 32
-        if T <: SIMD.VecTypes && hasmethod(vload, Tuple{Type{Vec{8,T}}, typeof(x), Int})
+        if T <: VecTypes && hasmethod(vload, Tuple{Type{Vec{8,T}}, typeof(x), Int})
             pks = BitVector(undef, length(x))
             fill!(pks, false)
 
@@ -173,7 +173,7 @@ function top_bit_set(::Type{T}, x) where T
     return !iszero(x & typemin(signed(T)))
 end
 
-function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T <: SIMD.VecTypes}
+function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T <: VecTypes}
     # Fear this hideous monstrosity...
 
     lasti = lastindex(x)
