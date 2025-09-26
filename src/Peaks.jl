@@ -1,11 +1,11 @@
 module Peaks
 
 using SIMD: SIMD, Vec, VecTypes, vload
-using RecipesBase: RecipesBase, @recipe, @series, @shorthands
 
 export argmaxima, simplemaxima, argminima, simpleminima, maxima, minima, findmaxima,
     findminima, findnextmaxima, findnextminima, peakproms, peakproms!, peakwidths,
-    peakwidths!, peakheights, peakheights!, ismaxima, isminima, isplateau, filterpeaks!
+    peakwidths!, peakheights, peakheights!, ismaxima, isminima, isplateau, filterpeaks!,
+    plotpeaks, plotpeaks!
 
 include("simple.jl")
 include("minmax.jl")
@@ -13,7 +13,6 @@ include("utils.jl")
 include("peakprom.jl")
 include("peakwidth.jl")
 include("peakheight.jl")
-include("plot.jl")
 
 function __init__()
     Base.Experimental.register_error_hint(MethodError) do io, exc, argtypes, kwargs
@@ -34,5 +33,26 @@ function __init__()
         end
     end
 end
+
+"""
+    plotpeaks(x, y, indices; show_prominences=true, show_widths=true, kwargs...)
+    plotpeaks(x, pks::NamedTuple; show_prominences=true, show_widths=true, kwargs...)
+    plotpeaks!(plt, x, y, indices; show_prominences=true, show_widths=true, kwargs...)
+    plotpeaks!(plt, x, pks::NamedTuple; show_prominences=true, show_widths=true, kwargs...)
+
+Plot the peaks of a line; optionally, also show the reference level for each peak's
+prominence, and the left/right bounds of each peak's width. This is a Plots.jl recipe.
+
+See also: [`findmaxima`](@ref), [`peakproms`](@ref), [`peakwidths`](@ref),
+
+#### Keyword arguments:
+- `proms`: The prominence of each peak. The `proms` keyword will be ignored if a `pks::NamedTuple` is given and has a defined `proms` property.
+- `edges`: The edges of each peak. Can either be a zipped vector of left and right
+  edges (e.g. `[(4.5, 6.25)]`) or a tuple of the left and right edges vectors (e.g. `([4.5],
+  [6.25])`). The `edges` keyword will be ignored if a `pks::NamedTuple` is given and has a defined `edges` property.
+"""
+function plotpeaks end
+function plotpeaks! end
+@doc (@doc plotpeaks) plotpeaks!
 
 end # module Peaks
