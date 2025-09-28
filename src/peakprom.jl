@@ -1,8 +1,8 @@
 """
-    peakproms(indices, x; [strict=true, min, max]) -> (indices, proms)
+    peakproms(indices, y; [strict=true, min, max]) -> (indices, proms)
     peakproms(pks::NamedTuple; [strict=true, min, max]) -> NamedTuple
 
-Calculate the prominences of peak `indices` in `x`, and remove peaks with prominences less
+Calculate the prominences of peak `indices` in `y`, and remove peaks with prominences less
 than `min` and/or greater than `max`.
 
 Peak prominence is the absolute height (value) difference between the current peak and the
@@ -100,10 +100,10 @@ function _strict_inner_promscalcloop!(cmp::C, extremum::M, extrema::A, _ref::MT,
 end
 
 """
-    peakproms!(indices, x; [strict=true, min, max]) -> (indices, proms)
+    peakproms!(indices, y; [strict=true, min, max]) -> (indices, proms)
     peakproms!(pks::NamedTuple; [strict=true, min, max]) -> NamedTuple
 
-Calculate the prominences of peak `indices` in `x`, and remove peaks with prominences less
+Calculate the prominences of peak `indices` in `y`, and remove peaks with prominences less
 than `min` and/or greater than `max`.
 
 If a NamedTuple `pks` is given, a new NamedTuple is returned with the same fields

@@ -1,8 +1,8 @@
 """
-    peakwidths(indices, x, proms; [strict=true, relheight=0.5, min, max]) -> (indices, widths, ledge, redge)
+    peakwidths(indices, y, proms; [strict=true, relheight=0.5, min, max]) -> (indices, widths, ledge, redge)
     peakwidths(pks::NamedTuple; [strict=true, relheight=0.5, min, max]) -> NamedTuple
 
-Calculate the widths of peak `indices` in `x` at a reference level based on `proms` and
+Calculate the widths of peak `indices` in `y` at a reference level based on `proms` and
 `relheight`, and removing peaks with widths less than `min` and/or greater than
 `max`. Returns the peaks, widths, and the left and right edges at the reference level.
 
@@ -24,19 +24,19 @@ See also: [`peakwidths!`](@ref), [`peakproms`](@ref), [`findmaxima`](@ref)
 
 # Examples
 ```jldoctest
-julia> x = Float64[0,5,2,2,3,3,1,4,0];
+julia> y = Float64[0,5,2,2,3,3,1,4,0];
 
-julia> pks = findmaxima(x) |> peakproms!(;max=2);
+julia> pks = findmaxima(y) |> peakproms!(;max=2);
 
 julia> peakwidths(pks)
 (indices = [5], heights = [3.0], data = [0.0, 5.0, 2.0, 2.0, 3.0, 3.0, 1.0, 4.0, 0.0], proms = [1.0], widths = [1.75], edges = [(4.5, 6.25)])
 
-julia> x[4] = NaN;
+julia> y[4] = NaN;
 
-julia> peakwidths(pks.indices, x, pks.proms)
+julia> peakwidths(pks.indices, y, pks.proms)
 ([5], [NaN], [NaN], [6.25])
 
-julia> peakwidths(pks.indices, x, pks.proms; strict=false)
+julia> peakwidths(pks.indices, y, pks.proms; strict=false)
 ([5], [2.25], [4.0], [6.25])
 ```
 """
@@ -114,10 +114,10 @@ function _inner_widthscalcloop!(op::O, cmp::C, x::AbstractVector{T}, peaks::Abst
 end
 
 """
-    peakwidths!(indices, x; [strict=true, relheight=0.5, min, max]) -> (indices, widths, ledge, redge)
+    peakwidths!(indices, y; [strict=true, relheight=0.5, min, max]) -> (indices, widths, ledge, redge)
     peakwidths!(pks::NamedTuple; [strict=true, relheight=0.5, min, max]) -> NamedTuple
 
-Calculate the widths of peak `indices` in `x` at a reference level based on `proms` and
+Calculate the widths of peak `indices` in `y` at a reference level based on `proms` and
 `relheight`, removing peaks with widths less than `min` and/or greater than `max`.
 Returns the modified peaks, widths, and the left and right edges at the reference level.
 
@@ -130,9 +130,7 @@ See also: [`peakwidths`](@ref), [`peakproms`](@ref), [`findmaxima`](@ref)
 #
 # Examples
 ```jldoctest ; filter = r"(\\d*)\\.(\\d{3})\\d*" => s"\\1.\\2***"
-julia> x = Float64[0,5,2,2,3,3,1,4,0];
-
-julia> pks = findmaxima(x) |> peakproms!();
+julia> pks = findmaxima(Float64[0,5,2,2,3,3,1,4,0]) |> peakproms!();
 
 julia> peakwidths!(pks; min=1)
 (indices = [2, 5], heights = [5.0, 3.0], data = [0.0, 5.0, 2.0, 2.0, 3.0, 3.0, 1.0, 4.0, 0.0], proms = [5.0, 1.0], widths = [1.333, 1.75], edges = [(1.5, 2.833), (4.5, 6.25)])
