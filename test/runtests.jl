@@ -1,5 +1,5 @@
 using Peaks
-using Test, OffsetArrays, Plots, Aqua, JET, ExplicitImports
+using Test, OffsetArrays, Plots, Aqua, JET, ExplicitImports, ReferenceTests, ImageIO
 
 @testset verbose=true "Peaks" begin
     @testset "Aqua tests" begin
