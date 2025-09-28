@@ -120,6 +120,26 @@ function filterpeaks!(pred::Function, pks::NamedTuple)
     return pks
 end
 
+# plotting helper functions
+"Get `x[idx::Float]` using linear interpolation."
+function interp(x::AbstractVector{<:Real}, idx::Real)
+    isinteger(idx) && return x[Int(idx)]
+    prev = Int(floor(idx))
+    next = Int(ceil(idx))
+    return x[prev] + ((idx - prev) * (x[next] - x[prev])) / (next - prev)
+end
+
+function interp(x::AbstractVector{<:Real}, idx::AbstractVector{<:Real})
+    return interp.(Ref(x), idx)
+end
+
+function drop_irrelevant_side(i, peak, y, maxima)
+    if maxima
+        return ifelse(isminima(round(Int, i), y; strict=false), i, peak)
+    else
+        return ifelse(ismaxima(round(Int, i), y; strict=false), i, peak)
+    end
+end
 
 #====================================================================
 We store a version of findpeak here, as it might be implemented soon,
