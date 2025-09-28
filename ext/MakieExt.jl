@@ -13,7 +13,7 @@ using Makie: Makie, ScatterLines, @recipe, automatic, documented_attributes,
 
 Plot the peaks of a line using Makie
 
-See also: [`findmaxima`](@ref), [`peakproms`](@ref), [`peakwidths`](@ref),
+See also: [`findmaxima`](@ref Peaks.findmaxima), [`peakproms`](@ref), [`peakwidths`](@ref),
 """
 @recipe PeaksPlot begin
     "Show the reference level for each peak's prominence"

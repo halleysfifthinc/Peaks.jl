@@ -20,7 +20,7 @@ multisin(t) = 3sinpi(0.1t) + 2sinpi(0.2t) + sinpi(0.6t)
 y = multisin.(t) .+ 0.1rand(length(t))
 
 pks = findmaxima(y)
-plotpeaks(t, y; peaks=pks.indices)
+plotpeaks(t, pks)
 ```
 
 The simplest way to remove those peaks (assuming the signal is already filtered) is by
@@ -28,7 +28,7 @@ setting the window `w` argument in `findmaxima` and friends:
 
 ```@example spacing
 pks = findmaxima(y, 15)
-f = plotpeaks(t, y; peaks=pks.indices)
+f = plotpeaks(t, pks)
 ```
 
 If only the peaks circled in blue are wanted, then setting the window `w` too wide won't
@@ -37,10 +37,10 @@ work, since there are larger peaks that would become dominant.
 ```@example spacing
 pks = findmaxima(y, 15) # hide
 wpks = peakproms(pks; max=1) # hide
-f = plot(t[wpks.indices], wpks.heights; seriestype=:scatter, markershape=:circle, label="", # hide
+plt = plot(t[wpks.indices], wpks.heights; seriestype=:scatter, markershape=:circle, label="", # hide
     markersize=10, markercolor=RGBA(1,1,1,0), markerstrokealpha=.1, markerstrokecolor=:blue, # hide
     markerstrokewidth=2, z_order=1) # hide
-plotpeaks!(f, t, y; peaks=pks.indices) # hide
+plotpeaks!(plt, t, pks) # hide
 ```
 
 ## How to filter peaks by peak characteristics
@@ -54,10 +54,10 @@ show which characteristics should be filtered to remove all the unwanted peaks.
 ```@example spacing
 pks = findmaxima(y, 15) # hide
 wpks = peakproms(pks; max=1) # hide
-f = plot(t[wpks.indices], wpks.heights; seriestype=:scatter, markershape=:circle, label="", # hide
+plt = plot(t[wpks.indices], wpks.heights; seriestype=:scatter, markershape=:circle, label="", # hide
     markersize=10, markercolor=RGBA(1,1,1,0), markerstrokealpha=.1, markerstrokecolor=:blue, # hide
     markerstrokewidth=2, z_order=1) # hide
-plotpeaks!(f, t, y; peaks=pks.indices, prominences=true, widths=true)
+plotpeaks!(plt, t, pks; show_prominences=true, show_widths=true)
 ```
 ```@example spacing
 pks = peakproms(pks) |> peakwidths # hide
