@@ -81,12 +81,6 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test length(first(peakproms(maxs, sint; max=1.5))) == 1
 
         @test_throws ArgumentError peakproms([1,2,3], sint; max=0.1, min=1)
-
-        # TODO: Remove after next breaking release (v0.5)
-        @test_logs (:warn, r"renamed") peakproms(maxs, sint; maxprom=1)
-        @test_logs (:warn, r"renamed") peakproms(maxs, sint; minprom=1)
-        @test_logs (:warn, r"renamed") peakproms!(copy(maxs), copy(sint); maxprom=1)
-        @test_logs (:warn, r"renamed") peakproms!(copy(maxs), copy(sint); minprom=1)
     end
 
     @test_throws ArgumentError peakproms([2], 1:10)

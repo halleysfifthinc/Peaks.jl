@@ -27,15 +27,8 @@ julia> inds, heights = peakheights(pks.indices, pks.heights; max=4)
 """
 function peakheights(
     indices::AbstractVector{Int}, heights::AbstractVector;
-    minheight=nothing, maxheight=nothing,
-    min=minheight, max=maxheight
+    min=nothing, max=nothing
 )
-    if !isnothing(minheight)
-        Base.depwarn("Keyword `minheight` has been renamed to `min`", :peakheights!)
-    end
-    if !isnothing(maxheight)
-        Base.depwarn("Keyword `maxheight` has been renamed to `max`", :peakheights!)
-    end
     peakheights!(copy(indices), copy(heights); min=min, max=max)
 end
 
@@ -86,15 +79,8 @@ julia> inds, heights = peakheights!(pks.indices, pks.heights; min=3.5)
 """
 function peakheights!(
     peaks::Vector{Int}, heights::AbstractVector{T};
-    minheight=nothing, maxheight=nothing,
-    min=minheight, max=maxheight
+    min=nothing, max=nothing
 ) where {T}
-    if !isnothing(minheight)
-        Base.depwarn("Keyword `minheight` has been renamed to `min`", :peakheights!)
-    end
-    if !isnothing(maxheight)
-        Base.depwarn("Keyword `maxheight` has been renamed to `max`", :peakheights!)
-    end
     length(peaks) == length(heights) || throw(DimensionMismatch("length of `peaks`, $(length(peaks)), does not match the length of `heights`, $(length(heights))"))
     if !isnothing(min) || !isnothing(max)
         lo = something(min, typemin(Base.nonmissingtype(T)))

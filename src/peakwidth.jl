@@ -42,15 +42,8 @@ julia> peakwidths(pks.indices, y, pks.proms; strict=false)
 """
 function peakwidths(
     peaks::AbstractVector{Int}, x::AbstractVector, proms::AbstractVector;
-    strict=true, relheight=0.5, minwidth=nothing, maxwidth=nothing,
-    min=minwidth, max=maxwidth
+    strict=true, relheight=0.5, min=nothing, max=nothing
 )
-    if !isnothing(minwidth)
-        Base.depwarn("Keyword `minwidth` has been renamed to `min`", :peakwidths)
-    end
-    if !isnothing(maxwidth)
-        Base.depwarn("Keyword `maxwidth` has been renamed to `max`", :peakwidths)
-    end
     if !isnothing(min) || !isnothing(max)
         _peaks = copy(peaks)
         _proms = copy(proms)
@@ -144,15 +137,8 @@ julia> peakwidths!(pks.indices, pks.data, pks.proms; min=1)
 """
 function peakwidths!(
     peaks::AbstractVector{Int}, x::AbstractVector{T}, proms::AbstractVector{U};
-    strict=true, relheight=0.5, minwidth=nothing, maxwidth=nothing,
-    min=minwidth, max=maxwidth
+    strict=true, relheight=0.5, min=nothing, max=nothing
 ) where {T,U}
-    if !isnothing(minwidth)
-        Base.depwarn("Keyword `minwidth` has been renamed to `min`", :peakwidths!)
-    end
-    if !isnothing(maxwidth)
-        Base.depwarn("Keyword `maxwidth` has been renamed to `max`", :peakwidths!)
-    end
     if !isnothing(min) && !isnothing(max)
         min < max || throw(ArgumentError("Keyword `min` must be less than `max`"))
     end
