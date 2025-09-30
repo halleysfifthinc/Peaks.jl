@@ -6,10 +6,10 @@ using Makie: Makie, ScatterLines, @recipe, automatic, documented_attributes,
              lines!, linesegments!, scatter!
 
 """
-    peaksplot(x, y, indices)
-    peaksplot(x, pks::NamedTuple)
-    peaksplot!(ax, x, y, indices)
-    peaksplot!(ax, x, pks::NamedTuple)
+    peaksplot([x,] y, indices)
+    peaksplot([x,] pks::NamedTuple)
+    peaksplot!(ax, [x,] y, indices)
+    peaksplot!(ax, [x,] pks::NamedTuple)
 
 Plot the peaks of a line using Makie
 

@@ -35,10 +35,10 @@ function __init__()
 end
 
 """
-    plotpeaks(x, y, indices; show_prominences=true, show_widths=true, kwargs...)
-    plotpeaks(x, pks::NamedTuple; show_prominences=true, show_widths=true, kwargs...)
-    plotpeaks!(plt, x, y, indices; show_prominences=true, show_widths=true, kwargs...)
-    plotpeaks!(plt, x, pks::NamedTuple; show_prominences=true, show_widths=true, kwargs...)
+    plotpeaks([x,] y, indices; show_prominences=true, show_widths=true, kwargs...)
+    plotpeaks([x,] pks::NamedTuple; show_prominences=true, show_widths=true, kwargs...)
+    plotpeaks!(plt, [x,] y, indices; show_prominences=true, show_widths=true, kwargs...)
+    plotpeaks!(plt, [x,] pks::NamedTuple; show_prominences=true, show_widths=true, kwargs...)
 
 Plot the peaks of a line; optionally, also show the reference level for each peak's
 prominence, and the left/right bounds of each peak's width. This is a Plots.jl recipe.
