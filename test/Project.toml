@@ -1,5 +1,6 @@
 [deps]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 ExplicitImports = "7d51a73a-1435-4ff3-83d9-f097790105c7"
 ImageIO = "82e4d734-157c-48bb-816b-45c225c6df19"
 JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"

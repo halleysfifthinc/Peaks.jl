@@ -7,12 +7,15 @@ authors = ["Allen Hill <allenofthehills@gmail.com>"]
 SIMD = "fdea26ae-647d-5447-a871-4b548cad5224"
 
 [weakdeps]
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 
 [extensions]
 PlotsExt = "RecipesBase"
+MakieExt = "Makie"
 
 [compat]
+Makie = "0.24"
 RecipesBase = "1.3"
 SIMD = "3.4.5"
 julia = "1.10"

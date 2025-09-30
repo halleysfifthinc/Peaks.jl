@@ -58,4 +58,49 @@
         minpks = findminima(y) |> peakproms!(; min=1) |> peakwidths!
         @test_reference "references/plots/everything_minima.png" plotpeaks(t, minpks)
     end
+
+    @testset "Makie.jl recipe" begin
+        # first peak isn't an extrema
+        @test_throws ArgumentError peaksplot(t, y, [2])
+        @test_throws ArgumentError peaksplot(t, pks; show_prominences=2)
+        @test_throws ArgumentError peaksplot(t, pks; show_widths=2)
+
+        # show_prominences=false, show_widths=false
+        plt = peaksplot(t, y, pks; show_prominences=false, show_widths=false)
+        @test_reference "references/makie/onlypeaks.png" plt
+        plt = peaksplot(t, pks_nt; show_prominences=false, show_widths=false)
+        @test_reference "references/makie/onlypeaks.png" plt
+        plt = peaksplot(y, pks; show_prominences=false, show_widths=false)
+        @test_reference "references/makie/onlypeaks_nox.png" plt
+        plt = peaksplot(pks_nt; show_prominences=false, show_widths=false)
+        @test_reference "references/makie/onlypeaks_nox.png" plt
+
+        # show_prominences=true, show_widths=false
+        plt = peaksplot(t, y, pks; show_widths=false)
+        @test_reference "references/makie/peaks_and_proms.png" plt
+        plt = peaksplot(t, y, pks; proms, show_widths=false)
+        @test_reference "references/makie/peaks_and_proms.png" plt
+        plt = peaksplot(t, pks_nt; show_widths=false)
+        @test_reference "references/makie/peaks_and_proms.png" plt
+
+        # show_prominences=false, show_widths=true
+        plt = peaksplot(t, y, pks; show_prominences=false, show_widths=true)
+        @test_reference "references/makie/peaks_and_widths.png" plt
+        plt = peaksplot(t, pks_nt; show_prominences=false, show_widths=true)
+        @test_reference "references/makie/peaks_and_widths.png" plt
+
+        # show_prominences=true, show_widths=true
+        plt = peaksplot(t, y, pks)
+        @test_reference "references/makie/everything.png" plt
+        plt = peaksplot(t, y, pks; edges)
+        @test_reference "references/makie/everything.png" plt
+        plt = peaksplot(t, y, pks; edges=collect(zip(edges...)))
+        @test_reference "references/makie/everything.png" plt
+        plt = peaksplot(t, pks_nt)
+        @test_reference "references/makie/everything.png" plt
+
+        # add minima to plot
+        pks = findminima(y) |> peakproms!(; min=1) |> peakwidths!
+        @test_reference "references/makie/everything_minima.png" peaksplot(t, pks)
+    end
 end
