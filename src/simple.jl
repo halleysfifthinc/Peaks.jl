@@ -26,9 +26,8 @@ function findall_offset(B::BitVector, offset::Int)
     end
 end
 
+_simpleextrema(@nospecialize(f), cmp, x::AbstractVector{>:Missing}) = throw(MethodError(f, Tuple{typeof(x)}))
 function _simpleextrema(@nospecialize(f), cmp::F, x::AbstractVector{T}) where {F,T}
-    T >: Missing && throw(MethodError(f, Tuple{typeof(x)}))
-
     if typeof(axes(x,1)) <: AbstractUnitRange && length(x) > 32
         if T <: VecTypes && hasmethod(vload, Tuple{Type{Vec{8,T}}, typeof(x), Int})
             pks = BitVector(undef, length(x))

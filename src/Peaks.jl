@@ -16,8 +16,8 @@ include("peakheight.jl")
 
 function __init__()
     Base.Experimental.register_error_hint(MethodError) do io, exc, argtypes, kwargs
-        if (exc.f == simplemaxima || exc.f == simpleminima) && eltype(argtypes[1]) <: Missing
-            if exc.f == simplemaxima
+        if (exc.f === simplemaxima || exc.f === simpleminima) && eltype(argtypes[1]) >: Missing
+            if exc.f === simplemaxima
                 cmp = "max"
             else
                 cmp = "min"
@@ -25,7 +25,7 @@ function __init__()
             printstyled(io, "\nsimple$(cmp)ima"; color=:cyan)
             print(io, " does not support vectors with ")
             printstyled(io, "missing"; color=:cyan)
-            print(io, "s. See the ")
+            print(io, "s. Use the ")
             printstyled(io, "arg$(cmp)ima"; color=:cyan)
             print(io, " function to find $(cmp)ima when ")
             printstyled(io, "missing"; color=:cyan)
