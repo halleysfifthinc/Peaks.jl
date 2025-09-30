@@ -34,15 +34,8 @@ julia> inds, proms = peakproms(pks.indices, pks.data; max=4)
 ```
 """
 function peakproms(peaks::AbstractVector{Int}, x::AbstractVector{T};
-    strict=true, minprom=nothing, maxprom=nothing,
-    min=minprom, max=maxprom
+    strict=true, min=nothing, max=nothing
 ) where {T}
-    if !isnothing(minprom)
-        Base.depwarn("Keyword `minprom` has been renamed to `min`", :peakproms)
-    end
-    if !isnothing(maxprom)
-        Base.depwarn("Keyword `maxprom` has been renamed to `max`", :peakproms)
-    end
     if !isnothing(min) || !isnothing(max)
         _peaks = copy(peaks)
     else
@@ -126,15 +119,8 @@ julia> inds, proms = peakproms!(pks.indices, pks.data; max=4)
 ```
 """
 function peakproms!(peaks::AbstractVector{Int}, x::AbstractVector{T};
-    strict=true, minprom=nothing, maxprom=nothing,
-    min=minprom, max=maxprom
+    strict=true, min=nothing, max=nothing
 ) where {T}
-    if !isnothing(minprom)
-        Base.depwarn("Keyword `minprom` has been renamed to `min`", :peakproms!)
-    end
-    if !isnothing(maxprom)
-        Base.depwarn("Keyword `maxprom` has been renamed to `max`", :peakproms!)
-    end
     if !isnothing(min) && !isnothing(max)
         min < max || throw(ArgumentError("Keyword `min` must be less than `max`"))
     end
