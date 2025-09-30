@@ -116,19 +116,6 @@ julia> findnextmaxima([0,2,0,1,1,0], 3)
 findnextmaxima(x, i, w=1; strict=true) = findnextextrema(<, x, i, w, strict)
 
 """
-    ismaxima(i, y[, w=1; strict=true]) -> Bool
-
-Test if `i` is a maxima in `y`, where the maxima `i` is either the maximum of `y[i-w:i+w]`
-or the first index of a plateau.
-
-A plateau is defined as a maxima with consecutive equal (`==`) maximal values which
-are bounded by lesser values immediately before and after the consecutive maximal values.
-
-See also: [`findnextmaxima`](@ref)
-"""
-ismaxima(i, x, w=1; strict=true)::Bool = findnextextrema(<, x, i, w, strict) === i
-
-"""
     argmaxima(y[, w=1; strict=true]) -> Vector{Int}
 
 Find the indices of local maxima in `y`, where each maxima `i` is either the maximum of
@@ -308,19 +295,6 @@ julia> findnextminima([3,2,3,1,1,3], 3)
 findnextminima(x, i, w=1; strict=true) = findnextextrema(>, x, i, w, strict)
 
 """
-    isminima(i, y[, w=1; strict=true]) -> Bool
-
-Test if `i` is a minima in `y`, where the minima `i` is either the minimum of `y[i-w:i+w]`
-or the first index of a plateau.
-
-A plateau is defined as a minima with consecutive equal (`==`) minimal values which
-are bounded by greater values immediately before and after the consecutive minimal values.
-
-See also: [`findnextminima`](@ref)
-"""
-isminima(i, y, w=1; strict=true)::Bool = findnextextrema(>, y, i, w, strict) === i
-
-"""
     argminima(y[, w=1; strict=false]) -> Vector{Int}
 
 
@@ -470,26 +444,53 @@ function findminima(x, w::Int=1; strict::Bool=true)
     return (;indices=idxs, heights=x[idxs], data=x)
 end
 
-"""
-    isplateau(i, y[, w=1; strict=true]) -> Union{Missing,Bool}
+const MinMaxTuple = Union{
+    NamedTuple{(:min, :max)},
+    NamedTuple{(:max,)},
+    NamedTuple{(:min,)},
+    }
 
-Test if `i` is a plateau in `y`, where a plateau is defined as a maxima or minima with
-consecutive equal (`==`) extreme values which are bounded by lesser values immediately
-before and after the consecutive values. Returns `false` if `i` is the last index in `y`.
-
-See also: [`ismaxima`](@ref), [`isminima`](@ref)
 """
-function isplateau(i, x, w=1; strict=true)
-    if ismaxima(i, x, w; strict) || isminima(i, x, w; strict)
-        if i === lastindex(x)
-            # default unstrict assumption that first/last element can be peak means that we
-            # should not assume first/last element is (also) a plateau (too much assuming)
-            return false
-        else
-            return x[i] == x[i+1]
-        end
-    else
-        return false
+    findpeaks(y[, w=1; strict=true, heights, proms, widths, relheight]) -> NamedTuple
+
+Find the maximal peaks and peak characteristics in `y`, and filter by the requirements given
+for each peak characteristic (height, prominence, etc.).
+
+Peak characteristic keywords (e.g. `proms`, etc) must be a `NamedTuple` with `min` and/or
+`max` fields.
+
+See the [`peakwidths`](@ref) docstring for an explanation of the `relheight` keyword.
+
+See also: [`findmaxima`](@ref), [`peakheights`](@ref), [`peakproms`](@ref), [`peakwidths`](@ref)
+
+# Examples
+```jldoctest ; filter = r"(\\d*)\\.(\\d{3})\\d*" => s"\\1.\\2***"
+julia> pks = findpeaks(Float64[0,5,2,2,3,3,1,4,0])
+(indices = [2, 5, 8], heights = [5.0, 3.0, 4.0], data = [0.0, 5.0, 2.0, 2.0, 3.0, 3.0, 1.0, 4.0, 0.0], proms = [5.0, 1.0, 3.0], widths = [1.333, 1.75, 0.875], edges = [(1.5, 2.833), (4.5, 6.25), (7.5, 8.375)])
+
+julia> pks = findpeaks(Float64[0,5,2,2,3,3,1,4,0]; proms=(;max=3), widths=(;min=1.5))
+(indices = [5], heights = [3.0], data = [0.0, 5.0, 2.0, 2.0, 3.0, 3.0, 1.0, 4.0, 0.0], proms = [1.0], widths = [1.75], edges = [(4.5, 6.25)])
+```
+"""
+function findpeaks(x, w::Int=1;
+    strict::Bool=true, relheight=0.5,
+    heights::MinMaxTuple=(;min=nothing,max=nothing),
+    proms::MinMaxTuple=(;min=nothing,max=nothing),
+    widths::MinMaxTuple=(;min=nothing,max=nothing),
+)
+    if !(heights isa NamedTuple{(:min,:max)})
+        heights = merge((;min=nothing,max=nothing), heights)
     end
+    if !(proms isa NamedTuple{(:min,:max)})
+        proms = merge((;min=nothing,max=nothing), proms)
+    end
+    if !(widths isa NamedTuple{(:min,:max)})
+        widths = merge((;min=nothing,max=nothing), widths)
+    end
+
+    return findmaxima(x, w; strict) |>
+        peakheights!(;heights...) |>
+        peakproms!(;strict, proms...) |>
+        peakwidths!(;strict, relheight, widths...)
 end
 

@@ -4,8 +4,8 @@ using SIMD: SIMD, Vec, VecTypes, vload
 
 export argmaxima, simplemaxima, argminima, simpleminima, maxima, minima, findmaxima,
     findminima, findnextmaxima, findnextminima, peakproms, peakproms!, peakwidths,
-    peakwidths!, peakheights, peakheights!, ismaxima, isminima, isplateau, filterpeaks!,
-    plotpeaks, plotpeaks!, peaksplot, peaksplot!
+    peakwidths!, peakheights, peakheights!, findpeaks, ismaxima, isminima, isplateau,
+    filterpeaks!, plotpeaks, plotpeaks!, peaksplot, peaksplot!
 
 include("simple.jl")
 include("minmax.jl")

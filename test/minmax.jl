@@ -227,10 +227,25 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test isplateau(10, isx; strict=false) == false
     end
 
-    pks, vals = @test_nowarn findmaxima(x1)
-    @test x1[pks] == vals
+    pks, vals = findmaxima(x1)
     @test x1[pks] == maxima(x1)
-    pks, vals = @test_nowarn findminima(x1)
-    @test x1[pks] == vals
+    pks, vals = findminima(x1)
     @test x1[pks] == minima(x1)
+
+    y = Float64[0,5,2,2,3,3,1,4,0]
+    pks = findmaxima(y) |> peakproms!() |> peakwidths!()
+    indices = argmaxima(y)
+    _, proms = peakproms(indices, y)
+    _, widths, ledge, redge = peakwidths(indices, y, proms)
+    manual_pks_nt = (;indices, heights=y[indices], data=y, proms, widths, edges=collect(zip(ledge, redge)))
+    @test pks == manual_pks_nt
+    @test findpeaks(y) == manual_pks_nt
+
+    pks = findmaxima(y) |> peakproms!(;max=3) |> peakwidths!(;min=1.5)
+    _, proms = peakproms!(indices, y; max=3)
+    _, widths, ledge, redge = peakwidths!(indices, y, proms; min=1.5)
+    manual_pks_nt = (;indices, heights=y[indices], data=y, proms, widths, edges=collect(zip(ledge, redge)))
+    @test pks == manual_pks_nt
+    @test findpeaks(y; heights=(;max=10), proms=(;max=3), widths=(;min=1.5)) == manual_pks_nt
+
 end
