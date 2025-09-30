@@ -53,11 +53,13 @@ function peakwidths(
     end
     if !isnothing(min) || !isnothing(max)
         _peaks = copy(peaks)
+        _proms = copy(proms)
     else
         # peaks will not be modified
         _peaks = peaks
+        _proms = proms
     end
-    peakwidths!(_peaks, x, proms; strict=strict, relheight=relheight,
+    peakwidths!(_peaks, x, _proms; strict=strict, relheight=relheight,
         min=min, max=max)
 end
 
@@ -120,6 +122,7 @@ end
 Calculate the widths of peak `indices` in `y` at a reference level based on `proms` and
 `relheight`, removing peaks with widths less than `min` and/or greater than `max`.
 Returns the modified peaks, widths, and the left and right edges at the reference level.
+`proms` will be modified if `min` or `max` is specified.
 
 If a NamedTuple `pks` is given, a new NamedTuple is returned with the same fields (references)
 from `pks`. `pks` must have `:indices`, `:heights`, and `:proms` fields. If `pks` has
@@ -127,7 +130,7 @@ from `pks`. `pks` must have `:indices`, `:heights`, and `:proms` fields. If `pks
 remaining fields will be copied unmodified.
 
 See also: [`peakwidths`](@ref), [`peakproms`](@ref), [`findmaxima`](@ref)
-#
+
 # Examples
 ```jldoctest ; filter = r"(\\d*)\\.(\\d{3})\\d*" => s"\\1.\\2***"
 julia> pks = findmaxima(Float64[0,5,2,2,3,3,1,4,0]) |> peakproms!();
@@ -193,6 +196,7 @@ function peakwidths!(
         hi = something(max, typemax(Base.nonmissingtype(eltype(widths))))
         matched = findall(x -> !ismissing(x) && !(lo ≤ x ≤ hi), widths)
         deleteat!(peaks, matched)
+        deleteat!(proms, matched)
         deleteat!(ledge, matched)
         deleteat!(redge, matched)
         deleteat!(widths, matched)
