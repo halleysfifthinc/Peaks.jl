@@ -104,6 +104,13 @@ recipe `plotpeaks`:
 
 ```@example tutorial
 using Plots
-plotpeaks(t, y; peaks=indices, prominences=true, widths=true)
+plotpeaks(t, y, indices; show_prominences=true, show_widths=true)
 ```
 
+or using a `Makie.jl` recipe (with a different function name to avoid name conflicts):
+
+```@example tutorial
+using CairoMakie
+CairoMakie.activate!(type = "svg") # hide
+peaksplot(t, y, indices; show_prominences=true, show_widths=true)
+```

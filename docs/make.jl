@@ -1,13 +1,13 @@
 using Documenter, DocumenterInterLinks
-using Peaks
+using Peaks, CairoMakie
 
 ENV["GKSwstype"] = "100"
 
-DocMeta.setdocmeta!(Peaks, :DocTestSetup, :(using Peaks); recursive=true)
 makedocs(
     sitename = "Peaks",
-    modules = [Peaks],
-    checkdocs = :exports,
+    modules = [Peaks, Base.get_extension(Peaks, :MakieExt)],
+    meta = Dict(:DocTestSetup => :(using Peaks)),
+    checkdocs = :warn,
     format = Documenter.HTML(;
         prettyurls=true,
         canonical="https://halleysfifthinc.github.io/Peaks.jl",

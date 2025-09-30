@@ -15,9 +15,7 @@ See also: [`peakproms`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref)
 
 # Examples
 ```jldoctest
-julia> x = [0,5,2,3,3,1,4,0];
-
-julia> pks = findmaxima(x)
+julia> pks = findmaxima([0,5,2,3,3,1,4,0])
 (indices = [2, 4, 7], heights = [5, 3, 4], data = [0, 5, 2, 3, 3, 1, 4, 0])
 
 julia> peakheights(pks; max=4)
@@ -76,9 +74,7 @@ See also: [`peakproms`](@ref), [`peakwidths`](@ref), [`findmaxima`](@ref)
 
 # Examples
 ```jldoctest
-julia> x = [0,5,2,3,3,1,4,0];
-
-julia> pks = findmaxima(x)
+julia> pks = findmaxima([0,5,2,3,3,1,4,0])
 (indices = [2, 4, 7], heights = [5, 3, 4], data = [0, 5, 2, 3, 3, 1, 4, 0])
 
 julia> peakheights!(pks; max=4)

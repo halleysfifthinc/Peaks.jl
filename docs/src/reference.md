@@ -33,3 +33,11 @@ isminima
 isplateau
 ```
 
+## Plotting
+
+```@docs
+plotpeaks
+plotpeaks!
+peaksplot
+peaksplot!
+```

@@ -1,5 +1,6 @@
 using Peaks
-using Test, OffsetArrays, Plots, Aqua, JET, ExplicitImports
+using Test, Aqua, JET, ExplicitImports, ReferenceTests, ImageIO
+using OffsetArrays, Plots, CairoMakie
 
 @testset verbose=true "Peaks" begin
     @testset "Aqua tests" begin
@@ -16,14 +17,14 @@ using Test, OffsetArrays, Plots, Aqua, JET, ExplicitImports
         @static if VERSION < v"1.11"
             @test check_all_qualified_accesses_are_public(Peaks; ignore=(
                 :_overflowind, :_blsr, :_toind, # for findall_offset function
-                :Experimental, :register_error_hint, # should be public
+                :Experimental, :register_error_hint, :argument_names, # should be public
                 :VecTypes, # from SIMD
                 :Fix2, :depwarn
                 )) === nothing
         else
             @test check_all_qualified_accesses_are_public(Peaks; ignore=(
                 :_overflowind, :_blsr, :_toind, # for findall_offset function
-                :Experimental, :register_error_hint, # should be public
+                :Experimental, :register_error_hint, :argument_names, # should be public
                 :VecTypes, # from SIMD
                 )) === nothing
         end
