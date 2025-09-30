@@ -239,11 +239,13 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
     _, widths, ledge, redge = peakwidths(indices, y, proms)
     manual_pks_nt = (;indices, heights=y[indices], data=y, proms, widths, edges=collect(zip(ledge, redge)))
     @test pks == manual_pks_nt
+    @test findpeaks(y) == manual_pks_nt
 
     pks = findmaxima(y) |> peakproms!(;max=3) |> peakwidths!(;min=1.5)
     _, proms = peakproms!(indices, y; max=3)
     _, widths, ledge, redge = peakwidths!(indices, y, proms; min=1.5)
     manual_pks_nt = (;indices, heights=y[indices], data=y, proms, widths, edges=collect(zip(ledge, redge)))
     @test pks == manual_pks_nt
+    @test findpeaks(y; heights=(;max=10), proms=(;max=3), widths=(;min=1.5)) == manual_pks_nt
 
 end

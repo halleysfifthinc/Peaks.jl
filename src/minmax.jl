@@ -444,3 +444,53 @@ function findminima(x, w::Int=1; strict::Bool=true)
     return (;indices=idxs, heights=x[idxs], data=x)
 end
 
+const MinMaxTuple = Union{
+    NamedTuple{(:min, :max)},
+    NamedTuple{(:max,)},
+    NamedTuple{(:min,)},
+    }
+
+"""
+    findpeaks(y[, w=1; strict=true, heights, proms, widths, relheight]) -> NamedTuple
+
+Find the maximal peaks and peak characteristics in `y`, and filter by the requirements given
+for each peak characteristic (height, prominence, etc.).
+
+Peak characteristic keywords (e.g. `proms`, etc) must be a `NamedTuple` with `min` and/or
+`max` fields.
+
+See the [`peakwidths`](@ref) docstring for an explanation of the `relheight` keyword.
+
+See also: [`findmaxima`](@ref), [`peakheights`](@ref), [`peakproms`](@ref), [`peakwidths`](@ref)
+
+# Examples
+```jldoctest ; filter = r"(\\d*)\\.(\\d{3})\\d*" => s"\\1.\\2***"
+julia> pks = findpeaks(Float64[0,5,2,2,3,3,1,4,0])
+(indices = [2, 5, 8], heights = [5.0, 3.0, 4.0], data = [0.0, 5.0, 2.0, 2.0, 3.0, 3.0, 1.0, 4.0, 0.0], proms = [5.0, 1.0, 3.0], widths = [1.333, 1.75, 0.875], edges = [(1.5, 2.833), (4.5, 6.25), (7.5, 8.375)])
+
+julia> pks = findpeaks(Float64[0,5,2,2,3,3,1,4,0]; proms=(;max=3), widths=(;min=1.5))
+(indices = [5], heights = [3.0], data = [0.0, 5.0, 2.0, 2.0, 3.0, 3.0, 1.0, 4.0, 0.0], proms = [1.0], widths = [1.75], edges = [(4.5, 6.25)])
+```
+"""
+function findpeaks(x, w::Int=1;
+    strict::Bool=true, relheight=0.5,
+    heights::MinMaxTuple=(;min=nothing,max=nothing),
+    proms::MinMaxTuple=(;min=nothing,max=nothing),
+    widths::MinMaxTuple=(;min=nothing,max=nothing),
+)
+    if !(heights isa NamedTuple{(:min,:max)})
+        heights = merge((;min=nothing,max=nothing), heights)
+    end
+    if !(proms isa NamedTuple{(:min,:max)})
+        proms = merge((;min=nothing,max=nothing), proms)
+    end
+    if !(widths isa NamedTuple{(:min,:max)})
+        widths = merge((;min=nothing,max=nothing), widths)
+    end
+
+    return findmaxima(x, w; strict) |>
+        peakheights!(;heights...) |>
+        peakproms!(;strict, proms...) |>
+        peakwidths!(;strict, relheight, widths...)
+end
+

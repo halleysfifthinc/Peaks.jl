@@ -1,14 +1,15 @@
 ## Finding peaks
 
 ```@docs
-argmaxima
-argminima
-maxima
-minima
+findpeaks
 findmaxima
 findminima
+argmaxima
+argminima
 simplemaxima
 simpleminima
+maxima
+minima
 ```
 
 ## Peak characteristics & filtering

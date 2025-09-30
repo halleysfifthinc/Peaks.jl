@@ -190,24 +190,3 @@ function drop_irrelevant_side(i, peak, y, maxima)
     end
 end
 
-#====================================================================
-We store a version of findpeak here, as it might be implemented soon,
-and I did not want to throw away this implementation
-"""
-    findpeaks(x) -> NamedTuple
-    findpeaks(x, w=1; strict=true) -> NamedTuple
-
-Find the peaks in a vector `x`, where each maxima i is either
-the maximum of x[i-w:i+w] or the first index of a plateau.
-A `NamedTuple` is returned with the original vector
-in the field `data`, and the indices of the peaks
-in the field `indices`.
-
-This function serves as the entry-point for other
-functions such as `peakproms!` and `peakwidths!`
-"""
-function findpeaks(x::AbstractVector, w::Int=1; strict=true)
-    indices, heights = findmaxima(x, w; strict)
-    return (data=x, indices=indices, heights=heights)
-end
-=#
