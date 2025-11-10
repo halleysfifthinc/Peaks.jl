@@ -63,7 +63,7 @@ jobs:
         run: |
             using Pkg
             Pkg.Registry.update()
-            Pkg.instantiate()
+            Pkg.instantiate(;workspace=true)
       - name: Run doctests
         shell: julia --project=docs --color=yes {0}
         run: |
