@@ -113,7 +113,7 @@ Return a bitmask where the highest bit in each series of consecutive, non-zero b
 
 # Examples
 ```julia-repl
-julia> lowest_set_bits(0b01110101) |> bitstring
+julia> highest_set_bits(0b01110101) |> bitstring
 "0b01000101"
 ```
 """
