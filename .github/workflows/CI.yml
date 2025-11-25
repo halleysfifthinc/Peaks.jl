@@ -35,7 +35,7 @@ jobs:
         with:
           version: ${{ matrix.version }}
       - uses: julia-actions/cache@d10a6fd8f31b12404a54613ebad242900567f2b9 # v2.1.0
-      - uses: julia-actions/julia-runtest@b67f25cc97aa716a662fc9586ea6d5d7bf6c2da3 # v1.11.3
+      - uses: julia-actions/julia-runtest@d60b785c6f2bdf4ebfb18b2b6f7d93b7dfb0efe3 # v1.11.4
       - uses: julia-actions/julia-processcoverage@03114f09f119417c3242a9fb6e0b722676aedf38 # v1.2.2
       - uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
         with:
