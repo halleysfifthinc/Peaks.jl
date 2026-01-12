@@ -16,4 +16,4 @@ Peaks = {path = ".."}
 
 [compat]
 Documenter = "1.3"
-PlotlyBase = "=0.8.19" # 0.8.20-0.8.21? has broken include_plotlyjs in `to_html`
+PlotlyBase = "=0.8.19, 0.8" # 0.8.20-0.8.21? has broken include_plotlyjs in `to_html`
