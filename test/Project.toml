@@ -12,3 +12,14 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [sources]
 Peaks = {path = ".."}
+
+[compat]
+Aqua = "0.8"
+CairoMakie = "0.15.4"
+ExplicitImports = "1.15"
+ImageIO = "0.6"
+JET = "0.11"
+OffsetArrays = "1"
+Plots = "1.40.13"
+ReferenceTests = "0.10"
+Test = "1"
