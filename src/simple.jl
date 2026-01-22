@@ -193,7 +193,7 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
         @inbounds while i < lasti-10
             pk = UInt64(0)
             post = UInt64(0)
-            shift = 1
+            shift = (j % 64) + 1
             # in 64 elements blocks, create bitmasks for `x[i-1] < x[i]` (aka `pre`),
             # `x[i+1] < x[i]` (aka `post`) and `x[i+1] == x[i]` (aka `plat`)
             for _ in 1:8
@@ -314,8 +314,8 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
         end
 
         # @debug "Ending plateau status" continuing_plat, plat_begin
-        j = ifelse(continuing_plat,plat_begin,j-8)
-        i = ifelse(continuing_plat,plat_begin-(firstindex(x)-1),i-8)
+        j = ifelse(continuing_plat,plat_begin,j+2)
+        i = ifelse(continuing_plat,plat_begin-(firstindex(x)-1),i+2)
         # @debug j, i
     else
         j = 2
