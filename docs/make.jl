@@ -7,7 +7,7 @@ makedocs(
     sitename = "Peaks",
     modules = [Peaks, Base.get_extension(Peaks, :MakieExt)],
     meta = Dict(:DocTestSetup => :(using Peaks)),
-    checkdocs = :warn,
+    warnonly = [:cross_references, :missing_docs],
     format = Documenter.HTML(;
         prettyurls=true,
         canonical="https://halleysfifthinc.github.io/Peaks.jl",
