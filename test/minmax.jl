@@ -233,7 +233,7 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
     @test x1[pks] == minima(x1)
 
     y = Float64[0,5,2,2,3,3,1,4,0]
-    pks = findmaxima(y) |> peakproms!() |> peakwidths!()
+    pks = findmaxima(y) |> peakheights() |> peakproms() |> peakwidths()
     indices = argmaxima(y)
     _, proms = peakproms(indices, y)
     _, widths, ledge, redge = peakwidths(indices, y, proms)
