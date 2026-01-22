@@ -1,5 +1,5 @@
 using Peaks: lowest_set_bits, highest_set_bits, matching_bit_runs_mask_highest_bit,
-    matching_bit_runs_mask_lowest_bit, _simd_extrema!, _simpleextrema_base
+    matching_bit_runs_mask_lowest_bit, _simd_extrema!, _simpleextrema_base, findall_offset
 
 _simplemaxima(x) = _simpleextrema_base(<, x, Val(:packed))
 _simpleminima(x) = _simpleextrema_base(>, x, Val(:packed))
@@ -164,7 +164,11 @@ end
     for pklen in 3:96
         arr = repeat([0,1]; outer=cld(pklen,2))
         @test @views argmaxima(arr[1:pklen]) == simplemaxima(arr[1:pklen])
+        @test @views argmaxima(arr[1:pklen]) == findall_offset(_simdmaxima(arr[1:pklen]), 0)
+
         arr = repeat([1,0]; outer=cld(pklen,2))
         @test @views argmaxima(arr[1:pklen]) == simplemaxima(arr[1:pklen])
+        @test @views argmaxima(arr[1:pklen]) == findall_offset(_simdmaxima(arr[1:pklen]), 0)
+
     end
 end
