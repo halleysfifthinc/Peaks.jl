@@ -30,6 +30,26 @@ function __init__()
             print(io, " function to find $(cmp)ima when ")
             printstyled(io, "missing"; color=:cyan)
             print(io, "s are present.")
+        elseif exc.f === plotpeaks || exc.f === plotpeaks!
+            print(io, "\n")
+            printstyled(io, "plotpeaks"; color=:cyan)
+            print(io, " requires ")
+            printstyled(io, "Plots.jl"; color=:cyan)
+            print(io, " to be loaded. Run ")
+            printstyled(io, "using Plots"; color=:cyan)
+            print(io, " before calling ")
+            printstyled(io, "plotpeaks"; color=:cyan)
+            print(io, ".")
+        elseif exc.f === peaksplot || exc.f === peaksplot!
+            print(io, "\n")
+            printstyled(io, "peaksplot"; color=:cyan)
+            print(io, " requires a ")
+            printstyled(io, "Makie.jl"; color=:cyan)
+            print(io, " backend to be loaded. Run e.g. ")
+            printstyled(io, "using CairoMakie"; color=:cyan)
+            print(io, " before calling ")
+            printstyled(io, "peaksplot"; color=:cyan)
+            print(io, ".")
         end
     end
 end

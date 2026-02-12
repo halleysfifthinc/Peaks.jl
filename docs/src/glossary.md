@@ -88,7 +88,8 @@ larger of the two minimums in the adjacent reference ranges. Reference ranges co
 between the current maxima and adjacent (i.e. previous and next) reference maxima, which
 must be at least as large as the current maxima, or the beginning/end of the array. The same
 is true of minima with opposite extrema/extremum (e.g. minima for maxima, and maximum for
-minimum, etc.).
+minimum, etc.). This concept is analogous to
+[topographic prominence](https://en.wikipedia.org/wiki/Topographic_prominence) in geography.
 
 ```@example prominence
 PlotForceHTML(p) # hide
