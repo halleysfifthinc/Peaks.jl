@@ -49,17 +49,12 @@ A common task is keeping only peaks above (or below) a certain height. Use
 [`peakheights`](@ref) with the `min` and/or `max` keyword arguments:
 
 ```@example spacing
-pks = findmaxima(y)
-pks = peakheights(pks; min=3)
-plotpeaks(t, pks; show_prominences=false, show_widths=false)
-```
-
-Alternatively, the [`findpeaks`](@ref) function can find peaks and filter by height,
-prominence, and width in a single call:
-
-```@example spacing
-pks = findpeaks(y; heights=(;min=3))
-plotpeaks(t, pks; show_prominences=false, show_widths=false)
+allpks = findmaxima(y)
+pks = peakheights(allpks; min=3)
+# Equivalently: pks = findpeaks(y; heights=(;min=3))
+removed = setdiff(allpks.indices, pks.indices) # peaks below threshold
+plt = plotpeaks(t, pks; show_prominences=false, show_widths=false)
+plotpeaks!(plt, t, y, removed; show_prominences=false, show_widths=false, markercolor=:Gray) # removed peaks
 ```
 
 ## How to filter peaks by peak characteristics
