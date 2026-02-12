@@ -14,14 +14,14 @@
         @test_throws ArgumentError plotpeaks(t, y, [2])
         @test_throws ArgumentError plotpeaks(t, y, [2]; show_prominences=2)
         @test_throws ArgumentError plotpeaks(t, y, [2]; show_widths=2)
-        @test_warn r"deprecated" plotpeaks(t, y; peaks=pks)
-        @test_warn r"renamed" plotpeaks(t, y, pks; prominences=false)
-        @test_warn r"renamed" plotpeaks(t, y, pks; widths=false)
+        @test_deprecated r"kwarg is deprecated" plotpeaks(t, y; peaks=pks)
+        @test_deprecated r"renamed" plotpeaks(t, y, pks; prominences=false)
+        @test_deprecated r"renamed" plotpeaks(t, y, pks; widths=false)
 
         # show_prominences=false, show_widths=false
         plt = plotpeaks(t, y, pks; show_prominences=false, show_widths=false)
         @test_reference "references/plots/onlypeaks.png" plt
-        plt = plotpeaks(t, y; peaks=pks, show_prominences=false, show_widths=false)
+        @test_deprecated plt = plotpeaks(t, y; peaks=pks, show_prominences=false, show_widths=false)
         @test_reference "references/plots/onlypeaks.png" plt
         plt = plotpeaks(t, pks_nt; show_prominences=false, show_widths=false)
         @test_reference "references/plots/onlypeaks.png" plt

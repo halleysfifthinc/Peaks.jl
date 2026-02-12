@@ -36,6 +36,11 @@ isplateau
 
 ## Plotting
 
+Plotting functions are provided as package extensions. [`plotpeaks`](@ref)/[`plotpeaks!`](@ref)
+require [Plots.jl](https://github.com/JuliaPlots/Plots.jl) to be loaded (e.g. `using Plots`),
+and [`peaksplot`](@ref)/[`peaksplot!`](@ref) require a
+[Makie.jl](https://github.com/MakieOrg/Makie.jl) backend to be loaded (e.g. `using CairoMakie`).
+
 ```@docs
 plotpeaks
 plotpeaks!

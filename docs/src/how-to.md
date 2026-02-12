@@ -43,6 +43,20 @@ plt = plot(t[wpks.indices], wpks.heights; seriestype=:scatter, markershape=:circ
 plotpeaks!(plt, t, pks) # hide
 ```
 
+## How to filter peaks by a height threshold
+
+A common task is keeping only peaks above (or below) a certain height. Use
+[`peakheights`](@ref) with the `min` and/or `max` keyword arguments:
+
+```@example spacing
+allpks = findmaxima(y)
+pks = peakheights(allpks; min=3)
+# Equivalently: pks = findpeaks(y; heights=(;min=3))
+removed = setdiff(allpks.indices, pks.indices) # peaks below threshold
+plt = plotpeaks(t, pks; show_prominences=false, show_widths=false)
+plotpeaks!(plt, t, y, removed; show_prominences=false, show_widths=false, markercolor=:Gray) # removed peaks
+```
+
 ## How to filter peaks by peak characteristics
 
 Every peak-characteristic finding function can optionally filter the newly calculated

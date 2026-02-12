@@ -1,6 +1,6 @@
 using Peaks
 using Test, Aqua, JET, ExplicitImports, ReferenceTests, ImageIO
-using OffsetArrays, Plots, CairoMakie
+using OffsetArrays
 
 @testset verbose=true "Peaks" begin
     @testset "Aqua tests" begin
@@ -40,6 +40,23 @@ using OffsetArrays, Plots, CairoMakie
     include("peakprom.jl")
     include("peakwidth.jl")
     include("peakheight.jl")
+
+    @testset "Error hints" begin
+        @test_throws MethodError simplemaxima([missing, 1.0, missing])
+        @test_throws "does not support vectors" simplemaxima([missing, 1.0, missing])
+        @test_throws MethodError simpleminima([missing, 1.0, missing])
+        @test_throws "does not support vectors" simpleminima([missing, 1.0, missing])
+        @test_throws MethodError plotpeaks([1.0, 2.0, 1.0], [2])
+        @test_throws r"requires .* loaded" plotpeaks([1.0, 2.0, 1.0], [2])
+        @test_throws MethodError plotpeaks!(nothing, [1.0, 2.0, 1.0], [2])
+        @test_throws r"requires .* loaded" plotpeaks!(nothing, [1.0, 2.0, 1.0], [2])
+        @test_throws MethodError peaksplot([1.0, 2.0, 1.0], [2])
+        @test_throws r"requires .* loaded" peaksplot([1.0, 2.0, 1.0], [2])
+        @test_throws MethodError peaksplot!(nothing, [1.0, 2.0, 1.0], [2])
+        @test_throws r"requires .* loaded" peaksplot!(nothing, [1.0, 2.0, 1.0], [2])
+    end
+
+    using Plots, CairoMakie
     include("plotting.jl")
     include("utils.jl")
 end
