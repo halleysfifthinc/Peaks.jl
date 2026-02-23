@@ -1,6 +1,6 @@
 module Peaks
 
-using SIMD: SIMD, Vec, VecTypes, vload
+using SIMD: SIMD, Vec, VecTypes, vload, bitmask
 
 export argmaxima, simplemaxima, argminima, simpleminima, maxima, minima, findmaxima,
     findminima, findnextmaxima, findnextminima, peakproms, peakproms!, peakwidths,

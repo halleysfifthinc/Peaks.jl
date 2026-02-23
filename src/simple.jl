@@ -202,11 +202,11 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
                 xcurr = vload(Vec{8,T}, x, i+2)
                 xpost = vload(Vec{8,T}, x, i+3)
 
-                _pre = sum(convert(Vec{8,UInt64}, cmp(xpre, xcurr)) << Vec((0,1,2,3,4,5,6,7)))
-                _post = sum(convert(Vec{8,UInt64}, cmp(xpost, xcurr)) << Vec((0,1,2,3,4,5,6,7)))
+                _pre = UInt64(bitmask(cmp(xpre, xcurr)))
+                _post = UInt64(bitmask(cmp(xpost, xcurr)))
                 _c = _pre & _post
 
-                _plat = sum(convert(Vec{8,UInt64}, xpost == xcurr) << Vec((0,1,2,3,4,5,6,7)))
+                _plat = UInt64(bitmask(xpost == xcurr))
 
                 pk |= _c << shift
                 plat |= _plat << shift
