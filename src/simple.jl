@@ -161,10 +161,99 @@ julia> matching_bit_runs_mask_highest_bit(0b01110101, 0b01000001) |> bitstring
 ```
 """
 function matching_bit_runs_mask_highest_bit(bits, mask)
-    # TODO: Figure out how to do this directly. ~7% of simd_extrema runtime spent here (the
-    # bitreverse's specifically)
     matches = highest_set_bits(bits) & mask
-    return bitreverse(matching_bit_runs_mask_lowest_bit(bitreverse(bits), bitreverse(matches)))
+    let ⊕=reversecarry_add
+        return bits & (~(bits ⊕ matches))
+    end
+end
+
+"""
+    reversecarry_add(x, y)
+
+Add x and y with reversed (left-to-right) carry semantics.
+
+Based on a [Kogge-Stone adder](https://en.wikipedia.org/wiki/Kogge%E2%80%93Stone_adder).
+
+# Examples
+```jldoctest
+julia> reversecarry_add(0b01110101, 0b01000001) |> bitstring
+"00001100"
+```
+"""
+function reversecarry_add(x::T, y::T) where T<:Union{UInt8,UInt16,UInt32,UInt64}
+    P = x ⊻ y # bits that will cause carry's to propagate
+    G = x & y # additions that generate carry bits
+
+    # First stage: merge adjacent 1-bit spans
+    G |= P & (G >> 1) # (max span length in G is 2 at this point)
+    P &= P >> 1
+
+    # Second stage: merge adjacent 2-bit spans
+    G |= P & (G >> 2) # (max span length in G is 4 at this point)
+    P &= P >> 2
+
+    # Third stage: merge adjacent 4-bit spans, etc
+    G |= P & (G >> 4)
+    if sizeof(T) > 1 # updated P and higher stages aren't needed for UInt8
+        P &= P >> 4
+
+        G |= P & (G >> 8)
+        if sizeof(T) > 2
+            P &= P >> 8
+
+            G |= P & (G >> 16)
+            if sizeof(T) > 4
+                P &= P >> 16
+
+                G |= P & (G >> 32)
+            end
+        end
+    end
+
+    return x ⊻ y ⊻ (G >> 1)
+end
+
+"""
+    lsb_of_runs_mask_msb(bits, mask)
+
+Return the LSB of the bit-runs selected by matching MSB in the mask.
+
+The bit mask is coerced to only contain MSB of bit-runs (i.e. `mask & highest_set_bits(bits)`).
+
+# Examples
+```julia-repl
+julia> lsb_of_runs_mask_msb(0b01110101, 0b00010001) |> bitstring
+"0b01110001"
+```
+"""
+function lsb_of_runs_mask_msb(bits::T, mask::T) where T <: Union{UInt8,UInt16,UInt32,UInt64}
+    G = mask & highest_set_bits(bits)
+    P = bits ⊻ G
+
+    G |= P & (G >> 1)
+    P &= P >> 1
+
+    G |= P & (G >> 2)
+    P &= P >> 2
+
+    G |= P & (G >> 4)
+    if sizeof(T) > 1
+        P &= P >> 4
+
+        G |= P & (G >> 8)
+        if sizeof(T) > 2
+            P &= P >> 8
+
+            G |= P & (G >> 16)
+            if sizeof(T) > 4
+                P &= P >> 16
+
+                G |= P & (G >> 32)
+            end
+        end
+    end
+
+    return lowest_set_bits(G)
 end
 
 top_bit_set(x) = top_bit_set(typeof(x), x)
@@ -263,7 +352,7 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
 
                 # plateaus must end with a post bit, but the plateau beginning (i.e. lowest bit
                 # in the run) is considered the peak location
-                pk |= lowest_set_bits(matching_bit_runs_mask_highest_bit(plat, post))
+                pk |= lsb_of_runs_mask_msb(plat, post)
             end
 
             # Set the chunk of the bitvector (using OR because if the top bit of _c is set,
