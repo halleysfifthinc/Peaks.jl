@@ -255,13 +255,16 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
                 end
             end
 
-            # plateaus must begin with a pre bit (i.e. a plateau must begin with an element
-            # less than the plateau value)
-            plat = matching_bit_runs_mask_lowest_bit(plat, pre)
+            # skip unnecessary plateau checks
+            if !iszero(plat)
+                # plateaus must begin with a pre bit (i.e. a plateau must begin with an element
+                # less than the plateau value)
+                plat = matching_bit_runs_mask_lowest_bit(plat, pre)
 
-            # plateaus must end with a post bit, but the plateau beginning (i.e. lowest bit
-            # in the run) is considered the peak location
-            pk |= lowest_set_bits(matching_bit_runs_mask_highest_bit(plat, post))
+                # plateaus must end with a post bit, but the plateau beginning (i.e. lowest bit
+                # in the run) is considered the peak location
+                pk |= lowest_set_bits(matching_bit_runs_mask_highest_bit(plat, post))
+            end
 
             # Set the chunk of the bitvector (using OR because if the top bit of _c is set,
             # we need to set the first bit of the next chunk. This is needed because the
