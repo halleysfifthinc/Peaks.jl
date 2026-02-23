@@ -1,5 +1,6 @@
 using Peaks: lowest_set_bits, highest_set_bits, matching_bit_runs_mask_highest_bit,
-    matching_bit_runs_mask_lowest_bit, _simd_extrema!, _simpleextrema_base, findall_offset
+    matching_bit_runs_mask_lowest_bit, lsb_of_runs_mask_msb,
+    _simd_extrema!, _simpleextrema_base, findall_offset
 
 _simplemaxima(x) = _simpleextrema_base(<, x, Val(:packed))
 _simpleminima(x) = _simpleextrema_base(>, x, Val(:packed))
@@ -56,15 +57,15 @@ end
 
 function manual_test_matching_bit_runs_mask_lowest_bit(bits, mask)
     res = zero(typeof(bits))
-    shift = trailing_zeros(mask)+1
+    shift = trailing_zeros(mask)
     to = 0
     two = oftype(bits, 2)
     nbits = sizeof(bits)*8
     while shift < nbits && to < nbits
-        # by definition (starting from trailing_zeros(mask)+1, and continuing from
+        # by definition (starting from trailing_zeros(mask), and continuing from
         # `next_one(mask, to)`) the current bit `mask & 2^shift` is set
         to = next_zero(bits, shift)
-        res |= bits & (widen(two)^to - two^(shift-1)) % typeof(bits)
+        res |= bits & (widen(two)^to - two^shift) % typeof(bits)
         shift = next_one(mask, to)
     end
     return res
@@ -99,16 +100,16 @@ function test_bit_run_mask_permutations(::Type{T}, mask_type=:lowest) where {T}
         test_func = matching_bit_runs_mask_highest_bit
     end
 
-    for i in 0:typemax(T)
+    for i in zero(T):typemax(T)
         base_mask = mask_func(i)
         @test test_func(i, base_mask) == reference_matching_func(i, base_mask)
         zeroing = next_one(base_mask, 0)
         for _ in 1:count_ones(base_mask)
-            mask = base_mask & ~(2^zeroing) # zero one bit-run
+            mask = base_mask & ~(T(0x1) << zeroing) # zero one bit-run
 
             pass = @test test_func(i, mask) == reference_matching_func(i, mask)
             if !(pass isa Test.Pass)
-                @error i, mask
+                @error "" (;i, mask)
             end
 
             zeroing = next_one(base_mask, zeroing+1)
@@ -124,8 +125,30 @@ end
     @test matching_bit_runs_mask_lowest_bit(0b01110101, 0b00010001) == 0b01110001
     @test matching_bit_runs_mask_highest_bit(0b01110101, 0b01000001) == 0b01110001
 
-    test_bit_run_mask_permutations(UInt16, :lowest)
-    test_bit_run_mask_permutations(UInt16, :highest)
+    @testset "lowest" test_bit_run_mask_permutations(UInt16, :lowest)
+    @testset "highest" test_bit_run_mask_permutations(UInt16, :highest)
+
+    # lbits_of_matched_runs_hbit_mask matches naive implementation
+    for T in (UInt8, UInt16)
+        for bits in zero(T):typemax(T)
+            base_mask = highest_set_bits(bits)
+            zeroing = next_one(base_mask, 0)
+            for _ in 1:count_ones(base_mask)
+                mask = base_mask & ~T(2^zeroing)
+                msb_masked_bitruns = bitreverse(matching_bit_runs_mask_lowest_bit(bitreverse(bits), bitreverse(mask)))
+                pass = @test msb_masked_bitruns == matching_bit_runs_mask_highest_bit(bits, mask)
+                if !(pass isa Test.Pass)
+                    @error bits, mask
+                end
+                naive = lowest_set_bits(msb_masked_bitruns)
+                pass = @test lsb_of_runs_mask_msb(bits, mask) == naive
+                if !(pass isa Test.Pass)
+                    @error bits, mask
+                end
+                zeroing = next_one(base_mask, zeroing+1)
+            end
+        end
+    end
 
     # Single element peak that is moved through packed peaks chunks and (at some point)
     # crosses a chunk boundary
