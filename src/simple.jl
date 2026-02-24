@@ -94,12 +94,12 @@ end
 """
     lowest_set_bits(x)
 
-Return a bitmask where the lowest bit in each series of consecutive, non-zero bits is set.
+Return LSBs of each run of consecutively set bits (including single-bit runs).
 
 # Examples
-```julia-repl
+```jldoctest; setup = :(using Peaks: lowest_set_bits)
 julia> lowest_set_bits(0b01110101) |> bitstring
-"0b00010101"
+"00010101"
 ```
 """
 function lowest_set_bits(x)
@@ -109,12 +109,12 @@ end
 """
     highest_set_bits(x)
 
-Return a bitmask where the highest bit in each series of consecutive, non-zero bits is set.
+Return MSBs of each run of consecutively set bits (including single-bit runs).
 
 # Examples
-```julia-repl
+```jldoctest; setup = :(using Peaks: highest_set_bits)
 julia> highest_set_bits(0b01110101) |> bitstring
-"0b01000101"
+"01000101"
 ```
 """
 function highest_set_bits(x)
@@ -122,45 +122,37 @@ function highest_set_bits(x)
 end
 
 """
-    matching_bit_runs_mask_lowest_bit(bits, mask)
+    matching_runs_mask_lsb(bits, mask)
 
-Return an integer where bits are zeroed unless the lowest set bit of a bit-run (consecutive
-non-zero bits) is also set in the bit mask.
+Return an integer containing only bit runs whose LSB is set in mask.
 
-The bit mask must be a partial subset of bits set in `lowest_set_bits(bits)`.
-(i.e. `iszero(mask ⊻ lowest_set_bits(bits)) && mask ≤ lowest_set_bits(bits)`)
-It is the callers responsibility to ensure that `mask` is correct, and this function is not
-correct or tested for incorrect masks.
+The bit mask is coerced to only contain LSB of bit runs (i.e. `mask & lowest_set_bits(bits)`).
 
 # Examples
-```julia-repl
-julia> matching_bit_runs_mask_lowest_bit(0b01110101, 0b00010001) |> bitstring
-"0b01110001"
+```jldoctest; setup = :(using Peaks: matching_runs_mask_lsb)
+julia> matching_runs_mask_lsb(0b01110101, 0b00010001) |> bitstring
+"01110001"
 ```
 """
-function matching_bit_runs_mask_lowest_bit(bits, mask)
+function matching_runs_mask_lsb(bits, mask)
     matches = lowest_set_bits(bits) & mask
     return bits & (~(bits + matches))
 end
 
 """
-    matching_bit_runs_mask_highest_bit(bits, mask)
+    matching_runs_mask_msb(bits, mask)
 
-Return an integer where bits are zeroed unless the highest set bit of a bit-run (consecutive
-non-zero bits) is also set in the bit mask.
+Return an integer containing only bit runs whose MSB is set in mask.
 
-The bit mask must be a subset of bits set in `highest_set_bits(bits)`.
-(i.e. `iszero(mask ⊻ highest_set_bits(bits)) && mask ≤ highest_set_bits(bits)`)
-It is the callers responsibility to ensure that `mask` is correct, and this function is not
-correct or tested for incorrect masks.
+The bit mask is coerced to only contain MSB of bit runs (i.e. `mask & highest_set_bits(bits)`).
 
 # Examples
-```julia-repl
-julia> matching_bit_runs_mask_highest_bit(0b01110101, 0b01000001) |> bitstring
-"0b01110001"
+```jldoctest; setup = :(using Peaks: matching_runs_mask_msb)
+julia> matching_runs_mask_msb(0b01110101, 0b01000001) |> bitstring
+"01110001"
 ```
 """
-function matching_bit_runs_mask_highest_bit(bits, mask)
+function matching_runs_mask_msb(bits, mask)
     matches = highest_set_bits(bits) & mask
     let ⊕=reversecarry_add
         return bits & (~(bits ⊕ matches))
@@ -175,7 +167,7 @@ Add x and y with reversed (left-to-right) carry semantics.
 Based on a [Kogge-Stone adder](https://en.wikipedia.org/wiki/Kogge%E2%80%93Stone_adder).
 
 # Examples
-```jldoctest
+```jldoctest; setup = :(using Peaks: reversecarry_add)
 julia> reversecarry_add(0b01110101, 0b01000001) |> bitstring
 "00001100"
 ```
@@ -184,15 +176,15 @@ function reversecarry_add(x::T, y::T) where T<:Union{UInt8,UInt16,UInt32,UInt64}
     P = x ⊻ y # bits that will cause carry's to propagate
     G = x & y # additions that generate carry bits
 
-    # First stage: merge adjacent 1-bit spans
-    G |= P & (G >> 1) # (max span length in G is 2 at this point)
+    # First stage: merge adjacent 1-bit runs
+    G |= P & (G >> 1) # (max run length in G is 2 at this point)
     P &= P >> 1
 
-    # Second stage: merge adjacent 2-bit spans
-    G |= P & (G >> 2) # (max span length in G is 4 at this point)
+    # Second stage: merge adjacent 2-bit runs
+    G |= P & (G >> 2) # (max run length in G is 4 at this point)
     P &= P >> 2
 
-    # Third stage: merge adjacent 4-bit spans, etc
+    # Third stage: merge adjacent 4-bit runs, etc
     G |= P & (G >> 4)
     if sizeof(T) > 1 # updated P and higher stages aren't needed for UInt8
         P &= P >> 4
@@ -216,14 +208,14 @@ end
 """
     lsb_of_runs_mask_msb(bits, mask)
 
-Return the LSB of the bit-runs selected by matching MSB in the mask.
+Return the LSB of the bit runs selected by matching MSB in the mask.
 
-The bit mask is coerced to only contain MSB of bit-runs (i.e. `mask & highest_set_bits(bits)`).
+The bit mask is coerced to only contain MSB of runs (i.e. `mask & highest_set_bits(bits)`).
 
 # Examples
-```julia-repl
-julia> lsb_of_runs_mask_msb(0b01110101, 0b00010001) |> bitstring
-"0b01110001"
+```jldoctest; setup = :(using Peaks: lsb_of_runs_mask_msb)
+julia> lsb_of_runs_mask_msb(0b01110101, 0b01000001) |> bitstring
+"0b00010001"
 ```
 """
 function lsb_of_runs_mask_msb(bits::T, mask::T) where T <: Union{UInt8,UInt16,UInt32,UInt64}
@@ -348,7 +340,7 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
             if !iszero(plat)
                 # plateaus must begin with a pre bit (i.e. a plateau must begin with an element
                 # less than the plateau value)
-                plat = matching_bit_runs_mask_lowest_bit(plat, pre)
+                plat = matching_runs_mask_lsb(plat, pre)
 
                 # plateaus must end with a post bit, but the plateau beginning (i.e. lowest bit
                 # in the run) is considered the peak location
