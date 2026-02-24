@@ -1,5 +1,5 @@
-using Peaks: lowest_set_bits, highest_set_bits, matching_bit_runs_mask_highest_bit,
-    matching_bit_runs_mask_lowest_bit, lsb_of_runs_mask_msb,
+using Peaks: lowest_set_bits, highest_set_bits, matching_runs_mask_lsb,
+    matching_runs_mask_msb, lsb_of_runs_mask_msb,
     _simd_extrema!, _simpleextrema_base, findall_offset
 
 _simplemaxima(x) = _simpleextrema_base(<, x, Val(:packed))
@@ -93,11 +93,11 @@ function test_bit_run_mask_permutations(::Type{T}, mask_type=:lowest) where {T}
     if mask_type == :lowest
         mask_func = lowest_set_bits
         reference_matching_func = manual_test_matching_bit_runs_mask_lowest_bit
-        test_func = matching_bit_runs_mask_lowest_bit
+        test_func = matching_runs_mask_lsb
     else
         mask_func = highest_set_bits
         reference_matching_func = manual_test_matching_bit_runs_mask_highest_bit
-        test_func = matching_bit_runs_mask_highest_bit
+        test_func = matching_runs_mask_msb
     end
 
     for i in zero(T):typemax(T)
@@ -122,8 +122,8 @@ end
     @test highest_set_bits(0b01110101) == 0b01000101
 
     # Obvious manually created bits/mask
-    @test matching_bit_runs_mask_lowest_bit(0b01110101, 0b00010001) == 0b01110001
-    @test matching_bit_runs_mask_highest_bit(0b01110101, 0b01000001) == 0b01110001
+    @test matching_runs_mask_lsb(0b01110101, 0b00010001) == 0b01110001
+    @test matching_runs_mask_msb(0b01110101, 0b01000001) == 0b01110001
 
     @testset "lowest" test_bit_run_mask_permutations(UInt16, :lowest)
     @testset "highest" test_bit_run_mask_permutations(UInt16, :highest)
@@ -135,8 +135,8 @@ end
             zeroing = next_one(base_mask, 0)
             for _ in 1:count_ones(base_mask)
                 mask = base_mask & ~T(2^zeroing)
-                msb_masked_bitruns = bitreverse(matching_bit_runs_mask_lowest_bit(bitreverse(bits), bitreverse(mask)))
-                pass = @test msb_masked_bitruns == matching_bit_runs_mask_highest_bit(bits, mask)
+                msb_masked_bitruns = bitreverse(matching_runs_mask_lsb(bitreverse(bits), bitreverse(mask)))
+                pass = @test msb_masked_bitruns == matching_runs_mask_msb(bits, mask)
                 if !(pass isa Test.Pass)
                     @error bits, mask
                 end
