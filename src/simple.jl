@@ -136,8 +136,10 @@ julia> matching_runs_mask_lsb(0b01110101, 0b00010001) |> bitstring
 """
 function matching_runs_mask_lsb(bits, mask)
     matches = lowest_set_bits(bits) & mask
-    return bits & (~(bits + matches))
+    return _unchecked_matching_runs_mask_lsb(bits, matches)
 end
+
+_unchecked_matching_runs_mask_lsb(bits, mask) = bits & (~(bits + mask))
 
 """
     matching_runs_mask_msb(bits, mask)
@@ -340,9 +342,10 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
             if !iszero(plat)
                 # plateaus must begin with a pre bit (i.e. a plateau must begin with an element
                 # less than the plateau value)
-                plat = matching_runs_mask_lsb(plat, pre)
+                # The only set bits in `pre` are either unset or the LSB of a run in `plat`
+                plat = _unchecked_matching_runs_mask_lsb(plat, plat & pre)
 
-                # plateaus must end with a post bit, but the plateau beginning (i.e. lowest bit
+                # plateaus must end with a post bit, but the plateau beginning (i.e. LSB
                 # in the run) is considered the peak location
                 pk |= lsb_of_runs_mask_msb(plat, post)
             end
