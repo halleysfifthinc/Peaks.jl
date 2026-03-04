@@ -273,8 +273,10 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
         _post = UInt64(0)
         plat = UInt64(0)
         pre = UInt64(0)
+        carry = UInt64(0)
         @inbounds while i < lasti-10
-            pk = UInt64(0)
+            pk = carry
+            carry = UInt64(0)
             post = UInt64(0)
             shift = (j & 0x3f) + 1 # manual equivalent of (j % 64) + 1
             # in 64 elements blocks, create bitmasks for `x[i-1] < x[i]` (aka `pre`),
@@ -352,15 +354,10 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
                 pk |= lsb_of_runs_mask_msb(plat, post)
             end
 
-            # Set the chunk of the bitvector (using OR because if the top bit of _c is set,
-            # we need to set the first bit of the next chunk. This is needed because the
-            # shifting is always +1 of a byte range, so the top bit of `_c` is always
-            # shifted beyond `pk` (i.e. non-existent bit 65).
             pks.chunks[pks_j] |= pk
-            # @debug "" r, _c
-            if r == 0 && top_bit_set(UInt8, _c)
-                pks.chunks[pks_j+1] |= 1
-            end
+            # When shift starts at 1, the MSB of the last _c overflows bit 65 of pk.
+            # Carry it as bit 0 of the next chunk (where shift=1 leaves bit 0 unused).
+            carry = UInt64(r == 0) & UInt64(top_bit_set(UInt8, _c))
 
             # @debug "" !continuing_plat, top_bit_set(UInt8, _plat), !top_bit_set(post)
 
@@ -400,6 +397,11 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
             # only the 8th bit is intended to be kept)
             plat = _plat >> 7
             pre = _pre >> 7
+        end
+
+        # Flush any carry from the last full chunk
+        if carry != 0
+            pks.chunks[(j >> 6) + 1] |= carry
         end
 
         # @debug "Ending plateau status" continuing_plat, plat_begin
