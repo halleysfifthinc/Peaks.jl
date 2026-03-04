@@ -217,7 +217,7 @@ The bit mask is coerced to only contain MSB of runs (i.e. `mask & highest_set_bi
 # Examples
 ```jldoctest; setup = :(using Peaks: lsb_of_runs_mask_msb)
 julia> lsb_of_runs_mask_msb(0b01110101, 0b01000001) |> bitstring
-"0b00010001"
+"00010001"
 ```
 """
 function lsb_of_runs_mask_msb(bits::T, mask::T) where T <: Union{UInt8,UInt16,UInt32,UInt64}
@@ -276,7 +276,7 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
         @inbounds while i < lasti-10
             pk = UInt64(0)
             post = UInt64(0)
-            shift = (j % 64) + 1
+            shift = (j & 0x3f) + 1 # manual equivalent of (j % 64) + 1
             # in 64 elements blocks, create bitmasks for `x[i-1] < x[i]` (aka `pre`),
             # `x[i+1] < x[i]` (aka `post`) and `x[i+1] == x[i]` (aka `plat`)
             for _ in 1:8
@@ -307,7 +307,9 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
                 shift += 8
                 i+11 < lasti || break
             end
-            pks_j, r = divrem(j, 64)
+            # equivalent to pks_j, r = divrem(j, 64)
+            r = j & 0x3f
+            pks_j = j >> 6
             pks_j += r > 0
             # @debug "" plat, post, pre, _post, _plat
 
@@ -321,7 +323,7 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
 
                 # if `t1s == 64` then the plateau does not end in this chunk
                 if t1s < 64
-                    plat_end_mask = (2^(t1s-1))
+                    plat_end_mask = UInt64(0x1) << (t1s-1)
                     # The top bit of the (first) plateau in `plat` must match a (set) bit in
                     # `post` for the plateau to be confirmed
                     if !iszero(post & plat_end_mask)
