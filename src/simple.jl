@@ -255,39 +255,36 @@ function top_bit_set(::Type{T}, x) where T
     return !iszero(x & typemin(signed(T)))
 end
 
+@noinline _unreachable_assertion() = throw(AssertionError("this is logically unreachable"))
+
 function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T <: VecTypes}
     # Fear this hideous monstrosity...
 
     lasti = lastindex(x)
 
-    continuing_plateau = false
-    plat_begin = 0
-
     if length(x) > 10
+        continuing_plateau = false
+        plat_begin = 0
+
         j = 0
         i = firstindex(x)-1
 
-        # "rise" and "fall" as in towards/away from a peak (whether maxima or minima)
-        _pk = UInt64(0)
-        _flat = UInt64(0)
-        _rise = UInt64(0)
-        _fall = UInt64(0)
-        flat = UInt64(0)
-        rise = UInt64(0)
         carry = UInt64(0)
-        @inbounds while i < lasti-10
-            pk = carry
-            fall = UInt64(0)
+        chunk = 1
 
-            # Shift in the top bits of `_flat` and `_rise` which were not resolved in this
-            # chunk
-            flat = _flat >> 7
-            rise = _rise >> 7
+        _rise, _flat = UInt64(0), UInt64(0)
+        @inbounds while i < lasti-10
+            local _pk, _fall
 
             shift = (j & 0x3f) + 1 # manual equivalent of (j % 64) + 1
 
+            # full-width comparisons with the top bits of `_flat` and `_rise`
+            # that were not resolved in this chunk
+            (pk, rise, flat, fall) = carry, _rise >> 7, _flat >> 7, UInt64(0)
+
             # in 64 elements blocks, create bitmasks for `x[i-1] < x[i]` (aka `rise`),
             # `x[i+1] < x[i]` (aka `fall`) and `x[i+1] == x[i]` (aka `flat`)
+            # "rise" and "fall" as in towards/away from a peak (whether maxima or minima)
             for _ in 1:8
                 # @debug "" i, j, shift
                 x_pre = vload(Vec{8,T}, x, i+1)
@@ -296,20 +293,26 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
 
                 _rise = UInt64(bitmask(cmp(x_pre, x_curr)))
                 _fall = UInt64(bitmask(cmp(x_post, x_curr)))
-                _flat = UInt64(bitmask(x_post == x_curr))
-
                 _pk = _rise & _fall
 
-                pk |= _pk << shift
-                flat |= _flat << shift
-                rise |= _rise << shift
+                _flat = UInt64(bitmask(x_post == x_curr))
 
-                # `fall` is only kept around for verifying plateau ends, where the *next*
-                # comparison after the last plateau element must be true. So although the -1
-                # shift is now incorrect/mismatched to compare against `rise`, it is correct
-                # to compare against `flat`, which is the only remaining use for it. (Since
-                # we already compared `_rise` & `_fall`)
-                fall |= _fall << (shift-1)
+                # shift will never be >= 64; the assert allows the compiler to remove bounds
+                # checking for the shift amount
+                let shift=shift
+                    shift < 64 || _unreachable_assertion()
+
+                    pk |= _pk << shift
+                    flat |= _flat << shift
+                    rise |= _rise << shift
+
+                    # `fall` is only kept around for verifying plateau ends, where the *next*
+                    # comparison after the last plateau element must be true. So although the -1
+                    # shift is now incorrect/mismatched to compare against `rise`, it is correct
+                    # to compare against `flat`, which is the only remaining use for it. (Since
+                    # we already compared `_rise` & `_fall`)
+                    fall |= _fall << (shift-1)
+                end
 
                 j += 8
                 i += 8
@@ -330,11 +333,14 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
                 # The plateau began before this chunk so at least the first (lowest) bit of
                 # `flat` must be set
                 t1s = trailing_ones(flat)
-                # @assert t1s > 0
 
                 # if `t1s == 64` then the plateau does not end in this chunk
                 if t1s < 64
-                    plat_end_mask = UInt64(0x1) << (t1s-1)
+                    sh_t1s = t1s-1
+                    # give the compiler enough information to safely elide the shift bounds check
+                    (sh_t1s & 63) == sh_t1s  || _unreachable_assertion()
+                    plat_end_mask = UInt64(0x1) << sh_t1s
+
                     # The top bit of the (first) plateau in `flat` must match a (set) bit in
                     # `fall` for the plateau to be confirmed
                     if !iszero(fall & plat_end_mask)
@@ -366,7 +372,7 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
             pks.chunks[chunk] |= pk
             # When shift starts at 1, the MSB of the last _pk overflows bit 65 of pk.
             # Carry it as bit 0 of the next chunk (where shift=1 leaves bit 0 unused).
-            carry = UInt64(r == 0) & UInt64(top_bit_set(UInt8, _pk))
+            carry = UInt64(r_is_zero & top_bit_set(UInt8, _pk))
 
             # @debug "" !continuing_plat, top_bit_set(UInt8, _flat), !top_bit_set(fall)
 
@@ -403,7 +409,7 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
 
         # Flush any carry from the last full chunk
         if carry != 0
-            pks.chunks[(j >> 6) + 1] |= carry
+            pks.chunks[chunk + 1] |= carry
         end
 
         # @debug "Ending plateau status" continuing_plat, plat_begin
