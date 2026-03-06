@@ -58,9 +58,9 @@ function _simpleextrema_base(cmp::F, x::AbstractVector{T}, peaktype::Val) where 
         xi = x[i]
         xim1 = x[i-1]
 
-        if cmp(xim1, xi) # pre
+        if cmp(xim1, xi) # rise
             xip1 = x[i+1]
-            if cmp(xip1, xi) # post
+            if cmp(xip1, xi) # fall
                 if peaktype === Val(:packed)
                     pks[i-ioffs] = true
                 else
@@ -70,7 +70,7 @@ function _simpleextrema_base(cmp::F, x::AbstractVector{T}, peaktype::Val) where 
                 continue # skip i += 1 at the end of the loop
             elseif xip1 == xi # plateau
                 j = something(findnext(Base.Fix2(!=, xi), x, i+2), lasti+1)
-                if j ≤ lasti && cmp(x[j], xi) # post
+                if j ≤ lasti && cmp(x[j], xi) # fall
                     if peaktype === Val(:packed)
                         pks[i-ioffs] = true
                     else
@@ -260,123 +260,132 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
 
     lasti = lastindex(x)
 
-    continuing_plat = false
+    continuing_plateau = false
     plat_begin = 0
 
     if length(x) > 10
         j = 0
         i = firstindex(x)-1
 
-        _c = UInt64(0)
-        _plat = UInt64(0)
-        _pre = UInt64(0)
-        _post = UInt64(0)
-        plat = UInt64(0)
-        pre = UInt64(0)
+        # "rise" and "fall" as in towards/away from a peak (whether maxima or minima)
+        _pk = UInt64(0)
+        _flat = UInt64(0)
+        _rise = UInt64(0)
+        _fall = UInt64(0)
+        flat = UInt64(0)
+        rise = UInt64(0)
         carry = UInt64(0)
         @inbounds while i < lasti-10
             pk = carry
-            carry = UInt64(0)
-            post = UInt64(0)
+            fall = UInt64(0)
+
+            # Shift in the top bits of `_flat` and `_rise` which were not resolved in this
+            # chunk
+            flat = _flat >> 7
+            rise = _rise >> 7
+
             shift = (j & 0x3f) + 1 # manual equivalent of (j % 64) + 1
-            # in 64 elements blocks, create bitmasks for `x[i-1] < x[i]` (aka `pre`),
-            # `x[i+1] < x[i]` (aka `post`) and `x[i+1] == x[i]` (aka `plat`)
+
+            # in 64 elements blocks, create bitmasks for `x[i-1] < x[i]` (aka `rise`),
+            # `x[i+1] < x[i]` (aka `fall`) and `x[i+1] == x[i]` (aka `flat`)
             for _ in 1:8
                 # @debug "" i, j, shift
-                xpre = vload(Vec{8,T}, x, i+1)
-                xcurr = vload(Vec{8,T}, x, i+2)
-                xpost = vload(Vec{8,T}, x, i+3)
+                x_pre = vload(Vec{8,T}, x, i+1)
+                x_curr = vload(Vec{8,T}, x, i+2)
+                x_post = vload(Vec{8,T}, x, i+3)
 
-                _pre = UInt64(bitmask(cmp(xpre, xcurr)))
-                _post = UInt64(bitmask(cmp(xpost, xcurr)))
-                _c = _pre & _post
+                _rise = UInt64(bitmask(cmp(x_pre, x_curr)))
+                _fall = UInt64(bitmask(cmp(x_post, x_curr)))
+                _flat = UInt64(bitmask(x_post == x_curr))
 
-                _plat = UInt64(bitmask(xpost == xcurr))
+                _pk = _rise & _fall
 
-                pk |= _c << shift
-                plat |= _plat << shift
-                pre |= _pre << shift
+                pk |= _pk << shift
+                flat |= _flat << shift
+                rise |= _rise << shift
 
-                # `post` is only kept around for verifying plateau ends, where the *next*
+                # `fall` is only kept around for verifying plateau ends, where the *next*
                 # comparison after the last plateau element must be true. So although the -1
-                # shift is now incorrect/mismatched to compare against `pre`, it is correct
-                # to compare against `plat`, which is the only remaining use for it. (Since
-                # we already compared `_pre` & `_post`)
-                post |= _post << (shift-1)
+                # shift is now incorrect/mismatched to compare against `rise`, it is correct
+                # to compare against `flat`, which is the only remaining use for it. (Since
+                # we already compared `_rise` & `_fall`)
+                fall |= _fall << (shift-1)
 
                 j += 8
                 i += 8
                 shift += 8
                 i+11 < lasti || break
             end
-            # equivalent to pks_j, r = divrem(j, 64)
+            # equivalent to chunk, r = divrem(j, 64)
             r = j & 0x3f
-            pks_j = j >> 6
-            pks_j += r > 0
-            # @debug "" plat, post, pre, _post, _plat
+            chunk = j >> 6
+
+            r_is_zero = r == 0
+            chunk += Int(!r_is_zero)
+            # @debug "" flat, fall, rise, _fall, _flat
 
             # (come back to the comments on this section after reading the next commented
             # sections)
-            if continuing_plat && r == 0
+            if continuing_plateau && r_is_zero
                 # The plateau began before this chunk so at least the first (lowest) bit of
-                # `plat` must be set
-                t1s = trailing_ones(plat)
-                @assert t1s > 0
+                # `flat` must be set
+                t1s = trailing_ones(flat)
+                # @assert t1s > 0
 
                 # if `t1s == 64` then the plateau does not end in this chunk
                 if t1s < 64
                     plat_end_mask = UInt64(0x1) << (t1s-1)
-                    # The top bit of the (first) plateau in `plat` must match a (set) bit in
-                    # `post` for the plateau to be confirmed
-                    if !iszero(post & plat_end_mask)
+                    # The top bit of the (first) plateau in `flat` must match a (set) bit in
+                    # `fall` for the plateau to be confirmed
+                    if !iszero(fall & plat_end_mask)
                         pks[plat_begin] = true
 
                         # Remove the plateau from consideration in the forthcoming ops to
-                        # create this chunk's `pk` (by unsetting the relevent `post` bit)
-                        post ⊻= plat_end_mask
+                        # create this chunk's `pk` (by unsetting the relevent `fall` bit)
+                        fall ⊻= plat_end_mask
                         # @debug "(confirmed) Plateau ends at $(plat_begin+t1s)"
                     end
 
                     # else this isn't a plateau; either way, reset `continuing_plat`
-                    continuing_plat = false
+                    continuing_plateau = false
                 end
             end
 
             # skip unnecessary plateau checks
-            if !iszero(plat)
-                # plateaus must begin with a pre bit (i.e. a plateau must begin with an element
+            if !iszero(flat)
+                # plateaus must begin with a rise bit (i.e. a plateau must begin with an element
                 # less than the plateau value)
-                # The only set bits in `pre` are either unset or the LSB of a run in `plat`
-                plat = _unchecked_matching_runs_mask_lsb(plat, plat & pre)
+                # The only set bits in `rise` are either unset or the LSB of a run in `flat`
+                flat = _unchecked_matching_runs_mask_lsb(flat, flat & rise)
 
-                # plateaus must end with a post bit, but the plateau beginning (i.e. LSB
+                # plateaus must end with a fall bit, but the plateau beginning (i.e. LSB
                 # in the run) is considered the peak location
-                pk |= lsb_of_runs_mask_msb(plat, post)
+                pk |= lsb_of_runs_mask_msb(flat, fall)
             end
 
-            pks.chunks[pks_j] |= pk
-            # When shift starts at 1, the MSB of the last _c overflows bit 65 of pk.
+            pks.chunks[chunk] |= pk
+            # When shift starts at 1, the MSB of the last _pk overflows bit 65 of pk.
             # Carry it as bit 0 of the next chunk (where shift=1 leaves bit 0 unused).
-            carry = UInt64(r == 0) & UInt64(top_bit_set(UInt8, _c))
+            carry = UInt64(r == 0) & UInt64(top_bit_set(UInt8, _pk))
 
-            # @debug "" !continuing_plat, top_bit_set(UInt8, _plat), !top_bit_set(post)
+            # @debug "" !continuing_plat, top_bit_set(UInt8, _flat), !top_bit_set(fall)
 
             # A plateau might begin in one chunk and not end until later. We only begin a
             # `continuing_plat` if we're not already in the middle of one. The last element
             # of this chunk must be a plateau and the plateau must not end in this chunk
-            # (i.e. top bit of `post` is not set).
-            # `_plat` and not `_post` because `_post`/`post` aren't shifted + 1 (so the top
-            # bit of `_post` isn't shifted beyond `post`, unlike the other bitmasks)
-            if !continuing_plat && top_bit_set(UInt8, _plat) && !top_bit_set(post)
-                l1s = leading_ones(plat)
-                # @debug "" _plat, _pre l1s > 0, top_bit_set(UInt8, _plat & _pre)
+            # (i.e. top bit of `fall` is not set).
+            # `_flat` and not `_fall` because `_fall`/`fall` aren't shifted + 1 (so the top
+            # bit of `_fall` isn't shifted beyond `fall`, unlike the other bitmasks)
+            if !continuing_plateau && top_bit_set(UInt8, _flat) && !top_bit_set(fall)
+                l1s = leading_ones(flat)
+                # @debug "" _flat, _rise l1s > 0, top_bit_set(UInt8, _flat & _rise)
 
-                # `plat` has leading ones, or the top-bit of `_plat` (aka bit 65 of `plat)
+                # `flat` has leading ones, or the top-bit of `_flat` (aka bit 65 of `flat)
                 # is set. We store the index of the beginning of the plateau to set (or not)
                 # that index in `pks` if this plateau is confirmed
-                if l1s > 0 || top_bit_set(UInt8, _plat & _pre)
-                    continuing_plat = true
-                    plat_begin = j-leading_ones(plat)+1
+                if l1s > 0 || top_bit_set(UInt8, _flat & _rise)
+                    continuing_plateau = true
+                    plat_begin = j-leading_ones(flat)+1
                     # @debug "Plateau begins @" plat_begin
 
                 # This was an incomplete chunk; we calculate the index of the beginning of
@@ -384,19 +393,12 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
                 # the plateau (if multiple elements long)
                 # We still set `continuing_plat` and `plat_begin` for the last, non-SIMD
                 # peak finding
-                elseif r > 0
-                    l0z = leading_zeros(lowest_set_bits(plat))
-                    continuing_plat = true
+                elseif !r_is_zero
+                    l0z = leading_zeros(lowest_set_bits(flat))
+                    continuing_plateau = true
                     plat_begin = j-l0z+8 # plus 8 because idky but it's correct
                 end
             end
-
-            # Shift in the top bits of `_plat` and `_pre` which were not resolved in this
-            # chunk
-            # (`_plat` and `_pre` are UInt64s but only the lower 8 bits might be filled (and
-            # only the 8th bit is intended to be kept)
-            plat = _plat >> 7
-            pre = _pre >> 7
         end
 
         # Flush any carry from the last full chunk
@@ -405,8 +407,8 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
         end
 
         # @debug "Ending plateau status" continuing_plat, plat_begin
-        j = ifelse(continuing_plat,plat_begin,j+2)
-        i = ifelse(continuing_plat,plat_begin-(firstindex(x)-1),i+2)
+        j = ifelse(continuing_plateau,plat_begin,j+2)
+        i = ifelse(continuing_plateau,plat_begin-(firstindex(x)-1),i+2)
         # @debug j, i
     else
         j = 2
@@ -418,9 +420,9 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
         xi = x[i]
         xim1 = x[i-1]
 
-        if cmp(xim1, xi) # pre
+        if cmp(xim1, xi) # rise
             xip1 = x[i+1]
-            if cmp(xip1, xi) # post
+            if cmp(xip1, xi) # fall
                 pks[j] = true
                 i += 2
                 j += 2
@@ -428,7 +430,7 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
             elseif xip1 == xi # plateau
                 k = something(findnext(Base.Fix2(!=, xi), x, i+2), lasti+1)
                 # @debug "" i,j,k k ≤ lasti, cmp(x[k], xi)
-                if k ≤ lasti && cmp(x[k], xi) # post
+                if k ≤ lasti && cmp(x[k], xi) # fall
                     pks[j] = true
                     j = j+(k-i)+1
                     i = k+1
