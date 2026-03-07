@@ -263,14 +263,14 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
     lasti = lastindex(x)
 
     if length(x) > 10
-        continuing_plateau = false
-        plat_begin = 0
+        ovrflw_plateau = false
 
         j = 0
         i = firstindex(x)-1
 
         carry = UInt64(0)
-        chunk = 1
+        ovrflw_plateau_chunk = chunk = 1
+        ovrflw_plateau_mask = UInt64(0)
 
         _rise, _flat = UInt64(0), UInt64(0)
         @inbounds while i < lasti-10
@@ -329,31 +329,27 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
 
             # (come back to the comments on this section after reading the next commented
             # sections)
-            if continuing_plateau && r_is_zero
+            if ovrflw_plateau && r_is_zero # only handle the ovrflw_plateau for a complete chunk
                 # The plateau began before this chunk so at least the first (lowest) bit of
                 # `flat` must be set
                 t1s = trailing_ones(flat)
 
                 # if `t1s == 64` then the plateau does not end in this chunk
                 if t1s < 64
-                    sh_t1s = t1s-1
+                    t1s -= 1
                     # give the compiler enough information to safely elide the shift bounds check
-                    (sh_t1s & 63) == sh_t1s  || _unreachable_assertion()
-                    plat_end_mask = UInt64(0x1) << sh_t1s
+                    (t1s & 63) == t1s  || _unreachable_assertion()
+                    plat_end_mask = UInt64(0x1) << t1s
 
                     # The top bit of the (first) plateau in `flat` must match a (set) bit in
                     # `fall` for the plateau to be confirmed
                     if !iszero(fall & plat_end_mask)
-                        pks[plat_begin] = true
-
-                        # Remove the plateau from consideration in the forthcoming ops to
-                        # create this chunk's `pk` (by unsetting the relevent `fall` bit)
-                        fall ⊻= plat_end_mask
+                        pks.chunks[ovrflw_plateau_chunk] |= ovrflw_plateau_mask
                         # @debug "(confirmed) Plateau ends at $(plat_begin+t1s)"
                     end
 
                     # else this isn't a plateau; either way, reset `continuing_plat`
-                    continuing_plateau = false
+                    ovrflw_plateau = false
                 end
             end
 
@@ -370,39 +366,37 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
             end
 
             pks.chunks[chunk] |= pk
-            # When shift starts at 1, the MSB of the last _pk overflows bit 65 of pk.
-            # Carry it as bit 0 of the next chunk (where shift=1 leaves bit 0 unused).
+            # When `shift == 57`, the MSB of _pk is shifted (overflows) into bit 65.
+            # Carry it for bit 0 of the next chunk (where shift=1 leaves bit 0 unused).
             carry = UInt64(r_is_zero & top_bit_set(UInt8, _pk))
 
             # @debug "" !continuing_plat, top_bit_set(UInt8, _flat), !top_bit_set(fall)
 
-            # A plateau might begin in one chunk and not end until later. We only begin a
-            # `continuing_plat` if we're not already in the middle of one. The last element
-            # of this chunk must be a plateau and the plateau must not end in this chunk
-            # (i.e. top bit of `fall` is not set).
-            # `_flat` and not `_fall` because `_fall`/`fall` aren't shifted + 1 (so the top
-            # bit of `_fall` isn't shifted beyond `fall`, unlike the other bitmasks)
-            if !continuing_plateau && top_bit_set(UInt8, _flat) && !top_bit_set(fall)
-                l1s = leading_ones(flat)
-                # @debug "" _flat, _rise l1s > 0, top_bit_set(UInt8, _flat & _rise)
+            if !ovrflw_plateau && # can't already be in the middle of an overflowing plateau
+                    top_bit_set(UInt8, _flat) && # MUST overflow[^1]
+                    !top_bit_set(fall) # MUST NOT have finished in this chunk[^2]
+                # [^1]: The top bit of _flat (and _rise) is shifted out of (overflows) the top of chunk
+                # [^2]: The MSB of `_flat` is *after* the MSB of `fall`. It's possible for
+                # `top_bit_set(UInt8, _flat) & top_bit_set(fall) == true` if a plateau ended
+                # in the MSB of `fall` with two consecutively equal values (that are less
+                # than the plateau height)
 
-                # `flat` has leading ones, or the top-bit of `_flat` (aka bit 65 of `flat)
-                # is set. We store the index of the beginning of the plateau to set (or not)
-                # that index in `pks` if this plateau is confirmed
-                if l1s > 0 || top_bit_set(UInt8, _flat & _rise)
-                    continuing_plateau = true
-                    plat_begin = j-leading_ones(flat)+1
-                    # @debug "Plateau begins @" plat_begin
+                # Logically, the highest set bit in `rise` corresponds to the LSB of the
+                # highest (overflowing) run in `flat`
+                l0s = leading_zeros(rise)
+                if l0s < 64
+                    ovrflw_plateau = true
+                    ovrflw_plateau_chunk = chunk
 
-                # This was an incomplete chunk; we calculate the index of the beginning of
-                # the plateau by counting the leading zeros after zero'ing the upper bits of
-                # the plateau (if multiple elements long)
-                # We still set `continuing_plat` and `plat_begin` for the last, non-SIMD
-                # peak finding
-                elseif !r_is_zero
-                    l0z = leading_zeros(lowest_set_bits(flat))
-                    continuing_plateau = true
-                    plat_begin = j-l0z+8 # plus 8 because idky but it's correct
+                    # give the compiler enough information to safely elide the shift bounds check
+                    (l0s & 63) == l0s  || _unreachable_assertion()
+                    ovrflw_plateau_mask = (typemin(Int64) % UInt64) >> l0s
+                elseif top_bit_set(UInt8, _rise) && i >= lasti-10
+                    # Plateau starts entirely in the overflow bit (bit 65) and we are exiting the SIMD loop
+                    # Set ovrflw_plateau* stuff to set up for the scalar loop
+                    ovrflw_plateau = true
+                    ovrflw_plateau_chunk = chunk + 1
+                    ovrflw_plateau_mask = UInt64(0x1)
                 end
             end
         end
@@ -412,9 +406,15 @@ function _simd_extrema!(pks::BitVector, cmp::F, x::AbstractVector{T}) where {F,T
             pks.chunks[chunk + 1] |= carry
         end
 
-        # @debug "Ending plateau status" continuing_plat, plat_begin
-        j = ifelse(continuing_plateau,plat_begin,j+2)
-        i = ifelse(continuing_plateau,plat_begin-(firstindex(x)-1),i+2)
+        # @debug "Ending plateau status" continuing_plateau, plat_chunk, plat_mask
+        if ovrflw_plateau
+            plat_begin = ovrflw_plateau_chunk*64 + trailing_zeros(ovrflw_plateau_mask) - 63
+            j = plat_begin
+            i = plat_begin + firstindex(x) - 1
+        else
+            j = j + 2
+            i = i + 2
+        end
         # @debug j, i
     else
         j = 2
