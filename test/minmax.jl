@@ -248,4 +248,18 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
     @test pks == manual_pks_nt
     @test findpeaks(y; heights=(;max=10), proms=(;max=3), widths=(;min=1.5)) == manual_pks_nt
 
+    @testset "findpeaks empty filters (issue #84)" begin
+        # heights filter removes all peaks before proms/widths are calculated
+        pks = findpeaks(y; heights=(; max=0))
+        @test isempty(pks.indices) && isempty(pks.proms) && isempty(pks.widths)
+
+        # proms filter removes all peaks before widths are calculated
+        pks = findpeaks(y; proms=(; max=0))
+        @test isempty(pks.indices) && isempty(pks.proms) && isempty(pks.widths)
+
+        # widths filter removes all peaks
+        pks = findpeaks(y; widths=(; max=0))
+        @test isempty(pks.indices) && isempty(pks.proms) && isempty(pks.widths)
+    end
+
 end
