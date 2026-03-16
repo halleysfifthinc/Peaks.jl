@@ -34,7 +34,7 @@ jobs:
       - uses: julia-actions/setup-julia@5c9647d97b78a5debe5164e9eec09d653d29bd71 # v2.6.1
         with:
           version: ${{ matrix.version }}
-      - uses: julia-actions/cache@d10a6fd8f31b12404a54613ebad242900567f2b9 # v2.1.0
+      - uses: julia-actions/cache@e33b4bfa0ea7cd9caedd7cb82b0e36956ef40285 # v3.0.0
       - uses: julia-actions/julia-runtest@d60b785c6f2bdf4ebfb18b2b6f7d93b7dfb0efe3 # v1.11.4
       - uses: julia-actions/julia-processcoverage@03114f09f119417c3242a9fb6e0b722676aedf38 # v1.2.2
       - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
@@ -57,7 +57,7 @@ jobs:
         with:
           version: '1'
           show-versioninfo: 'true'
-      - uses: julia-actions/cache@d10a6fd8f31b12404a54613ebad242900567f2b9 # v2.1.0
+      - uses: julia-actions/cache@e33b4bfa0ea7cd9caedd7cb82b0e36956ef40285 # v3.0.0
       - name: Configure doc environment
         shell: julia --project=docs --color=yes {0}
         run: |
