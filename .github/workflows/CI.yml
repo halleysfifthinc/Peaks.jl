@@ -28,13 +28,28 @@ jobs:
         version:
           - 'min'
           - '1'
-          # - 'pre'
+          - 'pre'
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: julia-actions/setup-julia@4c0cb0fce8556fdb04a90347310e5db8b1f98fb9 # v2.7.0
         with:
           version: ${{ matrix.version }}
       - uses: julia-actions/cache@e33b4bfa0ea7cd9caedd7cb82b0e36956ef40285 # v3.0.0
+      - name: Resolve pre-release environment
+        if: matrix.version == 'pre'
+        shell: julia --project=@. --color=yes {0}
+        # edit test/Project using TOML because of a Pkg.rm bug
+        run: |
+            using TOML
+            test_project = "test/Project.toml"
+            d = TOML.parsefile(test_project)
+            delete!(d["deps"], "JET")
+            delete!(d["compat"], "JET")
+            open(test_project, "w") do io
+                TOML.print(io, d)
+            end
+            using Pkg
+            Pkg.update()
       - uses: julia-actions/julia-runtest@d60b785c6f2bdf4ebfb18b2b6f7d93b7dfb0efe3 # v1.11.4
       - uses: julia-actions/julia-processcoverage@03114f09f119417c3242a9fb6e0b722676aedf38 # v1.2.2
       - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2

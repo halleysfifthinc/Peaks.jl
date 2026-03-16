@@ -1,5 +1,8 @@
 using Peaks
-using Test, Aqua, JET, ExplicitImports, ReferenceTests, ImageIO
+using Test, Aqua, ExplicitImports, ReferenceTests, ImageIO
+@static  if isempty(VERSION.prerelease)
+    using JET
+end
 using OffsetArrays
 
 @testset verbose=true "Peaks" begin
