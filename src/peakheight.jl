@@ -82,6 +82,7 @@ function peakheights!(
     min=nothing, max=nothing
 ) where {T}
     length(peaks) == length(heights) || throw(DimensionMismatch("length of `peaks`, $(length(peaks)), does not match the length of `heights`, $(length(heights))"))
+    isempty(peaks) && return empty(peaks), empty(heights)
     if !isnothing(min) || !isnothing(max)
         lo = something(min, typemin(Base.nonmissingtype(T)))
         hi = something(max, typemax(Base.nonmissingtype(T)))
