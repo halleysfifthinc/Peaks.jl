@@ -94,6 +94,19 @@ x1 = a*sin.(2*pi*f1*T*t)+b*sin.(2*pi*f2*T*t)+c*sin.(2*pi*f3*T*t);
         @test p == [0.0]
     end
 
+    @testset "Filtering empty peaks (issue #84)" begin
+        x2 = [0,5,2,3,3,1,4,0]
+        pks = argmaxima(x2)
+
+        # test both the raw/original API and the NamedTuple API
+        # (they are filtered by different codepaths)
+        _pks, _ = peakproms(pks, x2; max=0)
+        @test isempty(_pks)
+
+        _pks = peakproms(findmaxima(x2); max=0)
+        @test isempty(_pks.indices)
+    end
+
     issue91ddaa9 = [1,2,3,2,3,1]
     @test all(!iszero,
         last(peakproms(argminima(issue91ddaa9; strict=false), issue91ddaa9; strict=false)))

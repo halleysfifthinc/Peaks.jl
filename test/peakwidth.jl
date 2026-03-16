@@ -47,4 +47,19 @@
     @test_throws ArgumentError peakwidths([2], 1:10, [1])
     @test_throws ArgumentError peakwidths!((;proms=[1], widths=[2]))
     @test_throws ArgumentError peakwidths!((;proms=[1], edges=[2]))
+
+    @testset "Filtering empty peaks (issue #84)" begin
+        x2 = Float64[0,5,2,2,3,3,1,4,0]
+
+        pks, _ = peakwidths(Int[], x2, Float64[])
+        @test isempty(pks)
+
+        pks = argmaxima(x2)
+        _, proms = peakproms(pks, x2)
+        pks, _ = peakwidths(pks, x2, proms; max=0)
+        @test isempty(pks)
+
+        _pks = findmaxima(x2) |> peakproms!() |> peakwidths(; max=0)
+        @test isempty(_pks.indices)
+    end
 end

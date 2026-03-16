@@ -145,6 +145,16 @@ function peakwidths!(
     all(∈(eachindex(x)), peaks) ||
         throw(ArgumentError("peaks contains invalid indices to x"))
 
+    V1 = promote_type(T, U)
+    _bad = Missing <: V1 ? missing : float(Int)(NaN)
+
+    V = promote_type(V1, float(Int))
+    isempty(peaks) && return empty(peaks), empty(proms, V), empty(proms, V), empty(proms, V)
+
+    ledge = similar(proms, V)
+    redge = similar(proms, V)
+    widths = similar(proms, V)
+
     # if peaks was calculated with strict=false, first(peaks) could be minima at firstindex
     if ismaxima(first(peaks), x; strict=false)
         maxima = true
@@ -153,14 +163,6 @@ function peakwidths!(
     else
         throw(ArgumentError("The first peak in `indices` is not a local extrema"))
     end
-
-    V1 = promote_type(T, U)
-    _bad = Missing <: V1 ? missing : float(Int)(NaN)
-
-    V = promote_type(V1, float(Int))
-    ledge = similar(proms, V)
-    redge = similar(proms, V)
-    widths = similar(proms, V)
 
     if strict
         lst, fst = _bad, _bad
