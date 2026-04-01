@@ -1,5 +1,5 @@
 using Peaks: lowest_set_bits, highest_set_bits, matching_runs_mask_lsb,
-    matching_runs_mask_msb, lsb_of_runs_mask_msb,
+    matching_runs_mask_msb, lsb_of_runs_mask_msb, reversecarry_add,
     _simd_extrema!, _simpleextrema_base, findall_offset
 
 _simplemaxima(x) = _simpleextrema_base(<, x, Val(:packed))
@@ -124,6 +124,7 @@ end
     # Obvious manually created bits/mask
     @test matching_runs_mask_lsb(0b01110101, 0b00010001) == 0b01110001
     @test matching_runs_mask_msb(0b01110101, 0b01000001) == 0b01110001
+    @test reversecarry_add(UInt64(0b01110101), UInt64(0b01000001)) == UInt64(0b00001100) # Int to exercise full cascade
 
     @testset "lowest" test_bit_run_mask_permutations(UInt16, :lowest)
     @testset "highest" test_bit_run_mask_permutations(UInt16, :highest)
@@ -182,6 +183,13 @@ end
             end
             arr[pki:min(pki+plat_len,lastindex(arr)-1)] .= 0
         end
+    end
+
+    # Plateau starts entirely in the overflow bit (bit 65): the rise falls at
+    # exactly position 64→65, overflowing the 64-bit `rise` accumulator so
+    # `leading_zeros(rise) == 64`.
+    let arr = vcat(zeros(Int, 64), [1, 1], zeros(Int, 8))
+        @test simplemaxima(arr) == [65]
     end
 
     for pklen in 3:96
