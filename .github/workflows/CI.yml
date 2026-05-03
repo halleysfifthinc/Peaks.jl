@@ -35,7 +35,7 @@ jobs:
       - uses: julia-actions/setup-julia@f6f565d9f7cf12f53dc8045742460d6260ad3b39 # v3.0.1
         with:
           version: ${{ matrix.version }}
-      - uses: julia-actions/cache@9a93c5fb3e9c1c20b60fc80a478cae53e38618a4 # v3.0.2
+      - uses: julia-actions/cache@a45e8fa8be21c18a06b7177052533149e61e9b38 # v3.1.0
       - name: Resolve pre-release environment
         if: matrix.version == 'pre'
         shell: julia --project=@. --color=yes {0}
@@ -73,7 +73,7 @@ jobs:
         with:
           version: '1'
           show-versioninfo: 'true'
-      - uses: julia-actions/cache@9a93c5fb3e9c1c20b60fc80a478cae53e38618a4 # v3.0.2
+      - uses: julia-actions/cache@a45e8fa8be21c18a06b7177052533149e61e9b38 # v3.1.0
       - name: Configure doc environment
         shell: julia --project=docs --color=yes {0}
         run: |
