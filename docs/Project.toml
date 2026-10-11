@@ -22,6 +22,6 @@ DataFramesMeta = "0.15"
 Documenter = "1.12"
 DocumenterInterLinks = "1"
 Makie = "0.24.4"
-PlotlyBase = "=0.8.19" # 0.8.20-0.8.21? has broken include_plotlyjs in `to_html`
+PlotlyBase = "=0.8.19, 0.10" # 0.8.20-0.8.21? has broken include_plotlyjs in `to_html`
 PlotlyJS = "0.18.2"
 Plots = "1.40.13"
