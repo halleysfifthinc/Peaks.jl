@@ -1,7 +1,7 @@
 # Peaks.jl
 
-[![version](https://juliahub.com/docs/General/Peaks/stable/version.svg)](https://juliahub.com/ui/Packages/General/Peaks)
-[![pkgeval](https://juliahub.com/docs/General/Peaks/stable/pkgeval.svg)](https://juliahub.com/ui/Packages/General/Peaks)
+[![version](https://platform.juliahub.com/docs/General/Peaks/stable/version.svg)](https://platform.juliahub.com/ui/Packages/General/Peaks)
+[![pkgeval](https://platform.juliahub.com/docs/General/Peaks/stable/pkgeval.svg)](https://platform.juliahub.com/ui/Packages/General/Peaks)
 [![stable-docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://halleysfifthinc.github.io/Peaks.jl/stable)
 [![dev-docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://halleysfifthinc.github.io/Peaks.jl/dev)
 [![CI](https://github.com/halleysfifthinc/Peaks.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/halleysfifthinc/Peaks.jl/actions/workflows/CI.yml)
