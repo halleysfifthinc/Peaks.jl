@@ -54,7 +54,7 @@ jobs:
             # end
             using Pkg
             Pkg.update()
-      - uses: julia-actions/julia-runtest@6e050c8013b833b1195105ff2fce9cd802f53271 # v1.12.0
+      - uses: julia-actions/julia-runtest@e89ac6c957d7c4d7e0cb3162f12d8290a008f9d1 # v1.13.0
         with:
           force_latest_compatible_version: ${{ matrix.force_latest_compatible_version || 'auto' }}
       - uses: julia-actions/julia-processcoverage@03114f09f119417c3242a9fb6e0b722676aedf38 # v1.2.2
@@ -92,7 +92,7 @@ jobs:
             using Peaks
             DocMeta.setdocmeta!(Peaks, :DocTestSetup, :(using Peaks); recursive=true)
             doctest(Peaks)
-      - uses: julia-actions/julia-docdeploy@e62cc8fd639797a0c2922a437d5b1b81c4a12787 # v1.3.1
+      - uses: julia-actions/julia-docdeploy@66c6757addd12d160d5f4d3cab95fc5ffabf0cd1 # v1.4.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
